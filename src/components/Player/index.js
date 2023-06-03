@@ -9,7 +9,7 @@ export default function Player({ player }) {
     
     return (
         <div className="mx-auto w-full max-w-xl transform rounded-xl bg-white dark:bg-slate-900 shadow-2xl shadow-slate-300 dark:shadow-slate-900 ring-1 ring-black dark:ring-slate-800 ring-opacity-5 p-8">
-            <div className="grid grid-cols-3 space-x-8 items-center">
+            <div className="space-y-8 sm:space-y-0 sm:grid sm:grid-cols-3 sm:space-x-8 sm:items-center">
                 <ImageCard playerId={player.id} />
                 <BasicInfo player={player} />
             </div>

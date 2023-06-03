@@ -19,14 +19,14 @@ export default function PlayerStats({ player }) {
                         <thead>
                             <tr>
                                 {Object.entries(stats).map(([key]) => (
-                                    <th key={key} scope="col" className="whitespace-nowrap px-2 py-1 text-center font-semibold tracking-wide text-slate-700 dark:text-slate-200 uppercase">{key}</th>
+                                    <th key={key} scope="col" className="first:pl-0 last:pr-0 whitespace-nowrap px-2 py-1 text-sm sm:text-base text-center font-semibold tracking-wide text-slate-700 dark:text-slate-200 uppercase">{key}</th>
                                 ))}
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-950">
                             <tr>
                                 {Object.entries(stats).map(([key, val]) => (
-                                    <td key={`${key}-${val}`} className="whitespace-nowrap px-2 py-5 text-lg text-center text-slate-500 dark:text-slate-200"><span className={`${getRarityClassNames(val)} rounded-lg p-3 font-medium`}>{(val > 0) ? val : '–'}</span></td>
+                                    <td key={`${key}-${val}`} className="first:pl-0 last:pr-0 whitespace-nowrap px-1.5 sm:px-2 py-4 sm:py-5 text-base sm:text-lg text-center text-slate-500 dark:text-slate-200"><span className={`${getRarityClassNames(val)} rounded-lg p-2.5 sm:p-3 font-medium`}>{(val > 0) ? val : '–'}</span></td>
                                 ))}
                             </tr>
                         </tbody>

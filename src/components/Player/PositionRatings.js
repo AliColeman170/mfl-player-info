@@ -1,5 +1,6 @@
 import { attributeWeighting } from '@/config';
-import { getRarityClassNames } from '@/utils'
+import { getRarityClassNames } from '@/utils';
+import { StarIcon } from '@heroicons/react/24/solid';
 
 const DifferenceBadge = ({ difference }) => {
     let colorClass = "";
@@ -13,7 +14,7 @@ const DifferenceBadge = ({ difference }) => {
     } else {
         colorClass = "text-slate-400 dark:text-slate-200";
     }
-    return <span className={`inline-flex justify-center w-7 ml-2 font-medium ${colorClass}`}>{text}</span>;
+    return <span className={`inline-flex justify-center w-7 ml-1.5 sm:ml-2 text-sm sm:text-base font-medium ${colorClass}`}>{text}</span>;
 }
 
 export default function PositionRatings({ player }) {
@@ -44,18 +45,14 @@ export default function PositionRatings({ player }) {
                             <tbody className="divide-y divide-gray-200 dark:divide-slate-700">
                                 {positionRatings.map(({positions, rating, difference}) => (
                                     <tr key={positions}>
-                                        <td className="w-full whitespace-nowrap px-2 py-5 text-left font-medium text-slate-700 dark:text-slate-200 sm:pl-1">
+                                        <td className="w-full whitespace-nowrap px-1.5 sm:px-2 py-4 sm:py-5 text-left font-medium text-slate-700 dark:text-slate-200 sm:pl-1">
                                             <div className='flex items-center space-x-2'>
-                                                <span>{positions.join(' / ')}</span>
-                                                {positions.includes(player.metadata.positions[0]) && (
-                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-yellow-500">
-                                                        <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
-                                                    </svg>
-                                                )}
+                                                <span className='text-sm sm:text-base'>{positions.join(' / ')}</span>
+                                                {positions.includes(player.metadata.positions[0]) && <StarIcon className="w-5 h-5 text-yellow-400" />}
                                             </div>
                                         </td>
-                                        <td className="whitespace-nowrap px-2 py-3 text-center font-medium text-gray-500 dark:text-slate-200">
-                                            <span className={`${getRarityClassNames(rating)} rounded-lg inline-flex justify-center w-12 p-3 font-medium`}>{(rating > 0) ? rating : '–'}</span>
+                                        <td className="whitespace-nowrap px-1.5 sm:px-2 py-4 sm:py-5 text-center font-medium text-gray-500 dark:text-slate-200">
+                                            <span className={`${getRarityClassNames(rating)} rounded-lg text-base sm:text-lg w-12 p-2.5 sm:p-3 font-medium`}>{(rating > 0) ? rating : '–'}</span>
                                             <DifferenceBadge difference={difference} />
                                         </td>
                                     </tr>
