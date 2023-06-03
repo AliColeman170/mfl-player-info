@@ -19,7 +19,7 @@ export default function PlayerStats({ player }) {
                         <thead>
                             <tr>
                                 {Object.entries(stats).map(([key]) => (
-                                    <th key={key} scope="col" className="first:pl-0 last:pr-0 whitespace-nowrap px-2 py-1 text-sm sm:text-base text-center font-semibold tracking-wide text-slate-700 dark:text-slate-200 uppercase">{key}</th>
+                                    <th key={key} scope="col" className="first:pl-0 last:pr-0 whitespace-nowrap px-1.5 sm:px-2 py-1 text-sm sm:text-base text-center font-semibold tracking-wide text-slate-700 dark:text-slate-200 uppercase">{key}</th>
                                 ))}
                             </tr>
                         </thead>
