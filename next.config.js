@@ -1,6 +1,7 @@
 const nextConfig = {
     images: {
-        domains: ['d13e14gtps4iwl.cloudfront.net']
+        domains: ['d13e14gtps4iwl.cloudfront.net'],
+        minimumCacheTTL: 2592000,
     }
 }
 
