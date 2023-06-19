@@ -32,7 +32,7 @@ export default async function BasicInfo({ player }) {
                             </span>
                         </div>
                     </dt>
-                    <dd className="text-sm sm:text-base leading-6 text-slate-700 dark:text-slate-200 text-right sm:text-left col-span-2 capitalize flex items-center">
+                    <dd className="text-sm sm:text-base leading-6 text-slate-700 dark:text-slate-200 text-right sm:text-left col-span-2 capitalize flex items-center justify-end sm:justify-start">
                         <Suspense fallback={<SpinnerIcon className="animate-spin h-4 w-4 text-slate-400" />}>
                             <MarketValue player={player} />
                         </Suspense>
