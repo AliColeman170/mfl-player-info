@@ -1,1 +1,1 @@
-# MFL Ratings Calculator
+# MFL Player Info

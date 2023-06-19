@@ -15,7 +15,7 @@ export default function PlayerStats({ player }) {
         <div className="mt-8 flow-root">
             <div className="-my-3 overflow-x-auto">
                 <div className="inline-block min-w-full py-2 align-middle">
-                    <table className="min-w-full divide-y divide-gray-300 dark:divide-slate-700">
+                    <table className="min-w-full divide-y divide-slate-300 dark:divide-slate-700">
                         <thead>
                             <tr>
                                 {Object.entries(stats).map(([key]) => (

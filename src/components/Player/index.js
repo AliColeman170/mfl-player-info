@@ -3,6 +3,9 @@ import ImageCard from "./ImageCard";
 import PlayerStats from "./PlayerStats";
 import GoalkeeperStats from "./GoalkeeperStats";
 import PositionRatings from "./PositionRatings";
+import ContractStats from "./ContractStats";
+import { Suspense } from "react";
+import SpinnerIcon from "../SpinnerIcon";
 
 export default function Player({ player }) {
     const isGoalkeeper = player.metadata.positions.includes('GK');
@@ -15,6 +18,9 @@ export default function Player({ player }) {
             </div>
             {isGoalkeeper ? <GoalkeeperStats player={player} /> : <PlayerStats player={player} />}
             {!isGoalkeeper && <PositionRatings player={player} />}
+            <Suspense fallback={<div className="flex justify-center py-8"><SpinnerIcon className="animate-spin h-8 w-8 text-slate-400" /></div>}>
+                <ContractStats player={player} />
+            </Suspense>
         </div>
     )
 }

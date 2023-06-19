@@ -41,8 +41,8 @@ export default function PositionRatings({ player }) {
             <div className="mt-4 flow-root">
                 <div className="-my-2 overflow-x-auto">
                     <div className="inline-block min-w-full align-middle">
-                        <table className="min-w-full divide-y divide-gray-300 dark:divide-slate-700">
-                            <tbody className="divide-y divide-gray-200 dark:divide-slate-700">
+                        <table className="min-w-full divide-y divide-slate-300 dark:divide-slate-700">
+                            <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
                                 {positionRatings.map(({positions, rating, difference}) => (
                                     <tr key={positions}>
                                         <td className="w-full whitespace-nowrap px-1.5 sm:px-2 py-4 sm:py-5 text-left font-medium text-slate-700 dark:text-slate-200 sm:pl-1">
@@ -51,7 +51,7 @@ export default function PositionRatings({ player }) {
                                                 {positions.includes(player.metadata.positions[0]) && <StarIcon className="w-5 h-5 text-yellow-400" />}
                                             </div>
                                         </td>
-                                        <td className="whitespace-nowrap px-1.5 sm:px-2 py-4 sm:py-5 text-center font-medium text-gray-500 dark:text-slate-200">
+                                        <td className="whitespace-nowrap px-1.5 sm:px-2 py-4 sm:py-5 text-center font-medium text-slate-500 dark:text-slate-200">
                                             <span className={`${getRarityClassNames(rating)} rounded-lg text-base sm:text-lg w-12 p-2.5 sm:p-3 font-medium`}>{(rating > 0) ? rating : '–'}</span>
                                             <DifferenceBadge difference={difference} />
                                         </td>

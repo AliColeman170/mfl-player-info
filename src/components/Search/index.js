@@ -19,9 +19,9 @@ export default function Search() {
         }
     }
     return (
-        <div className="mx-auto w-full max-w-xl divide-y divide-gray-100 overflow-hidden rounded-xl bg-white dark:bg-slate-900 shadow-2xl shadow-slate-300 dark:shadow-slate-900 ring-1 ring-black dark:ring-slate-800 ring-opacity-5">
+        <div className="mx-auto w-full max-w-xl divide-y divide-slate-100 overflow-hidden rounded-xl bg-white dark:bg-slate-900 shadow-2xl shadow-slate-300 dark:shadow-slate-900 ring-1 ring-black dark:ring-slate-800 ring-opacity-5">
             <div className="relative">
-                <MagnifyingGlassIcon className="pointer-events-none absolute left-4 top-3.5 sm:top-4 h-7 w-7 sm:h-8 sm:w-8 text-gray-400 dark:text-slate-600" />
+                <MagnifyingGlassIcon className="pointer-events-none absolute left-4 top-3.5 sm:top-4 h-7 w-7 sm:h-8 sm:w-8 text-slate-400 dark:text-slate-600" />
                 <input
                     type="number"
                     step={1}
@@ -31,7 +31,7 @@ export default function Search() {
                     defaultValue={params.id ?? ''}
                     onChange={searchPlayer}
                 />
-                {isPending && <SpinnerIcon className="animate-spin absolute right-5 top-4 sm:top-5 h-6 w-6 text-gray-400" />}
+                {isPending && <SpinnerIcon className="animate-spin absolute right-5 top-4 sm:top-5 h-6 w-6 text-slate-400" />}
             </div>
         </div>
     )

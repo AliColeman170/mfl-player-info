@@ -5,7 +5,7 @@ export default function GoalkeeperStats({ player }) {
         <div className="mt-8 flow-root">
             <div className="-my-3 overflow-x-auto">
                 <div className="inline-block min-w-full py-2 align-middle">
-                    <table className="min-w-full divide-y divide-gray-300 dark:divide-slate-700">
+                    <table className="min-w-full divide-y divide-slate-300 dark:divide-slate-700">
                         <thead>
                             <tr>
                                 <th scope="col" className="first:pl-0 last:pr-0 whitespace-nowrap px-2 py-1 text-sm sm:text-base text-center font-semibold tracking-wide text-slate-700 dark:text-slate-200 uppercase">GK</th>

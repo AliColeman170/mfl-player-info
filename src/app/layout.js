@@ -8,11 +8,11 @@ import { Analytics } from '@vercel/analytics/react';
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata = {
-  title: 'MFL Player Ratings Calculator',
-  description: 'Calculate the overall rating for any Metaverse Football League (MFL) player in every position using their player ID.',
+  title: 'MFL Player Info | Ratings Calculator & Contract Details',
+  description: 'Calculate the overall rating and get contract data for any Metaverse Football League (MFL) player using their player ID.',
   keywords: ['MFL', '@playMFL', 'Metaverse', 'Football', 'league', 'football', 'calculator', 'player', 'ratings'],
   authors: [{ name: 'Ali Coleman', url: 'https://www.twitter.com/alicoleman170' }],
-  applicationName: 'MFL Ratings Calculator',
+  applicationName: 'MFL Player Info',
   creator: 'Ali Coleman',
   publisher: 'Ali Coleman',
   formatDetection: {
@@ -28,17 +28,17 @@ export const metadata = {
     { media: '(prefers-color-scheme: dark)', color: '#020617' },
   ],
    openGraph: {
-    title: 'MFL Player Ratings Calculator',
-    description: 'Calculate the overall rating for any Metaverse Football League (MFL) player in every position using their player ID.',
+    title: 'MFL Player Info',
+    description: 'Calculate the overall rating and get contract data for any Metaverse Football League (MFL) player using their player ID.',
     url: 'https://mflplayer.info',
-    siteName: 'MFL Player Ratings',
+    siteName: 'MFL Player Info',
     locale: 'en_US',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'MFL Player Ratings Calculator',
-    description: 'Calculate the overall rating for any Metaverse Football League (MFL) player in every position using their player ID.',
+    title: 'MFL Player Info',
+    description: 'Calculate the overall rating and get contract data for any Metaverse Football League (MFL) player using their player ID.',
     site: '@alicoleman170',
     creator: '@alicoleman170'
   },
