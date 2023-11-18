@@ -1,4 +1,5 @@
 import Player from '@/components/Player';
+import Search from '@/components/Search';
 import { getPlayerData } from '@/flow/api';
 import { notFound } from 'next/navigation';
 
@@ -8,6 +9,9 @@ export default async function PlayerPage({ params }) {
   if (!player) notFound();
 
   return (
-    <Player player={player} />
+    <div className="flex flex-1 h-full flex-col items-center justify-start space-y-8">
+      <Search />
+      <Player player={player} />
+    </div>
   );
 }
