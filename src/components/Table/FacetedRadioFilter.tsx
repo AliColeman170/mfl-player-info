@@ -48,7 +48,7 @@ export default function FacetedRadioFilter({
                   active ? "ring-1 ring-indigo-600" : "",
                   checked
                     ? "bg-slate-100 dark:bg-slate-950 text-slate-950 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-950 ring-1 ring-slate-200 dark:ring-indigo-800"
-                    : "bg-white dark:bg-slate-900 hover:bg-slate-50 rounded-lg border-0 py-3 px-4 text-slate-900 dark:text-slate-100 focus:ring-0 shadow-2xl shadow-slate-200 dark:shadow-slate-900 ring-1 ring-slate-900 dark:ring-slate-800 ring-opacity-5",
+                    : "bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-950 rounded-lg border-0 py-3 px-4 text-slate-900 dark:text-slate-100 focus:ring-0 shadow-2xl shadow-slate-200 dark:shadow-slate-900 ring-1 ring-slate-900 dark:ring-slate-800 ring-opacity-5",
                   "flex items-center justify-center rounded-md py-3 px-3 text-sm font-semibold sm:flex-1 cursor-pointer focus:outline-none"
                 )
               }

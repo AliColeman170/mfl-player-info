@@ -6,9 +6,9 @@ export function Header() {
   return (
     <header className="border-b border-slate-200 dark:border-slate-800 mb-10">
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-7 sm:py-6">
-        <div className="grid grid-cols-[50px_1fr_50px]">
-          <div></div>
-          <div className="flex flex-col sm:flex-row items-center sm:justify-center sm:space-x-4">
+        <div className="flex justify-between sm:grid sm:grid-cols-[50px_1fr_50px]">
+          <div className="hidden sm:block"></div>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-center sm:space-x-4">
             <Link href="/">
               <MFLIcon className="w-20 sm:w-24 text-slate-900 dark:text-white" />
             </Link>

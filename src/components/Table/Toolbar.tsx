@@ -115,7 +115,7 @@ export function Toolbar({ table }) {
           <DebouncedInput
             value={table.getState().globalFilter ?? ""}
             onChange={(value) => table.setGlobalFilter(String(value))}
-            className="block w-full bg-white dark:bg-slate-900 rounded-lg border-0 py-3 px-4 text-slate-900 shadow-2xl shadow-slate-200 dark:shadow-slate-900 dark:text-slate-400 placeholder:text-slate-400 focus:ring-0 ring-1 ring-slate-950 dark:ring-slate-800 ring-opacity-5"
+            className="block w-full bg-white dark:bg-slate-900 rounded-lg border-0 py-3 px-4 text-slate-900 shadow-2xl shadow-slate-200 dark:shadow-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-0 ring-1 ring-slate-950 dark:ring-slate-800 ring-opacity-5"
             placeholder="Search by name or id..."
           />
           <FacetedFilter
@@ -124,7 +124,7 @@ export function Toolbar({ table }) {
             placeholder="Filter tags..."
             showCount={true}
             showClear={false}
-            className="w-60"
+            className="w-72"
           />
         </div>
       </div>

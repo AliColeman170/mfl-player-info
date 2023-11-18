@@ -40,7 +40,7 @@ export function AddTagButton({ player }) {
       <Portal>
         <Popover.Panel
           ref={container}
-          className="absolute w-60 z-20 overflow-auto rounded-lg bg-white dark:bg-slate-950 text-sm shadow-2xl shadow-slate-200 ring-1 ring-slate-950 dark:ring-slate-800 ring-opacity-5 focus:outline-none"
+          className="absolute w-60 z-20 overflow-auto rounded-lg bg-white dark:bg-slate-950 text-sm shadow-2xl shadow-slate-200 dark:shadow-slate-900 ring-1 ring-slate-950 dark:ring-slate-800 ring-opacity-5 focus:outline-none"
         >
           {({ close }) => (
             <div className="p-4">
@@ -53,7 +53,7 @@ export function AddTagButton({ player }) {
                   value={newTag}
                   onChange={(e) => setNewTag(e.target.value)}
                   placeholder={`Add tag`}
-                  className="block w-full bg-white dark:bg-slate-900 rounded-lg border-0 text-sm py-3 px-3 text-slate-900 shadow-2xl shadow-slate-300 dark:shadow-slate-900 dark:text-slate-400 placeholder:text-slate-400 focus:ring-0 ring-1 ring-slate-950 dark:ring-slate-800 ring-opacity-5"
+                  className="block w-full bg-white dark:bg-slate-900 rounded-lg border-0 text-base py-3 px-3 text-slate-900 shadow-2xl shadow-slate-300 dark:shadow-slate-900 dark:text-slate-400 placeholder:text-slate-400 focus:ring-0 ring-1 ring-slate-950 dark:ring-slate-800 ring-opacity-5"
                   autoFocus={true}
                 />
                 <button
