@@ -1,12 +1,30 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useLayoutEffect, useState, useTransition } from "react";
 import { usePopper } from "../Table/usePopper";
 import { Popover } from "@headlessui/react";
 import { Portal } from "../Portal";
 import { PlusIcon } from "@heroicons/react/24/solid";
 import SpinnerIcon from "../SpinnerIcon";
 import { updateTags } from "@/lib/actions";
+
+const RenderAfter = ({ children }) => {
+  const [nextTick, setNextTick] = useState(false);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setNextTick(true);
+    }, 0);
+  }, []);
+
+  // useLayoutEffect(() => {
+  //   if (nextTick) {
+  //     update();
+  //   }
+  // }, [nextTick, update]);
+
+  return nextTick ? children : null;
+};
 
 export function AddTagButton({ player }) {
   const [newTag, setNewTag] = useState("");
@@ -16,6 +34,7 @@ export function AddTagButton({ player }) {
     placement: "bottom-end",
     strategy: "fixed",
     modifiers: [{ name: "offset", options: { offset: [0, 10] } }],
+    onFirstUpdate: (state) => console.log("Popper positioned on", state),
   });
 
   async function AddTag(callback) {
@@ -48,14 +67,16 @@ export function AddTagButton({ player }) {
                 Tag
               </label>
               <div className="flex items-center space-x-2 mt-1">
-                <input
-                  type="text"
-                  value={newTag}
-                  onChange={(e) => setNewTag(e.target.value)}
-                  placeholder={`Add tag`}
-                  className="block w-full bg-white dark:bg-slate-900 rounded-lg border-0 text-base py-3 px-3 text-slate-900 shadow-2xl shadow-slate-300 dark:shadow-slate-900 dark:text-slate-400 placeholder:text-slate-400 focus:ring-0 ring-1 ring-slate-950 dark:ring-slate-800 ring-opacity-5"
-                  autoFocus={true}
-                />
+                <RenderAfter>
+                  <input
+                    type="text"
+                    value={newTag}
+                    onChange={(e) => setNewTag(e.target.value)}
+                    placeholder={`Add tag`}
+                    className="block w-full bg-white dark:bg-slate-900 rounded-lg border-0 text-base py-3 px-3 text-slate-900 shadow-2xl shadow-slate-300 dark:shadow-slate-900 dark:text-slate-400 placeholder:text-slate-400 focus:ring-0 ring-1 ring-slate-950 dark:ring-slate-800 ring-opacity-5"
+                    autoFocus={true}
+                  />
+                </RenderAfter>
                 <button
                   onClick={async () => {
                     await AddTag(close);

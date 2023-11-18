@@ -94,9 +94,9 @@ export default async function UserPage({ params }) {
   return (
     <div className="mt-4">
       {user && user.dapperData ? (
-        <div className="flex items-start space-x-4">
+        <div className="flex items-start space-x-3 sm:space-x-4">
           <Image
-            className="h-12 w-12 rounded-full"
+            className="h-10 w-10 sm:h-12 sm:w-12 rounded-full"
             src={user.dapperData.image}
             width={745}
             height={745}
@@ -110,7 +110,7 @@ export default async function UserPage({ params }) {
             unoptimized
           />
           <div className="space-y-2">
-            <h1 className="text-4xl font-bold">
+            <h1 className="text-3xl sm:text-4xl font-bold truncate">
               {user.name
                 ? user.name
                 : user.dapperData?.username
