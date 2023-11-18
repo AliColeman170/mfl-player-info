@@ -35,11 +35,11 @@ export const columnLabels = [
   },
   {
     id: "position",
-    label: "Primary Position",
+    label: "Primary",
   },
   {
     id: "positions",
-    label: "Secondary Positions",
+    label: "Secondary",
   },
   {
     id: "overall",

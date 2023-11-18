@@ -129,8 +129,8 @@ export function Toolbar({ table }) {
         </div>
       </div>
       {showFilterControls && (
-        <div className="relative my-8 space-y-4 rounded-lg bg-white dark:bg-slate-950 p-8 text-sm shadow-2xl shadow-slate-200 dark:shadow-slate-900 ring-1 ring-slate-950 dark:ring-slate-800 ring-opacity-5">
-          <div className="grid grid-cols-12 gap-y-4 gap-x-8">
+        <div className="relative my-8 space-y-4 rounded-lg bg-white dark:bg-slate-950 p-6 sm:p-8 text-sm shadow-2xl shadow-slate-200 dark:shadow-slate-900 ring-1 ring-slate-950 dark:ring-slate-800 ring-opacity-5">
+          <div className="grid grid-cols-12 gap-y-4 gap-x-4 sm:gap-x-6 md:gap-x-8">
             <NumberFilter
               column={table.getColumn("overall")}
               label={columnLabels.find((i) => i.id === "overall").label}
