@@ -31,21 +31,30 @@ export function Table({ user, players }) {
       desc: false,
     },
   ]);
-  const [columnVisibility, setColumnVisibility] = useState(
-    typeof window !== "undefined" &&
+
+  useEffect(() => {
+    if (
+      typeof window !== "undefined" &&
       localStorage?.getItem("columnVisibility.store")
-      ? JSON.parse(localStorage?.getItem("columnVisibility.store"))
-      : {
-          height: false,
-          preferredFoot: false,
-          pace: false,
-          shooting: false,
-          passing: false,
-          dribbling: false,
-          defense: false,
-          physical: false,
-        }
-  );
+    ) {
+      setColumnVisibility(
+        JSON.parse(localStorage?.getItem("columnVisibility.store"))
+      );
+    } else {
+      setColumnVisibility({
+        height: false,
+        preferredFoot: false,
+        pace: false,
+        shooting: false,
+        passing: false,
+        dribbling: false,
+        defense: false,
+        physical: false,
+      });
+    }
+  }, []);
+
+  const [columnVisibility, setColumnVisibility] = useState({});
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
   const pagination = useMemo(
