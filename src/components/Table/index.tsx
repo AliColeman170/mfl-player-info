@@ -13,7 +13,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { columns } from "./columns";
 import { HeartIcon } from "@heroicons/react/24/solid";
 import { Pagination } from "./Pagination";
@@ -31,16 +31,21 @@ export function Table({ user, players }) {
       desc: false,
     },
   ]);
-  const [columnVisibility, setColumnVisibility] = useState({
-    height: false,
-    preferredFoot: false,
-    pace: false,
-    shooting: false,
-    passing: false,
-    dribbling: false,
-    defense: false,
-    physical: false,
-  });
+  const [columnVisibility, setColumnVisibility] = useState(
+    typeof window !== "undefined" &&
+      localStorage?.getItem("columnVisibility.store")
+      ? JSON.parse(localStorage?.getItem("columnVisibility.store"))
+      : {
+          height: false,
+          preferredFoot: false,
+          pace: false,
+          shooting: false,
+          passing: false,
+          dribbling: false,
+          defense: false,
+          physical: false,
+        }
+  );
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
   const pagination = useMemo(
@@ -50,6 +55,13 @@ export function Table({ user, players }) {
     }),
     [pageIndex, pageSize]
   );
+
+  useEffect(() => {
+    localStorage.setItem(
+      "columnVisibility.store",
+      JSON.stringify(columnVisibility)
+    );
+  }, [columnVisibility]);
 
   function selectFilter(row, columnId, value) {
     const selectedValues = value;

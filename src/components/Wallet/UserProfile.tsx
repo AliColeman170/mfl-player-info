@@ -29,6 +29,8 @@ export default function UserProfile({ user }) {
                   ? user.dapperData?.username
                   : user.addr
               }
+              width={745}
+              height={745}
               unoptimized
             />
           ) : (

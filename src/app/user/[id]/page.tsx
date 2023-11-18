@@ -98,6 +98,8 @@ export default async function UserPage({ params }) {
           <Image
             className="h-12 w-12 rounded-full"
             src={user.dapperData.image}
+            width={745}
+            height={745}
             alt={
               user.name
                 ? user.name

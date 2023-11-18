@@ -40,6 +40,8 @@ export function Toolbar({ table }) {
           <Image
             src={`https://app.playmfl.com/img/flags/${entry[0]}.svg`}
             alt={entry[0]}
+            width={512}
+            height={512}
             className="h-5 w-5"
             unoptimized
           />

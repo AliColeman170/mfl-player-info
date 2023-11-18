@@ -120,6 +120,8 @@ export const columns: ColumnDef<Player>[] = [
           src={`https://app.playmfl.com/img/flags/${getValue<string>()}.svg`}
           alt={getValue<string>()}
           title={getValue<string>()}
+          width={512}
+          height={512}
           unoptimized
         />
       );
