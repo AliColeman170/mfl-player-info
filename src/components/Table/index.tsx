@@ -18,6 +18,7 @@ import { columns } from "./columns";
 import { HeartIcon } from "@heroicons/react/24/solid";
 import { Pagination } from "./Pagination";
 import { Toolbar } from "./Toolbar";
+import { useLocalStorage } from "usehooks-ts";
 
 export function Table({ user, players }) {
   const [{ pageIndex, pageSize }, setPagination] = useState({
@@ -32,29 +33,20 @@ export function Table({ user, players }) {
     },
   ]);
 
-  useEffect(() => {
-    if (
-      typeof window !== "undefined" &&
-      localStorage?.getItem("columnVisibility.store")
-    ) {
-      setColumnVisibility(
-        JSON.parse(localStorage?.getItem("columnVisibility.store"))
-      );
-    } else {
-      setColumnVisibility({
-        height: false,
-        preferredFoot: false,
-        pace: false,
-        shooting: false,
-        passing: false,
-        dribbling: false,
-        defense: false,
-        physical: false,
-      });
+  const [columnVisibility, setColumnVisibility] = useLocalStorage(
+    "columnVisibility.store",
+    {
+      height: false,
+      preferredFoot: false,
+      pace: false,
+      shooting: false,
+      passing: false,
+      dribbling: false,
+      defense: false,
+      physical: false,
     }
-  }, []);
+  );
 
-  const [columnVisibility, setColumnVisibility] = useState({});
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
   const pagination = useMemo(
