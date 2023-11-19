@@ -72,18 +72,15 @@ export default async function RootLayout({
 }: {
   children: ReactNode;
 }) {
-  const session = await auth();
   return (
     <html lang="en">
       <body className={`${inter.className} min-h-screen flex flex-col`}>
         <UserProvider>
-          <SessionProvider session={session}>
-            <Header />
-            <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex-1">
-              {children}
-            </main>
-            <Footer />
-          </SessionProvider>
+          <Header />
+          <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex-1">
+            {children}
+          </main>
+          <Footer />
         </UserProvider>
         <Analytics />
       </body>

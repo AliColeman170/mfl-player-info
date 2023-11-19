@@ -8,7 +8,7 @@ async function getFavouriteData(playerId) {
     .from("favourites")
     .select()
     .eq("player_id", playerId)
-    .eq("wallet_address", session.user.addr)
+    .eq("wallet_address", session?.user.addr)
     .maybeSingle();
   return favourite;
 }
