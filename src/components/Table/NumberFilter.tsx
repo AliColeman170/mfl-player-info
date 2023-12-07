@@ -13,6 +13,8 @@ export function NumberFilter({ column, label, className = "" }) {
       <div className="grid grid-cols-1 @[180px]:grid-cols-2 gap-2 mt-1">
         <DebouncedInput
           type="number"
+          pattern="[0-9]*"
+          inputMode="numeric"
           min={Number(column.getFacetedMinMaxValues()?.[0] ?? "")}
           max={Number(column.getFacetedMinMaxValues()?.[1] ?? "")}
           value={columnFilterValue?.[0] ?? ""}
@@ -28,6 +30,8 @@ export function NumberFilter({ column, label, className = "" }) {
         />
         <DebouncedInput
           type="number"
+          pattern="[0-9]*"
+          inputMode="numeric"
           min={Number(column.getFacetedMinMaxValues()?.[0] ?? "")}
           max={Number(column.getFacetedMinMaxValues()?.[1] ?? "")}
           value={columnFilterValue?.[1] ?? ""}

@@ -8,7 +8,6 @@ import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import {
   ArrowTopRightOnSquareIcon,
-  LinkIcon,
   WalletIcon,
 } from "@heroicons/react/24/solid";
 import MFLIcon from "@/components/MFLIcon";

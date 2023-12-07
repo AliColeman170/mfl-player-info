@@ -2,6 +2,15 @@ import { attributeWeighting } from "@/config";
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
+interface PlayerStats {
+  pace: number;
+  dribbling: number;
+  passing: number;
+  shooting: number;
+  defense: number;
+  physical: number;
+}
+
 export const positionOrderArray = [
   "GK",
   "RB",
@@ -31,11 +40,12 @@ export function cn(...inputs) {
   return twMerge(clsx(inputs));
 }
 
-export function getPlayerPositionRatings(player) {
+export function getPlayerPositionRatings(player, stats?: PlayerStats) {
   const positionRatings = attributeWeighting
     .map(({ positions, weighting }) => {
       const { passing, shooting, defense, dribbling, pace, physical } =
-        player.metadata;
+        stats || player.metadata;
+
       const rating = Math.round(
         passing * weighting[0] +
           shooting * weighting[1] +
