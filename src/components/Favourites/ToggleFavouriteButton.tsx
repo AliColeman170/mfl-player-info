@@ -37,11 +37,11 @@ export function ToggleFavouriteButton({
       onClick={toggleFavourite}
     >
       {isPending ? (
-        <SpinnerIcon className="h-5 w-5 text-slate-500 animate-spin" />
+        <SpinnerIcon className="h-4 w-4 sm:h-5 sm:w-5 text-slate-500 animate-spin" />
       ) : isFavourite ? (
-        <FilledHeartIcon className="h-5 w-5 text-red-500 disabled:text-slate-500" />
+        <FilledHeartIcon className="h-4 w-4 sm:h-5 sm:w-5 text-red-500 disabled:text-slate-500" />
       ) : (
-        <HeartIcon className="h-5 w-5 hover:text-red-500" />
+        <HeartIcon className="h-4 w-4 sm:h-5 sm:w-5 hover:text-red-500" />
       )}
     </button>
   );
