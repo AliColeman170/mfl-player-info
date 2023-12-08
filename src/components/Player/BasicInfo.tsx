@@ -29,7 +29,12 @@ export default async function BasicInfo({ player }) {
             Name
           </dt>
           <dd className="text-sm @[16rem]/inner:text-base leading-none text-slate-700 dark:text-slate-200 @[10rem]/inner:text-right col-span-2 capitalize">
-            <Link href={`/player/${player.id}`}>{fullName}</Link>
+            <Link
+              href={`/player/${player.id}`}
+              className="text-indigo-500 hover:text-indigo-400"
+            >
+              {fullName}
+            </Link>
           </dd>
         </div>
         {Object.entries(metadata).map(([key, value]) => (
