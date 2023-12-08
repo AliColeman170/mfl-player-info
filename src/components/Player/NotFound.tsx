@@ -7,7 +7,7 @@ export default function NotFound() {
         <ExclamationCircleIcon className="w-16 h-16" />
       </h2>
       <p className="mt-4 text-slate-900 dark:text-slate-200">
-        The page you are looking for could not be found.
+        Player with the requested ID could not be found.
       </p>
     </div>
   );

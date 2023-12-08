@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import SpinnerIcon from "../SpinnerIcon";
 import { InformationCircleIcon } from "@heroicons/react/20/solid";
 import { MarketValue } from "./MarketValue";
+import Link from "next/link";
 
 export default async function BasicInfo({ player }) {
   const {
@@ -13,8 +14,8 @@ export default async function BasicInfo({ player }) {
     preferredFoot,
     positions,
   } = player.metadata;
+  const fullName = name ? name : `${firstName} ${lastName}`;
   const metadata = {
-    name: name ? name : `${firstName} ${lastName}`,
     age: ageAtMint,
     height: `${height}cm`,
     foot: preferredFoot.toLowerCase(),
@@ -22,22 +23,35 @@ export default async function BasicInfo({ player }) {
   };
   return (
     <div className="col-span-2">
-      <dl className="divide-y divide-slate-200 dark:divide-slate-700">
+      <dl className="@container/inner divide-y divide-slate-200 dark:divide-slate-700">
+        <div className="px-1 py-2 gap-y-1 @[16rem]/inner:py-2 grid @[10rem]/inner:grid-cols-3 @[10rem]/inner:gap-8 @[16rem]/inner:px-0">
+          <dt className="text-xs @[16rem]/inner:text-base font-semibold leading-none text-slate-700 dark:text-slate-400 uppercase">
+            Name
+          </dt>
+          <dd className="text-sm @[16rem]/inner:text-base leading-none text-slate-700 dark:text-slate-200 @[10rem]/inner:text-right col-span-2 capitalize">
+            <Link
+              href={`/player/${player.id}`}
+              className="text-indigo-500 hover:text-indigo-400"
+            >
+              {fullName}
+            </Link>
+          </dd>
+        </div>
         {Object.entries(metadata).map(([key, value]) => (
           <div
             key={key}
-            className="px-2 py-2 grid grid-cols-3 sm:gap-4 sm:px-0"
+            className="px-1 py-2 gap-y-1 @[16rem]/inner:py-2 grid @[10rem]/inner:grid-cols-3 @[10rem]/inner:gap-8 @[16rem]/inner:px-0"
           >
-            <dt className="text-sm sm:text-base font-semibold leading-6 text-slate-700 dark:text-slate-400 uppercase">
+            <dt className="text-xs @[16rem]/inner:text-base font-semibold leading-none text-slate-700 dark:text-slate-400 uppercase">
               {key}
             </dt>
-            <dd className="text-sm sm:text-base leading-6 text-slate-700 dark:text-slate-200 text-right sm:text-left col-span-2 capitalize">
+            <dd className="text-sm @[16rem]/inner:text-base leading-none text-slate-700 dark:text-slate-200 @[10rem]/inner:text-right col-span-2 capitalize">
               {value}
             </dd>
           </div>
         ))}
-        <div className="px-2 py-2 grid grid-cols-3 sm:gap-4 sm:px-0">
-          <dt className="text-sm sm:text-base font-semibold leading-6 text-slate-700 dark:text-slate-400 uppercase flex items-center space-x-2">
+        <div className="px-1 py-1.5 @[16rem]/inner:py-2 grid @[10rem]/inner:grid-cols-3 @[10rem]/inner:gap-8 @[16rem]/inner:px-0">
+          <dt className="text-xs @[16rem]/inner:text-base font-semibold leading-none text-slate-700 dark:text-slate-400 uppercase flex items-center space-x-2">
             <span>Value</span>
             <div className="group relative flex justify-center">
               <button>
@@ -49,7 +63,7 @@ export default async function BasicInfo({ player }) {
               </span>
             </div>
           </dt>
-          <dd className="text-sm sm:text-base leading-6 text-slate-700 dark:text-slate-200 text-right sm:text-left col-span-2 capitalize flex items-center justify-end sm:justify-start">
+          <dd className="text-sm @[16rem]/inner:text-base leading-none text-slate-700 dark:text-slate-200 text-left @[10rem]/inner:text-right col-span-2 capitalize flex items-center @[10rem]/inner:justify-end">
             <Suspense
               fallback={
                 <SpinnerIcon className="animate-spin h-4 w-4 text-slate-400" />

@@ -2,6 +2,15 @@ import { attributeWeighting } from "@/config";
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
+interface PlayerStats {
+  pace: number;
+  dribbling: number;
+  passing: number;
+  shooting: number;
+  defense: number;
+  physical: number;
+}
+
 export const positionOrderArray = [
   "GK",
   "RB",
@@ -31,26 +40,39 @@ export function cn(...inputs) {
   return twMerge(clsx(inputs));
 }
 
-export function getPlayerPositionRatings(player) {
-  const positionRatings = attributeWeighting
-    .map(({ positions, weighting }) => {
-      const { passing, shooting, defense, dribbling, pace, physical } =
-        player.metadata;
-      const rating = Math.round(
-        passing * weighting[0] +
-          shooting * weighting[1] +
-          defense * weighting[2] +
-          dribbling * weighting[3] +
-          pace * weighting[4] +
-          physical * weighting[5]
-      );
-      return {
-        positions,
-        rating,
-        difference: rating - player.metadata.overall,
-      };
-    })
-    .sort((a, b) => b.rating - a.rating);
+export function getPlayerPositionRatings(
+  player,
+  sorted?: boolean,
+  stats?: PlayerStats
+) {
+  const positionRatings = attributeWeighting.map(({ positions, weighting }) => {
+    const {
+      passing,
+      shooting,
+      defense,
+      dribbling,
+      pace,
+      physical,
+      goalkeeping = 0,
+    } = stats || player.metadata;
+
+    const rating = Math.round(
+      passing * weighting[0] +
+        shooting * weighting[1] +
+        defense * weighting[2] +
+        dribbling * weighting[3] +
+        pace * weighting[4] +
+        physical * weighting[5] +
+        goalkeeping * weighting[6]
+    );
+    return {
+      positions,
+      rating,
+      difference: rating - player.metadata.overall,
+    };
+  });
+
+  if (sorted) return positionRatings.sort((a, b) => b.rating - a.rating);
 
   return positionRatings;
 }

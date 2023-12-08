@@ -104,7 +104,7 @@ export default async function ContractStats({ player }) {
   if (!contractData[0]) return null;
   return (
     <div className="mt-12">
-      <h2 className="text-slate-900 dark:text-slate-200 font-bold tracking-tight text-3xl flex items-center space-x-2">
+      <h2 className="text-slate-900 dark:text-slate-200 font-bold tracking-tight text-2xl sm:text-3xl flex items-center space-x-2">
         <span>Contract Info</span>
         <div className="group relative flex justify-center">
           <button>

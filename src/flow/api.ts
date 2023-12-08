@@ -23,6 +23,8 @@ export { fcl };
 
 export async function getPlayerData(playerID) {
   try {
+    if (!playerID) throw new Error("No player ID provided");
+    if (isNaN(playerID) || playerID <= 0) throw new Error("Invalid player ID");
     const player = await fcl.query({
       cadence: `
         import MFLPlayer from 0xMFLPlayer
@@ -35,7 +37,8 @@ export async function getPlayerData(playerID) {
     });
     return player;
   } catch (error) {
-    throw new Error(error.message);
+    console.log(error);
+    return null;
   }
 }
 
@@ -59,6 +62,7 @@ export async function getPlayersData(playersIds) {
     });
     return players;
   } catch (error) {
-    throw new Error(error.message);
+    console.log(error);
+    return null;
   }
 }

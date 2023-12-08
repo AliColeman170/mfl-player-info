@@ -24,7 +24,7 @@ async function getFavourites() {
 
     return {
       ...fav,
-      positionRatings: getPlayerPositionRatings(fav),
+      positionRatings: getPlayerPositionRatings(fav, true),
       is_favourite: fave.is_favourite,
       tags: fave.tags,
     };
