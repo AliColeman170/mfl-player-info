@@ -8,7 +8,8 @@ import {
 import PlayerStats from "./PlayerStats";
 import { useState } from "react";
 import { Switch } from "@headlessui/react";
-import { PositionFamiliarityIndicator } from "../Compare/PositionRatingsComparison";
+import { PositionFamiliarityIndicator } from "./PositionFamiliarityIndicator";
+import { StyledRatingValue } from "./StyledRatingValue";
 
 interface PlayerStats {
   pace: number;
@@ -98,13 +99,13 @@ export default function PositionRatings({ player }) {
       />
 
       <div className="mt-12">
-        <div className="flex items-center justify-between">
-          <h2 className="text-slate-900 dark:text-slate-200 font-bold tracking-tight text-3xl">
+        <div className="sm:flex sm:items-center sm:justify-between">
+          <h2 className="text-slate-900 dark:text-slate-200 font-bold tracking-tight text-2xl sm:text-3xl">
             Position Ratings
           </h2>
-          <div className="flex justify-end items-center gap-x-2">
-            <label className="text-sm font-semibold">Training Mode</label>
+          <div className="mt-2 sm:mt-0 flex sm:flex-row-reverse justify-start sm:justify-end items-center gap-x-3">
             <Switch
+              id="training-toggle"
               checked={isTrainingMode}
               onChange={handleToggleSwitch}
               className={cn(
@@ -120,9 +121,15 @@ export default function PositionRatings({ player }) {
                 )}
               />
             </Switch>
+            <label
+              htmlFor="training-toggle"
+              className="text-sm text-right font-semibold"
+            >
+              Training Mode
+            </label>
           </div>
         </div>
-        <div className="mt-4 flow-root">
+        <div className="mt-5 flow-root">
           <div className="-my-2 overflow-x-auto">
             <div className="inline-block min-w-full align-middle">
               <table className="min-w-full divide-y divide-slate-300 dark:divide-slate-700">
@@ -148,13 +155,7 @@ export default function PositionRatings({ player }) {
                         </td>
                         <td className="flex items-center space-x-3 whitespace-nowrap px-1.5 sm:px-2 py-2.5 text-center font-medium text-slate-500 dark:text-slate-200">
                           <DifferenceBadge difference={difference} />
-                          <span
-                            className={`${getRarityClassNames(
-                              rating
-                            )} rounded-lg text-base sm:text-lg w-12 p-2 font-medium`}
-                          >
-                            {rating > 0 ? rating : "–"}
-                          </span>
+                          <StyledRatingValue rating={rating} />
                         </td>
                       </tr>
                     );

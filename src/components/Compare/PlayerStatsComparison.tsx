@@ -1,6 +1,7 @@
 import { Player } from "@/types/global";
 import { cn, getRarityClassNames } from "@/utils/helpers";
 import { StarIcon } from "@heroicons/react/20/solid";
+import { StyledRatingValue } from "../Player/StyledRatingValue";
 
 export async function PlayerStatsComparison({
   player1,
@@ -45,15 +46,9 @@ export async function PlayerStatsComparison({
       <div className="grid  divide-y divide-slate-200 dark:divide-slate-700">
         {!isGKComparision &&
           stats.map((stat) => (
-            <div key={stat} className="grid grid-cols-3 p-2">
-              <div className="flex items-center gap-x-3">
-                <div
-                  className={`${getRarityClassNames(
-                    player1Stats[stat]
-                  )} relative inline-flex rounded-lg w-12 p-2.5 sm:p-3 font-medium leading-6 justify-center`}
-                >
-                  {player1Stats[stat] >= 0 ? player1Stats[stat] : "–"}
-                </div>
+            <div key={stat} className="grid grid-cols-3 py-2 sm:p-2 gap-x-1.5">
+              <div className="flex items-center gap-x-1.5 sm:gap-x-3">
+                <StyledRatingValue rating={player1Stats[stat]} />
                 <StarIcon
                   className={cn(
                     "h-4 w-4",
@@ -75,28 +70,14 @@ export async function PlayerStatsComparison({
                       : "text-white dark:text-slate-900"
                   )}
                 />
-                <div
-                  className={`${getRarityClassNames(
-                    player2Stats[stat]
-                  )} relative inline-flex rounded-lg w-12 p-2.5 sm:p-3 font-medium leading-6 justify-center`}
-                >
-                  {player2Stats[stat] >= 0 ? player2Stats[stat] : "–"}
-                </div>
+                <StyledRatingValue rating={player2Stats[stat]} />
               </div>
             </div>
           ))}
         {(isPlayer1Goalkeeper || isPlayer2Goalkeeper) && (
-          <div className="grid grid-cols-3 p-2">
-            <div className="flex items-center gap-x-3">
-              <div
-                className={`${getRarityClassNames(
-                  player1.metadata.goalkeeping
-                )} relative inline-flex rounded-lg w-12 p-2.5 sm:p-3 font-medium leading-6 justify-center`}
-              >
-                {+player1.metadata.goalkeeping >= 0
-                  ? player1.metadata.goalkeeping
-                  : "–"}
-              </div>
+          <div className="grid grid-cols-3 py-2 sm:p-2 gap-x-1.5">
+            <div className="flex items-center gap-x-1.5 sm:gap-x-3">
+              <StyledRatingValue rating={player1.metadata.goalkeeping} />
               <StarIcon
                 className={cn(
                   "h-4 w-4",
@@ -118,15 +99,7 @@ export async function PlayerStatsComparison({
                     : "text-white dark:text-slate-900"
                 )}
               />
-              <div
-                className={`${getRarityClassNames(
-                  player2.metadata.goalkeeping
-                )} relative inline-flex rounded-lg w-12 p-2.5 sm:p-3 font-medium leading-6 justify-center`}
-              >
-                {+player2.metadata.goalkeeping >= 0
-                  ? player2.metadata.goalkeeping
-                  : "–"}
-              </div>
+              <StyledRatingValue rating={player2.metadata.goalkeeping} />
             </div>
           </div>
         )}

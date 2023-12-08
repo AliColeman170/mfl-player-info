@@ -27,13 +27,13 @@ export function SearchInput({
   return (
     <div className="mx-auto w-full divide-y divide-slate-100 overflow-hidden rounded-xl bg-white dark:bg-slate-900 shadow-2xl shadow-slate-300 dark:shadow-slate-900 ring-1 ring-slate-900 dark:ring-slate-800 ring-opacity-5">
       <div className="relative">
-        <MagnifyingGlassIcon className="pointer-events-none absolute left-4 top-3.5 sm:top-4 h-7 w-7 sm:h-8 sm:w-8 text-slate-400 dark:text-slate-600" />
+        <MagnifyingGlassIcon className="pointer-events-none absolute left-3 top-3 sm:top-4 h-6 w-6 sm:h-8 sm:w-8 text-slate-400 dark:text-slate-600" />
         <input
           ref={innerRef}
           type="number"
           step={1}
           min={1}
-          className="h-14 sm:h-16 text-lg sm:text-xl w-full border-0 bg-transparent pl-14 sm:pl-16 pr-4 text-slate-900 dark:text-slate-400 placeholder:text-slate-400 focus:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          className="h-12 sm:h-16 text-lg sm:text-xl w-full border-0 bg-transparent pl-12 sm:pl-16 pr-4 text-slate-900 dark:text-slate-400 placeholder:text-slate-400 focus:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           placeholder={placeholder}
           defaultValue={value}
           onChange={handleSearch}
