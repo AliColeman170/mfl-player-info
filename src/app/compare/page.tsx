@@ -13,7 +13,7 @@ export default function ComparePage({
   const player1Id = searchParams.player1 || "";
   const player2Id = searchParams.player2 || "";
   return (
-    <div className="flex flex-1 h-full flex-col items-center justify-start space-y-8">
+    <div className="flex flex-1 h-full flex-col items-center justify-start space-y-4 md:space-y-8">
       <ComparePlayerSearch
         key={`player1=${player1Id}&player2=${player2Id}`}
         player1={player1Id}
