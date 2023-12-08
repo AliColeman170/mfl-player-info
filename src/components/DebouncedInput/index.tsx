@@ -1,4 +1,5 @@
-const { useState, useEffect } = require("react");
+import { useState, useEffect } from "react";
+import { useDebounce } from "usehooks-ts";
 
 export function DebouncedInput({
   value: initialValue,
@@ -7,18 +8,15 @@ export function DebouncedInput({
   ...props
 }) {
   const [value, setValue] = useState(initialValue);
+  const debouncedValue = useDebounce<string>(value, debounce);
 
   useEffect(() => {
     setValue(initialValue);
   }, [initialValue]);
 
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      onChange(value);
-    }, debounce);
-
-    return () => clearTimeout(timeout);
-  }, [value, onChange, debounce]);
+    onChange(value);
+  }, [debouncedValue]);
 
   return (
     <input

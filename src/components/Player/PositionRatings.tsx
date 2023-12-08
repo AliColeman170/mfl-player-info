@@ -5,10 +5,10 @@ import {
   getPlayerPositionRatings,
   getRarityClassNames,
 } from "@/utils/helpers";
-import { StarIcon } from "@heroicons/react/24/solid";
 import PlayerStats from "./PlayerStats";
 import { useState } from "react";
 import { Switch } from "@headlessui/react";
+import { PositionFamiliarityIndicator } from "../Compare/PositionRatingsComparison";
 
 interface PlayerStats {
   pace: number;
@@ -19,7 +19,7 @@ interface PlayerStats {
   physical: number;
 }
 
-const DifferenceBadge = ({ difference }) => {
+export const DifferenceBadge = ({ difference }) => {
   let colorClass = "";
   let text = difference.toString();
 
@@ -33,7 +33,7 @@ const DifferenceBadge = ({ difference }) => {
   }
   return (
     <span
-      className={`inline-flex justify-center w-7 ml-1.5 sm:ml-2 text-sm sm:text-base font-medium ${colorClass}`}
+      className={`inline-flex justify-center w-7 text-sm sm:text-base font-medium ${colorClass}`}
     >
       {text}
     </span>
@@ -84,7 +84,7 @@ export default function PositionRatings({ player }) {
     }
   }
 
-  const positionRatings = getPlayerPositionRatings(player, stats);
+  const positionRatings = getPlayerPositionRatings(player, true, stats);
 
   return (
     <>
@@ -108,7 +108,7 @@ export default function PositionRatings({ player }) {
               checked={isTrainingMode}
               onChange={handleToggleSwitch}
               className={cn(
-                isTrainingMode ? "bg-indigo-600" : "bg-gray-200",
+                isTrainingMode ? "bg-indigo-600" : "bg-gray-300",
                 "relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 dark:focus:ring-offset-slate-900"
               )}
             >
@@ -127,30 +127,38 @@ export default function PositionRatings({ player }) {
             <div className="inline-block min-w-full align-middle">
               <table className="min-w-full divide-y divide-slate-300 dark:divide-slate-700">
                 <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
-                  {positionRatings.map(({ positions, rating, difference }) => (
-                    <tr key={positions.join("-")}>
-                      <td className="w-full whitespace-nowrap px-1.5 sm:px-2 py-4 sm:py-5 text-left font-medium text-slate-700 dark:text-slate-200 sm:pl-1">
-                        <div className="flex items-center space-x-2">
-                          <span className="text-sm sm:text-base">
-                            {positions.join(" / ")}
+                  {positionRatings.map(({ positions, rating, difference }) => {
+                    if (
+                      positions.includes("GK") &&
+                      !player.metadata.positions.includes("GK")
+                    )
+                      return null;
+                    return (
+                      <tr key={positions.join("-")}>
+                        <td className="w-full whitespace-nowrap px-1.5 sm:px-2 py-4 sm:py-5 text-left font-medium text-slate-700 dark:text-slate-200 sm:pl-1">
+                          <div className="flex items-center space-x-3">
+                            <span className="text-sm sm:text-base">
+                              {positions.join(" / ")}
+                            </span>
+                            <PositionFamiliarityIndicator
+                              player={player}
+                              positions={positions}
+                            />
+                          </div>
+                        </td>
+                        <td className="flex items-center space-x-3 whitespace-nowrap px-1.5 sm:px-2 py-2.5 text-center font-medium text-slate-500 dark:text-slate-200">
+                          <DifferenceBadge difference={difference} />
+                          <span
+                            className={`${getRarityClassNames(
+                              rating
+                            )} rounded-lg text-base sm:text-lg w-12 p-2 font-medium`}
+                          >
+                            {rating > 0 ? rating : "–"}
                           </span>
-                          {positions.includes(player.metadata.positions[0]) && (
-                            <StarIcon className="w-5 h-5 text-yellow-400" />
-                          )}
-                        </div>
-                      </td>
-                      <td className="whitespace-nowrap px-1.5 sm:px-2 py-4 sm:py-5 text-center font-medium text-slate-500 dark:text-slate-200">
-                        <span
-                          className={`${getRarityClassNames(
-                            rating
-                          )} rounded-lg text-base sm:text-lg w-12 p-2.5 sm:p-3 font-medium`}
-                        >
-                          {rating > 0 ? rating : "–"}
-                        </span>
-                        <DifferenceBadge difference={difference} />
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

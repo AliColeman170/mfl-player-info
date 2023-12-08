@@ -71,7 +71,7 @@ async function fetchPlayers(address) {
       const faveData = favourites.find((fave) => fave.player_id === player.id);
       return {
         ...player,
-        positionRatings: getPlayerPositionRatings(player),
+        positionRatings: getPlayerPositionRatings(player, true),
         is_favourite: faveData?.is_favourite ?? undefined,
         tags: faveData?.tags ?? undefined,
       };

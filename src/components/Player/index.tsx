@@ -10,8 +10,8 @@ export default function Player({ player }) {
   const isGoalkeeper = player.metadata.positions.includes("GK");
 
   return (
-    <div className="mx-auto w-full max-w-xl transform rounded-xl bg-white dark:bg-slate-900 shadow-2xl shadow-slate-300 dark:shadow-slate-900 ring-1 ring-slate-950 dark:ring-slate-800 ring-opacity-5 p-4 sm:p-6 lg:p-8">
-      <div className="space-y-8 sm:space-y-0 sm:grid sm:grid-cols-3 sm:space-x-8 sm:items-center">
+    <div className="@container/main mx-auto w-full max-w-xl transform rounded-xl bg-white dark:bg-slate-900 shadow-2xl shadow-slate-300 dark:shadow-slate-900 ring-1 ring-slate-950 dark:ring-slate-800 ring-opacity-5 p-4 sm:p-6 lg:p-8">
+      <div className="space-y-8 @sm/main:space-y-0 @sm/main:grid @sm/main:grid-cols-3 @sm/main:space-x-8 @sm/main:items-center">
         <ImageCard playerId={player.id} />
         <BasicInfo player={player} />
       </div>

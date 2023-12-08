@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export function Footer() {
   return (
-    <footer className="mx-auto w-full max-w-xl px-6 lg:px-8 py-8 text-center">
+    <footer className="mt-8 mx-auto w-full max-w-xl px-6 lg:px-8 py-8 text-center">
       <div className="flex items-center justify-center space-x-3">
         <Link href={process.env.NEXT_BUY_ME_A_COFFEE_URL} target="_blank">
           <svg

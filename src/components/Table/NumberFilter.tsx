@@ -1,6 +1,5 @@
 import { cn } from "@/utils/helpers";
-
-const { DebouncedInput } = require("../DebouncedInput");
+import { DebouncedInput } from "../DebouncedInput";
 
 export function NumberFilter({ column, label, className = "" }) {
   const columnFilterValue = column.getFilterValue();
