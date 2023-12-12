@@ -45,14 +45,10 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  alternates: {
-    canonical: "/",
-  },
   openGraph: {
     title: "MFL Player Info",
     description:
       "Calculate the overall rating and get contract data for any Metaverse Football League (MFL) player using their player ID.",
-    url: "https://mflplayer.info",
     siteName: "MFL Player Info",
     locale: "en_US",
     type: "website",
