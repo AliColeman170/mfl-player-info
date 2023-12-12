@@ -44,7 +44,7 @@ export async function generateMetadata({
       url,
       images: [
         {
-          url: `${process.env.NEXT_SITE_URL}/og-image?player1=${player1Id}&player2=${player2Id}`,
+          url: `${process.env.NEXT_SITE_URL}/compare/og-image?player1=${player1Id}&player2=${player2Id}`,
           width: 1200,
           height: 630,
           alt: `${title}`,
@@ -55,7 +55,7 @@ export async function generateMetadata({
       title,
       images: [
         {
-          url: `${process.env.NEXT_SITE_URL}/og-image?player1=${player1Id}&player2=${player2Id}`,
+          url: `${process.env.NEXT_SITE_URL}/compare/og-image?player1=${player1Id}&player2=${player2Id}`,
           alt: `${title}`,
           width: 1200,
           height: 670,
