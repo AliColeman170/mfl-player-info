@@ -1,9 +1,69 @@
-import { PlayerCard } from "@/components/Compare/PlayerCard";
 import { PlayerComparison } from "@/components/Compare/PlayerComparison";
-import { PlayerStatsComparison } from "@/components/Compare/PlayerStatsComparison";
 import { ComparePlayerSearch } from "@/components/Search/ComparePlayerSearch";
-import SpinnerIcon from "@/components/SpinnerIcon";
-import { Suspense } from "react";
+
+import type { Metadata } from "next";
+
+type Props = {
+  params: { id: string };
+  searchParams: { [key: string]: string | string[] | undefined };
+};
+
+export async function generateMetadata({
+  searchParams,
+}: Props): Promise<Metadata> {
+  // read route params
+  const player1Id = searchParams.player1 || "";
+  const player2Id = searchParams.player2 || "";
+
+  // fetch data
+  const player1 = await fetch(
+    `https://z519wdyajg.execute-api.us-east-1.amazonaws.com/prod/players/${player1Id}`
+  ).then((res) => res.json());
+
+  const player2 = await fetch(
+    `https://z519wdyajg.execute-api.us-east-1.amazonaws.com/prod/players/${player2Id}`
+  ).then((res) => res.json());
+
+  const player1Name = player1.player
+    ? `${player1.player.metadata.firstName} ${player1.player.metadata.lastName}`
+    : "???";
+  const player2Name = player2.player
+    ? `${player2.player.metadata.firstName} ${player2.player.metadata.lastName}`
+    : "???";
+
+  const title = `${player1Name} v ${player2Name} | Player Comparison | MFL Player Info`;
+  const url = `${process.env.NEXT_SITE_URL}/compare?player1=${player1Id}&player2=${player2Id}`;
+
+  return {
+    title,
+    alternates: {
+      canonical: url,
+    },
+    openGraph: {
+      title,
+      url,
+      images: [
+        {
+          url: `${process.env.NEXT_SITE_URL}/og-image?player1=${player1Id}&player2=${player2Id}`,
+          width: 1200,
+          height: 630,
+          alt: `${title}`,
+        },
+      ],
+    },
+    twitter: {
+      title,
+      images: [
+        {
+          url: `${process.env.NEXT_SITE_URL}/og-image?player1=${player1Id}&player2=${player2Id}`,
+          alt: `${title}`,
+          width: 1200,
+          height: 670,
+        },
+      ],
+    },
+  };
+}
 
 export default function ComparePage({
   searchParams,

@@ -1,4 +1,12 @@
 import { SinglePlayerSearch } from "@/components/Search/SinglePlayerSearch";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: { url: "https://mflplayer.info" },
+};
 
 export default function Home() {
   return (
