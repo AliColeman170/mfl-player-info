@@ -19,8 +19,6 @@ export async function GET(req: NextRequest) {
     new URL("./assets/images/placeholder.png", process.env.NEXT_SITE_URL)
   ).then((res) => res.arrayBuffer());
 
-  console.log({ defaultImage });
-
   return new ImageResponse(
     (
       <div
