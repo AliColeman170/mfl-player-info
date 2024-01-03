@@ -94,7 +94,7 @@ export async function CareerStats({ player }) {
   return (
     <div className="col-start-1 col-span-3">
       <h2 className="font-bold text-lg mb-1 @sm/main:hidden">Career Stats</h2>
-      <dl className="@container/inner divide-y divide-slate-200 dark:divide-slate-700 @sm/main:divide-y-0 grid grid-cols-1 @sm/main:grid-cols-none @sm/main:grid-flow-col-dense @sm/main:text-center @sm/main:rounded-xl @sm/main:ring-1 @sm/main:ring-slate-950 @sm/main:dark:ring-slate-700 @sm/main:shadow-2xl @sm/main:shadow-slate-300 @sm/main:dark:shadow-slate-900">
+      <dl className="@container/inner divide-y divide-slate-200 dark:divide-slate-700 @sm/main:divide-y-0 grid grid-cols-1 @sm/main:grid-cols-none @sm/main:grid-flow-col-dense @sm/main:text-center @sm/main:rounded-xl @sm/main:ring-1 @sm/main:ring-slate-200 @sm/main:dark:ring-slate-700 @sm/main:shadow-2xl @sm/main:shadow-slate-300/20 @sm/main:dark:shadow-slate-900/20">
         <CareerStatItem>
           <CareerStatItemTitle title="Matches Played">
             <span className="@sm/main:hidden">Matches Played</span>
