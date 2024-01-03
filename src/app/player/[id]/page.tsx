@@ -2,6 +2,7 @@ import Player from "@/components/Player";
 import { getPlayerData } from "@/flow/api";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { openGraph, twitter } from "@/app/shared-meta";
 
 type Props = {
   params: { id: string };
@@ -28,10 +29,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       canonical: url,
     },
     openGraph: {
+      ...openGraph,
       title,
       url,
     },
     twitter: {
+      ...twitter,
       title,
     },
   };

@@ -6,8 +6,7 @@ import { ReactNode } from "react";
 import { UserProvider } from "@/components/Wallet/UserProvider";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { SessionProvider } from "next-auth/react";
-import { auth } from "@/auth";
+import { openGraph, twitter } from "./shared-meta";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -45,22 +44,8 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  openGraph: {
-    title: "MFL Player Info",
-    description:
-      "Calculate the overall rating and get contract data for any Metaverse Football League (MFL) player using their player ID.",
-    siteName: "MFL Player Info",
-    locale: "en_US",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "MFL Player Info",
-    description:
-      "Calculate the overall rating and get contract data for any Metaverse Football League (MFL) player using their player ID.",
-    site: "@alicoleman170",
-    creator: "@alicoleman170",
-  },
+  openGraph,
+  twitter,
 };
 
 export default async function RootLayout({
