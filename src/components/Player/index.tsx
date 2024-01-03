@@ -12,7 +12,7 @@ export default function Player({ player }) {
 
   return (
     <div className="@container/main mx-auto w-full max-w-xl transform rounded-xl bg-white dark:bg-slate-900 shadow-2xl shadow-slate-300 dark:shadow-slate-900 ring-1 ring-slate-950 dark:ring-slate-800 ring-opacity-5 p-4 sm:p-6 lg:p-8">
-      <div className="gap-y-8 @sm/main:space-y-0 @sm/main:grid @sm/main:grid-cols-3 @sm/main:gap-x-8 @sm/main:items-center">
+      <div className="gap-y-8 grid grid-cols-1 @sm/main:grid-cols-3 @sm/main:gap-8 @sm/main:items-center">
         <ImageCard playerId={player.id} />
         <BasicInfo player={player} />
         <Suspense

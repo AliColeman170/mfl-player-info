@@ -22,7 +22,7 @@ export default async function BasicInfo({ player }) {
     position: positions.join(" / "),
   };
   return (
-    <div className="col-span-2">
+    <div className="col-start-1 @sm/main:col-start-2 @sm/main:col-span-2">
       <dl className="@container/inner divide-y divide-slate-200 dark:divide-slate-700">
         <div className="px-1 py-2 gap-y-1 @[16rem]/inner:py-2 grid @[10rem]/inner:grid-cols-3 @[10rem]/inner:gap-8 @[16rem]/inner:px-0">
           <dt className="text-xs @[16rem]/inner:text-base font-semibold leading-none text-slate-700 dark:text-slate-400 uppercase">

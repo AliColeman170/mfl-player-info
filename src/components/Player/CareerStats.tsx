@@ -1,3 +1,35 @@
+function CareerStatItemTitle({
+  title,
+  children,
+}: {
+  title?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <dt
+      title={title}
+      className="text-xs @[16rem]/inner:text-base font-semibold leading-none text-slate-700 dark:text-slate-400 uppercase"
+    >
+      {children}
+    </dt>
+  );
+}
+function CareerStatItemValue({ children }: { children: React.ReactNode }) {
+  return (
+    <dd className="text-sm @[16rem]/inner:text-base text-right @sm/main:text-center @sm/main:pt-2 leading-none text-slate-700 dark:text-slate-200 capitalize">
+      {children}
+    </dd>
+  );
+}
+
+function CareerStatItem({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="py-3 gap-y-2 items-center grid grid-cols-[2fr_1fr] @sm/main:grid-cols-1 @sm/main:divide-y @sm/main:divide-slate-200 @sm/main:dark:divide-slate-700">
+      {children}
+    </div>
+  );
+}
+
 export async function CareerStats({ player }) {
   const careerStats = await fetch(
     `https://z519wdyajg.execute-api.us-east-1.amazonaws.com/prod/players/${player.id}/competitions`
@@ -61,130 +93,105 @@ export async function CareerStats({ player }) {
   if (stats.nbMatches === 0) return null;
   return (
     <div className="col-start-1 col-span-3">
-      <dl className="grid grid-flow-col-dense text-center rounded-xl ring-1 ring-slate-950 dark:ring-slate-700 shadow-2xl shadow-slate-300 dark:shadow-slate-900">
-        <div className="py-3 gap-y-2 grid divide-y divide-slate-200 dark:divide-slate-700">
-          <dt
-            title="Matches Played"
-            className="text-sm font-semibold leading-none text-slate-700 dark:text-slate-400 uppercase"
-          >
-            MP
-          </dt>
-          <dd className="text-base pt-2 leading-none text-slate-700 dark:text-slate-200 capitalize">
-            {stats.nbMatches}
-          </dd>
-        </div>
+      <h2 className="font-bold text-lg mb-1 @sm/main:hidden">Career Stats</h2>
+      <dl className="@container/inner divide-y divide-slate-200 dark:divide-slate-700 @sm/main:divide-y-0 grid grid-cols-1 @sm/main:grid-cols-none @sm/main:grid-flow-col-dense @sm/main:text-center @sm/main:rounded-xl @sm/main:ring-1 @sm/main:ring-slate-950 @sm/main:dark:ring-slate-700 @sm/main:shadow-2xl @sm/main:shadow-slate-300 @sm/main:dark:shadow-slate-900">
+        <CareerStatItem>
+          <CareerStatItemTitle title="Matches Played">
+            <span className="@sm/main:hidden">Matches Played</span>
+            <span className="hidden @sm/main:inline-block">MP</span>
+          </CareerStatItemTitle>
+          <CareerStatItemValue>{stats.nbMatches}</CareerStatItemValue>
+        </CareerStatItem>
         {isGoalkeeper ? (
           <>
-            <div className="py-3 gap-y-2 grid divide-y divide-slate-200 dark:divide-slate-700">
-              <dt
-                title="Goals Conceded"
-                className="text-sm font-semibold leading-none text-slate-700 dark:text-slate-400 uppercase"
-              >
-                GC
-              </dt>
-              <dd className="text-base pt-2 leading-none text-slate-700 dark:text-slate-200 capitalize">
-                {stats.goalsConceded}
-              </dd>
-            </div>
-            <div className="py-3 gap-y-2 grid divide-y divide-slate-200 dark:divide-slate-700">
-              <dt
-                title="Saves"
-                className="text-sm font-semibold leading-none text-slate-700 dark:text-slate-400 uppercase"
-              >
-                SV
-              </dt>
-              <dd className="text-base pt-2 leading-none text-slate-700 dark:text-slate-200 capitalize">
-                {stats.saves}
-              </dd>
-            </div>
-            <div className="py-3 gap-y-2 grid divide-y divide-slate-200 dark:divide-slate-700">
-              <dt
-                title="Saves per 90'"
-                className="text-sm font-semibold leading-none text-slate-700 dark:text-slate-400 uppercase"
-              >
-                SVP90
-              </dt>
-              <dd className="text-base pt-2 leading-none text-slate-700 dark:text-slate-200 capitalize">
+            <CareerStatItem>
+              <CareerStatItemTitle title="Goals Conceded">
+                <span className="@sm/main:hidden">Goals Conceded</span>
+                <span className="hidden @sm/main:inline-block">GC</span>
+              </CareerStatItemTitle>
+              <CareerStatItemValue>{stats.goalsConceded}</CareerStatItemValue>
+            </CareerStatItem>
+            <CareerStatItem>
+              <CareerStatItemTitle title="Saves">
+                <span className="@sm/main:hidden">Saves</span>
+                <span className="hidden @sm/main:inline-block">SV</span>
+              </CareerStatItemTitle>
+              <CareerStatItemValue>{stats.saves}</CareerStatItemValue>
+            </CareerStatItem>
+            <CareerStatItem>
+              <CareerStatItemTitle title="Saves Per 90'">
+                <span className="@sm/main:hidden">Saves Per 90'</span>
+                <span className="hidden @sm/main:inline-block">SVP90</span>
+              </CareerStatItemTitle>
+              <CareerStatItemValue>
                 {stats.savesPerGame === Infinity
                   ? "–"
                   : `${stats.savesPerGame}'`}
-              </dd>
-            </div>
-            <div className="py-3 gap-y-2 grid divide-y divide-slate-200 dark:divide-slate-700">
-              <dt
-                title="Minutes per Goal Against"
-                className="text-sm font-semibold leading-none text-slate-700 dark:text-slate-400 uppercase"
-              >
-                MPGA
-              </dt>
-              <dd className="text-base pt-2 leading-none text-slate-700 dark:text-slate-200 capitalize">
+              </CareerStatItemValue>
+            </CareerStatItem>
+            <CareerStatItem>
+              <CareerStatItemTitle title="Minutes per Goal Against">
+                <span className="@sm/main:hidden">
+                  Minutes Per Goal Against
+                </span>
+                <span className="hidden @sm/main:inline-block">MPGA</span>
+              </CareerStatItemTitle>
+              <CareerStatItemValue>
                 {stats.minutesPerGoalAgainst === Infinity
                   ? "–"
                   : `${stats.minutesPerGoalAgainst}'`}
-              </dd>
-            </div>
+              </CareerStatItemValue>
+            </CareerStatItem>
           </>
         ) : (
           <>
-            <div className="py-3 gap-y-2 grid divide-y divide-slate-200 dark:divide-slate-700">
-              <dt
-                title="Goals"
-                className="text-sm font-semibold leading-none text-slate-700 dark:text-slate-400 uppercase"
-              >
-                G
-              </dt>
-              <dd className="text-base pt-2 leading-none text-slate-700 dark:text-slate-200 capitalize">
-                {stats.goals}
-              </dd>
-            </div>
-            <div className="py-3 gap-y-2 grid divide-y divide-slate-200 dark:divide-slate-700">
-              <dt
-                title="Assists"
-                className="text-sm font-semibold leading-none text-slate-700 dark:text-slate-400 uppercase"
-              >
-                A
-              </dt>
-              <dd className="text-base pt-2 leading-none text-slate-700 dark:text-slate-200 capitalize">
-                {stats.assists}
-              </dd>
-            </div>
-            <div className="py-3 gap-y-2 grid divide-y divide-slate-200 dark:divide-slate-700">
-              <dt
-                title="Goals + Assists"
-                className="text-sm font-semibold leading-none text-slate-700 dark:text-slate-400 uppercase"
-              >
-                G+A
-              </dt>
-              <dd className="text-base pt-2 leading-none text-slate-700 dark:text-slate-200 capitalize">
+            <CareerStatItem>
+              <CareerStatItemTitle title="Goals">
+                <span className="@sm/main:hidden">Goals</span>
+                <span className="hidden @sm/main:inline-block">G</span>
+              </CareerStatItemTitle>
+              <CareerStatItemValue>{stats.goals}</CareerStatItemValue>
+            </CareerStatItem>
+            <CareerStatItem>
+              <CareerStatItemTitle title="Assists">
+                <span className="@sm/main:hidden">Assists</span>
+                <span className="hidden @sm/main:inline-block">A</span>
+              </CareerStatItemTitle>
+              <CareerStatItemValue>{stats.assists}</CareerStatItemValue>
+            </CareerStatItem>
+            <CareerStatItem>
+              <CareerStatItemTitle title="Goals Contributions">
+                <span className="@sm/main:hidden">Goals Contributions</span>
+                <span className="hidden @sm/main:inline-block">G+A</span>
+              </CareerStatItemTitle>
+              <CareerStatItemValue>
                 {stats.goalContributions}
-              </dd>
-            </div>
-            <div className="py-3 gap-y-2 grid divide-y divide-slate-200 dark:divide-slate-700">
-              <dt
-                title="Minutes per Goal"
-                className="text-sm font-semibold leading-none text-slate-700 dark:text-slate-400 uppercase"
-              >
-                MPG
-              </dt>
-              <dd className="text-base pt-2 leading-none text-slate-700 dark:text-slate-200 capitalize">
+              </CareerStatItemValue>
+            </CareerStatItem>
+            <CareerStatItem>
+              <CareerStatItemTitle title="Minutes per Goal">
+                <span className="@sm/main:hidden">Minutes Per Goal</span>
+                <span className="hidden @sm/main:inline-block">MPG</span>
+              </CareerStatItemTitle>
+              <CareerStatItemValue>
                 {stats.minutesPerGoal === Infinity
                   ? "–"
                   : `${stats.minutesPerGoal}'`}
-              </dd>
-            </div>
-            <div className="py-3 gap-y-2 grid divide-y divide-slate-200 dark:divide-slate-700">
-              <dt
-                title="Minutes per Goal + Assist"
-                className="text-sm font-semibold leading-none text-slate-700 dark:text-slate-400 uppercase"
-              >
-                MPGA
-              </dt>
-              <dd className="text-base pt-2 leading-none text-slate-700 dark:text-slate-200 capitalize">
+              </CareerStatItemValue>
+            </CareerStatItem>
+            <CareerStatItem>
+              <CareerStatItemTitle title="Minutes Per Goal Contribution">
+                <span className="@sm/main:hidden">
+                  Minutes Per Goal Contribution
+                </span>
+                <span className="hidden @sm/main:inline-block">MPGA</span>
+              </CareerStatItemTitle>
+              <CareerStatItemValue>
                 {stats.minutesPerGoalContribution === Infinity
                   ? "–"
                   : `${stats.minutesPerGoalContribution}'`}
-              </dd>
-            </div>
+              </CareerStatItemValue>
+            </CareerStatItem>
           </>
         )}
       </dl>

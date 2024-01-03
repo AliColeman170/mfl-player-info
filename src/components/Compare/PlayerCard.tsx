@@ -1,6 +1,9 @@
 import ImageCard from "../Player/ImageCard";
 import BasicInfo from "../Player/BasicInfo";
 import { cn } from "@/utils/helpers";
+import { Suspense } from "react";
+import SpinnerIcon from "../SpinnerIcon";
+import { CareerStats } from "../Player/CareerStats";
 
 export async function PlayerCard({
   player,
@@ -17,9 +20,18 @@ export async function PlayerCard({
         className
       )}
     >
-      <div className="space-y-8 @sm:space-y-0 @sm:grid @sm:grid-cols-3 @sm:space-x-8 @sm:items-center">
+      <div className="grid grid-cols-1 grid-flow-row gap-y-8 @sm:gap-y-4 @sm:grid @sm:grid-cols-3 @sm:gap-x-8 @sm:items-center">
         <ImageCard playerId={player.id} />
         <BasicInfo player={player} />
+        <Suspense
+          fallback={
+            <div className="flex justify-center col-span-3 py-2">
+              <SpinnerIcon className="animate-spin h-6 w-6 text-slate-400" />
+            </div>
+          }
+        >
+          <CareerStats player={player} />
+        </Suspense>
       </div>
     </div>
   );
