@@ -1,7 +1,7 @@
 import { PlayerComparison } from "@/components/Compare/PlayerComparison";
 import { ComparePlayerSearch } from "@/components/Search/ComparePlayerSearch";
-
 import type { Metadata } from "next";
+import { openGraph, twitter } from "../shared-meta";
 
 type Props = {
   params: { id: string };
@@ -40,6 +40,7 @@ export async function generateMetadata({
       canonical: url,
     },
     openGraph: {
+      ...openGraph,
       title,
       url,
       images: [
@@ -52,6 +53,7 @@ export async function generateMetadata({
       ],
     },
     twitter: {
+      ...twitter,
       title,
       images: [
         {
