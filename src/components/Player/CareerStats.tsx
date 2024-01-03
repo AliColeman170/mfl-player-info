@@ -120,7 +120,7 @@ export async function CareerStats({ player }) {
             </CareerStatItem>
             <CareerStatItem>
               <CareerStatItemTitle title="Saves Per 90'">
-                <span className="@sm/main:hidden">Saves Per 90'</span>
+                <span className="@sm/main:hidden">Saves Per 90&apos;</span>
                 <span className="hidden @sm/main:inline-block">SVP90</span>
               </CareerStatItemTitle>
               <CareerStatItemValue>
