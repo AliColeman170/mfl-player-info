@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  cn,
-  getPlayerPositionRatings,
-  getRarityClassNames,
-} from "@/utils/helpers";
+import { cn, getPlayerPositionRatings } from "@/utils/helpers";
 import PlayerStats from "./PlayerStats";
 import { useState } from "react";
 import { Switch } from "@headlessui/react";
