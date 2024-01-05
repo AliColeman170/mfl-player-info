@@ -114,7 +114,7 @@ export default function PositionRatings({ player }) {
 
   return (
     <>
-      <div className="mt-4">
+      <div className="mt-8">
         <PlayerStats
           player={player}
           stats={stats}
@@ -125,7 +125,7 @@ export default function PositionRatings({ player }) {
         />
       </div>
 
-      <div className="mt-12">
+      <div className="mt-8">
         <div className="flex items-center justify-between">
           <h2 className="text-slate-900 dark:text-slate-200 font-bold tracking-tight text-2xl sm:text-3xl">
             Position Ratings
