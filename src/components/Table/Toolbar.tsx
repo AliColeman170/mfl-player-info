@@ -11,6 +11,7 @@ import { FacetedFilter } from "./FacetedFilter";
 import { columnLabels } from "./columns";
 import FacetedRadioFilter from "./FacetedRadioFilter";
 import Image from "next/image";
+import FavouriteToggle from "./FavouriteToggle";
 
 export function Toolbar({ table }) {
   const [showFilterControls, setShowFilterControls] = useState(false);
@@ -93,7 +94,7 @@ export function Toolbar({ table }) {
   return (
     <>
       <div className="grid md:grid-cols-2 mb-6 gap-4">
-        <div className="flex md:order-2 relative z-10 items-center justify-between md:justify-end space-x-3">
+        <div className="flex md:order-2 relative z-10 items-center justify-between md:justify-end gap-x-3">
           <div className="flex md:flex-row-reverse items-center">
             <FilterOptions
               count={table.getState().columnFilters.length}
@@ -111,7 +112,8 @@ export function Toolbar({ table }) {
           </div>
           <ViewOptions table={table} />
         </div>
-        <div className="flex md:order-1 flex-1 items-center space-x-2 justify-stretch">
+        <div className="flex md:order-1 flex-1 items-center gap-x-3 justify-stretch">
+          <FavouriteToggle column={table.getColumn("favourite")} />
           <DebouncedInput
             value={table.getState().globalFilter ?? ""}
             onChange={(value) => table.setGlobalFilter(String(value))}

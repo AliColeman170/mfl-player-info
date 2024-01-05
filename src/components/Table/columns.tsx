@@ -90,6 +90,7 @@ export const columnLabels = [
 export const columns: ColumnDef<Player>[] = [
   {
     id: "favourite",
+    accessorFn: (row) => !!row.is_favourite,
     cell: ({ table, row }) => (
       <ToggleFavouriteButton
         user={table.options.meta.user}
@@ -100,6 +101,7 @@ export const columns: ColumnDef<Player>[] = [
     ),
     enableSorting: false,
     enableHiding: false,
+    enableColumnFilter: true,
   },
   {
     id: "id",
