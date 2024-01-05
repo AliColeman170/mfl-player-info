@@ -13,8 +13,8 @@ import {
   PositionalFamiliarityIndicator,
 } from "./PositionFamiliarityIndicator";
 import { StyledRatingValue } from "./StyledRatingValue";
-import { captainBoost, positionalFamiliarity } from "@/config";
-import { Cog8ToothIcon, CogIcon } from "@heroicons/react/24/outline";
+import { positionalFamiliarity } from "@/config";
+import { Cog8ToothIcon } from "@heroicons/react/24/outline";
 
 interface PlayerStats {
   pace: number;
@@ -114,7 +114,7 @@ export default function PositionRatings({ player }) {
 
   return (
     <>
-      <div className="mt-4">
+      <div className="mt-8">
         <PlayerStats
           player={player}
           stats={stats}
@@ -125,7 +125,7 @@ export default function PositionRatings({ player }) {
         />
       </div>
 
-      <div className="mt-12">
+      <div className="mt-8">
         <div className="flex items-center justify-between">
           <h2 className="text-slate-900 dark:text-slate-200 font-bold tracking-tight text-2xl sm:text-3xl">
             Position Ratings
@@ -149,7 +149,9 @@ export default function PositionRatings({ player }) {
                     checked={isTrainingMode}
                     onChange={handleToggleSwitch}
                     className={cn(
-                      isTrainingMode ? "bg-indigo-600" : "bg-gray-300",
+                      isTrainingMode
+                        ? "bg-indigo-600"
+                        : "bg-slate-300 dark:bg-slate-800",
                       "relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 dark:focus:ring-offset-slate-900"
                     )}
                   >
@@ -176,7 +178,7 @@ export default function PositionRatings({ player }) {
                     className={cn(
                       enablePositionalFamiliarity
                         ? "bg-indigo-600"
-                        : "bg-gray-300",
+                        : "bg-slate-300 dark:bg-slate-800",
                       "relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 dark:focus:ring-offset-slate-900"
                     )}
                   >
@@ -203,7 +205,9 @@ export default function PositionRatings({ player }) {
                     checked={isCaptain}
                     onChange={setIsCaptain}
                     className={cn(
-                      isCaptain ? "bg-indigo-600" : "bg-gray-300",
+                      isCaptain
+                        ? "bg-indigo-600"
+                        : "bg-slate-300 dark:bg-slate-800",
                       "relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 dark:focus:ring-offset-slate-900"
                     )}
                   >

@@ -1,3 +1,5 @@
+"use client";
+
 import { updateTags } from "@/lib/actions";
 import { XMarkIcon } from "@heroicons/react/20/solid";
 import { useTransition } from "react";

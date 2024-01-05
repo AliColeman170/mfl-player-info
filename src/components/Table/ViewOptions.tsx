@@ -67,7 +67,7 @@ export function ViewOptions({
                     >
                       {column.getIsVisible() ? (
                         <CheckIcon
-                          className="mr-3 h-4 w-4 text-gray-400 group-hover:text-gray-500"
+                          className="mr-3 h-4 w-4 text-slate-400 group-hover:text-slate-500"
                           aria-hidden="true"
                         />
                       ) : (
