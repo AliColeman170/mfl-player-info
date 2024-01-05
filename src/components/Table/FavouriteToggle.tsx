@@ -40,7 +40,7 @@ function FavouriteToggle({ column }) {
   return (
     <div
       className={cn(
-        "relative inline-flex h-9 w-16 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 focus:ring-offset-slate-50 dark:focus:ring-offset-slate-950 bg-slate-300 dark:bg-slate-800",
+        "relative inline-flex h-9 w-16 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 focus:ring-offset-slate-50 dark:focus:ring-offset-slate-950 bg-slate-200 dark:bg-slate-800",
         enabled !== undefined && "bg-indigo-600"
       )}
     >
