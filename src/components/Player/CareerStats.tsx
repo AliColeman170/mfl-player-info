@@ -90,7 +90,12 @@ export async function CareerStats({ player }) {
 
   const isGoalkeeper = player.metadata.positions.includes("GK");
 
-  if (stats.nbMatches === 0) return null;
+  if (stats.nbMatches === 0)
+    return (
+      <div className="col-start-1 col-span-3 place-content-center">
+        <p className="text-center py-8">No games played</p>
+      </div>
+    );
   return (
     <div className="col-start-1 col-span-3">
       <h2 className="font-bold text-lg mb-1 @sm/main:hidden">Career Stats</h2>
