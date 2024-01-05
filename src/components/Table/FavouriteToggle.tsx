@@ -27,8 +27,8 @@ function FavouriteToggle({ column }) {
       checked={enabled}
       onChange={handleChange}
       className={cn(
-        enabled ? "bg-indigo-600" : "bg-gray-200",
-        "relative inline-flex h-9 w-14 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 focus:ring-offset-gray-950"
+        enabled ? "bg-indigo-600" : "bg-slate-300 dark:bg-slate-800",
+        "relative inline-flex h-9 w-14 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 focus:ring-offset-slate-50 dark:focus:ring-offset-slate-950"
       )}
     >
       <span className="sr-only">Filter Favourites</span>
@@ -47,7 +47,7 @@ function FavouriteToggle({ column }) {
           )}
           aria-hidden="true"
         >
-          <HeartIcon className="h-4 w-4 text-gray-400" />
+          <HeartIcon className="h-4 w-4 text-slate-400" />
         </span>
         <span
           className={cn(
