@@ -19,13 +19,15 @@ export function AddTagButton({ player }) {
   });
 
   async function AddTag(callback) {
-    const currentTags = player.tags || [];
-    const updatedTags = [...currentTags, newTag];
-    startTransition(() => {
-      updateTags(player.id, updatedTags);
-      setNewTag("");
-      callback();
-    });
+    if (newTag) {
+      const currentTags = player.tags || [];
+      const updatedTags = [...currentTags, newTag];
+      startTransition(() => {
+        updateTags(player.id, updatedTags);
+        setNewTag("");
+        callback();
+      });
+    }
   }
 
   return (
@@ -59,6 +61,7 @@ export function AddTagButton({ player }) {
                   onClick={async () => {
                     await AddTag(close);
                   }}
+                  disabled={!newTag}
                   className="flex w-20 items-center justify-center rounded-md text-sm bg-indigo-600 px-3 py-3 font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                 >
                   {isPending ? (

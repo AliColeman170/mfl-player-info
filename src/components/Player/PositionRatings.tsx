@@ -13,8 +13,8 @@ import {
   PositionalFamiliarityIndicator,
 } from "./PositionFamiliarityIndicator";
 import { StyledRatingValue } from "./StyledRatingValue";
-import { captainBoost, positionalFamiliarity } from "@/config";
-import { Cog8ToothIcon, CogIcon } from "@heroicons/react/24/outline";
+import { positionalFamiliarity } from "@/config";
+import { Cog8ToothIcon } from "@heroicons/react/24/outline";
 
 interface PlayerStats {
   pace: number;
