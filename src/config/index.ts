@@ -99,8 +99,8 @@ export const positionalFamiliarity = [
     adjustment: {
       GK: -20,
       CB: -8,
-      RB: 0,
-      LB: -8,
+      RB: -8,
+      LB: 0,
       RWB: -20,
       LWB: -5,
       CDM: -20,
