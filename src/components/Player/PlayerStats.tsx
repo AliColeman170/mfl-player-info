@@ -9,7 +9,7 @@ export default function PlayerStats({
   resetStatValue,
 }) {
   return (
-    <div className="mt-8 flow-root">
+    <div className="flow-root">
       <div className="-my-3 overflow-x-auto">
         <div className="inline-block min-w-full py-2 align-middle">
           <table className="min-w-full divide-y divide-slate-300 dark:divide-slate-700">

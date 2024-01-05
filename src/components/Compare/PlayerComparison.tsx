@@ -3,6 +3,8 @@ import { PlayerCard } from "./PlayerCard";
 import NotFound from "../Player/NotFound";
 import { PlayerStatsComparison } from "./PlayerStatsComparison";
 import PositionRatingsComparison from "./PositionRatingsComparison";
+import PositionalRatingsComparison from "./PositionalRatingsComparison";
+import { PositionalFamiliarityToggleWrapper } from "./PositionalFamiliarityToggleWrapper";
 
 export async function PlayerComparison({ player1Id, player2Id }) {
   const player1 = await getPlayerData(player1Id);
@@ -14,7 +16,10 @@ export async function PlayerComparison({ player1Id, player2Id }) {
       {player1 && player2 && (
         <>
           <PlayerStatsComparison player1={player1} player2={player2} />
-          <PositionRatingsComparison player1={player1} player2={player2} />
+          <PositionalFamiliarityToggleWrapper
+            player1={player1}
+            player2={player2}
+          />
         </>
       )}
     </div>
