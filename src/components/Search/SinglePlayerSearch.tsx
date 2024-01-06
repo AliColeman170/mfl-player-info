@@ -11,10 +11,6 @@ export function SinglePlayerSearch({ id }: { id?: string }) {
   const [playerId, setPlayerId] = useState<string | null>(id);
   const debouncedPlayerId = useDebounce<string>(playerId, 800);
 
-  useEffect(() => {
-    searchPlayer(debouncedPlayerId);
-  }, [debouncedPlayerId]);
-
   function searchPlayer(id) {
     if (id) {
       startTransition(() => {
@@ -24,6 +20,10 @@ export function SinglePlayerSearch({ id }: { id?: string }) {
       router.push(`/`);
     }
   }
+
+  useEffect(() => {
+    searchPlayer(debouncedPlayerId);
+  }, [debouncedPlayerId]);
 
   function handleSearchChange(e) {
     if (e.target.value) {

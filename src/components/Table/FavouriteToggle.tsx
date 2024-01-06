@@ -3,11 +3,12 @@ import { cn } from "@/utils/helpers";
 import { useEffect, useState } from "react";
 
 function FavouriteToggle({ column }) {
-  const [enabled, setEnabled] = useState(column?.getFilterValue());
+  const value = column?.getFilterValue();
+  const [enabled, setEnabled] = useState(value);
 
   useEffect(() => {
-    setEnabled(column?.getFilterValue());
-  }, [column?.getFilterValue()]);
+    setEnabled(value);
+  }, [value]);
 
   function toggleNotFav() {
     if (enabled === false) {
