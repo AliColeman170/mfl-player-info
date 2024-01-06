@@ -53,8 +53,11 @@ async function fetchPlayers(address) {
     let page = 0;
     let hasChecked = false;
     let players = [];
+    let done = false;
 
-    while (page * LIMIT === players.length && !hasChecked) {
+    while (!done) {
+      console.log("loop", page);
+
       const query = hasChecked
         ? `&beforePlayerId=${players[players.length - 1].id}`
         : "";
@@ -63,6 +66,9 @@ async function fetchPlayers(address) {
       );
       const retrievedPlayers = await res.json();
       players.push(...retrievedPlayers);
+      if (retrievedPlayers.length === 0 || players.length < (page + 1) * 400) {
+        done = true;
+      }
       page++;
       hasChecked = true;
     }

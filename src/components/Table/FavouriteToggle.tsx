@@ -1,6 +1,5 @@
 "use state";
 import { cn } from "@/utils/helpers";
-import { Switch } from "@headlessui/react";
 import { useEffect, useState } from "react";
 
 function FavouriteToggle({ column }) {
@@ -9,14 +8,6 @@ function FavouriteToggle({ column }) {
   useEffect(() => {
     setEnabled(column?.getFilterValue());
   }, [column?.getFilterValue()]);
-
-  function handleChange() {
-    if (enabled === true) {
-      column?.setFilterValue(true);
-    } else {
-      column?.setFilterValue(undefined);
-    }
-  }
 
   function toggleNotFav() {
     if (enabled === false) {
