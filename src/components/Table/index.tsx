@@ -88,6 +88,7 @@ export function Table({ user, players }) {
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
     getFacetedMinMaxValues: getFacetedMinMaxValues(),
+    autoResetPageIndex: false,
     filterFns: {
       select: selectFilter,
     },

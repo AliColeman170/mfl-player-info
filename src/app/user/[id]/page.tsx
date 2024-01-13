@@ -56,8 +56,6 @@ async function fetchPlayers(address) {
     let done = false;
 
     while (!done) {
-      console.log("loop", page);
-
       const query = hasChecked
         ? `&beforePlayerId=${players[players.length - 1].id}`
         : "";

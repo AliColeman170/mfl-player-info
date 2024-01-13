@@ -93,6 +93,7 @@ export const columns: ColumnDef<Player>[] = [
     accessorFn: (row) => !!row.is_favourite,
     cell: ({ table, row }) => (
       <ToggleFavouriteButton
+        //@ts-ignore
         user={table.options.meta.user}
         playerId={row.original.id}
         isFavourite={row.original.is_favourite}
@@ -449,10 +450,12 @@ export const columns: ColumnDef<Player>[] = [
     accessorFn: (row) => row.tags,
     header: "TAGS",
     cell: ({ table, row }) => {
+      //@ts-ignore
       return <TagsList user={table.options.meta.user} player={row.original} />;
     },
     enableSorting: false,
     enableHiding: true,
+    //@ts-ignore
     filterFn: "select",
     enableGlobalFilter: true,
     getUniqueValues: (row) => {

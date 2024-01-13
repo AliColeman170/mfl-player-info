@@ -97,7 +97,7 @@ export default function PositionRatings({ player }) {
   const positionRatings = useMemo(
     () =>
       getPlayerPositionRatings(player, true, stats, isCaptain, captainPosition),
-    [stats, isCaptain, captainPosition]
+    [player, stats, isCaptain, captainPosition]
   );
 
   const playerPositionFamiliarityRatings = useMemo(
@@ -109,7 +109,7 @@ export default function PositionRatings({ player }) {
         isCaptain,
         captainPosition
       ),
-    [stats, isCaptain, captainPosition]
+    [player, stats, isCaptain, captainPosition]
   );
 
   return (
@@ -126,7 +126,7 @@ export default function PositionRatings({ player }) {
       </div>
 
       <div className="mt-8">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between pr-1.5 sm:pr-2">
           <h2 className="text-slate-900 dark:text-slate-200 font-bold tracking-tight text-2xl sm:text-3xl">
             Position Ratings
           </h2>
