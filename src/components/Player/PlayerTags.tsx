@@ -11,8 +11,6 @@ export async function PlayerTags({ player }) {
     .eq("wallet_address", session?.user.addr)
     .maybeSingle();
 
-  console.log({ favourite });
-
   if (!favourite) return null;
   return (
     <div className="px-1 py-1.5 @[16rem]/inner:py-2 grid @[10rem]/inner:grid-cols-3 @[10rem]/inner:gap-8 @[16rem]/inner:px-0">
