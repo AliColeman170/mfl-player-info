@@ -57,7 +57,7 @@ export default function PositionRatings({ player }) {
   };
   const [isTrainingMode, setIsTrainingMode] = useState<boolean>(false);
   const [enablePositionalFamiliarity, setEnablePositionalFamiliarity] =
-    useState<boolean>(false);
+    useState<boolean>(true);
   const [isCaptain, setIsCaptain] = useState<boolean>(false);
   const [captainPosition, setCaptainPosition] = useState<string>("");
 
