@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useDebounce } from "usehooks-ts";
+import { useDebounceValue } from "usehooks-ts";
 
 export function DebouncedInput({
   value: initialValue,
@@ -8,7 +8,7 @@ export function DebouncedInput({
   ...props
 }) {
   const [value, setValue] = useState(initialValue);
-  const debouncedValue = useDebounce<string>(value, debounce);
+  const debouncedValue = useDebounceValue<string>(value, debounce);
 
   useEffect(() => {
     setValue(initialValue);

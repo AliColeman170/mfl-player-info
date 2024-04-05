@@ -1,15 +1,17 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useTransition } from "react";
 import { SearchInput } from "./SearchInput";
-import { useDebounce } from "usehooks-ts";
+import { useDebounceValue } from "usehooks-ts";
 
 export function SinglePlayerSearch({ id }: { id?: string }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
-  const [playerId, setPlayerId] = useState<string | null>(id);
-  const debouncedPlayerId = useDebounce<string>(playerId, 800);
+  const [debouncedPlayerId, setPlayerId] = useDebounceValue<string | null>(
+    id,
+    800
+  );
 
   function searchPlayer(id) {
     if (id) {
