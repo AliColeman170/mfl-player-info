@@ -14,11 +14,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const id = params.id;
 
   // fetch data
-  const player = await fetch(
+  const result = await fetch(
     `https://z519wdyajg.execute-api.us-east-1.amazonaws.com/prod/players/${params.id}`
-  ).then((res) => res.json());
+  )
+    .then((res) => res.json())
+    .catch();
 
-  const { firstName, lastName } = player.player.metadata;
+  if (!result.player) return;
+
+  const { firstName, lastName } = result.player?.metadata;
 
   const title = `${firstName} ${lastName} | #${id} | MFL Player Info`;
   const url = `${process.env.NEXT_SITE_URL}/player/${id}`;

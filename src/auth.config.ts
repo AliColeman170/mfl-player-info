@@ -7,7 +7,7 @@ export const authConfig = {
       return true;
     },
     // async redirect(url, baseUrl) { return baseUrl },
-    session({ session, token }) {
+    async session({ session, token }: { session: any; token: any }) {
       session.user = token.user;
       return session;
     },

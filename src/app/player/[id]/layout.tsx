@@ -1,9 +1,9 @@
-import { SinglePlayerSearch } from "@/components/Search/SinglePlayerSearch";
+import { ComboSearch } from "@/components/Search/ComboSearch";
 
 export default function PlayerLayout({ children, params }) {
   return (
     <div className="flex flex-1 h-full flex-col items-center justify-start space-y-8">
-      <SinglePlayerSearch key="search" id={params.id} />
+      <ComboSearch key="search" id={params.id} autofocus={true} />
       {children}
     </div>
   );

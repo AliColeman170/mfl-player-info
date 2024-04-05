@@ -1,53 +1,45 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { SearchInput } from "./SearchInput";
-import { useEffect, useState, useTransition } from "react";
-import { useDebounce } from "usehooks-ts";
+import { useTransition } from "react";
+import { SearchComboBox } from "./SearchComboBox";
 
 export function ComparePlayerSearch({ player1, player2 }) {
   const router = useRouter();
   const [player1Loading, loadPlayer1] = useTransition();
   const [player2Loading, loadPlayer2] = useTransition();
 
-  const [player1Id, setPlayer1Id] = useState<string | null>(player1);
-  const [player2Id, setPlayer2Id] = useState<string | null>(player2);
-
-  const debouncedPlayer1Id = useDebounce<string>(player1Id, 800);
-  const debouncedPlayer2Id = useDebounce<string>(player2Id, 800);
-
-  useEffect(() => {
+  function handlePlayer1Change(id) {
     loadPlayer1(() => {
-      router.push(
-        `/compare?player1=${debouncedPlayer1Id}&player2=${player2Id}`
-      );
+      router.push(`/compare?player1=${id}&player2=${player2}`);
     });
-  }, [debouncedPlayer1Id]);
-
-  useEffect(() => {
+  }
+  function handlePlayer2Change(id) {
     loadPlayer2(() => {
-      router.push(
-        `/compare?player1=${player1Id}&player2=${debouncedPlayer2Id}`
-      );
+      router.push(`/compare?player1=${player1}&player2=${id}`);
     });
-  }, [debouncedPlayer2Id]);
+  }
 
   return (
     <div className="w-full max-w-5xl grid grid-cols-2 gap-x-4 md:gap-x-8 place-items-center">
       <div className="max-w-xl w-full">
-        <SearchInput
-          placeholder="Player 1 ID"
-          value={player1 ?? ""}
-          handleSearch={(e) => setPlayer1Id(e.target.value)}
-          isLoading={player1Loading}
-        />
+        <div className="relative">
+          <SearchComboBox
+            key="player-1"
+            id={player1}
+            handlePlayerChange={handlePlayer1Change}
+            isLoading={player1Loading}
+          />
+        </div>
       </div>
       <div className="max-w-xl w-full">
-        <SearchInput
-          placeholder="Player 2 ID"
-          value={player2 ?? ""}
-          handleSearch={(e) => setPlayer2Id(e.target.value)}
-          isLoading={player2Loading}
-        />
+        <div className="relative">
+          <SearchComboBox
+            key="player-2"
+            id={player2}
+            handlePlayerChange={handlePlayer2Change}
+            isLoading={player2Loading}
+          />
+        </div>
       </div>
     </div>
   );
