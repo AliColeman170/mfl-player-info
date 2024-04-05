@@ -46,13 +46,13 @@ export function SearchComboBox({
     if (query !== "") {
       fetchSearchResults();
     }
-  }, [query]);
+  }, [query, handlePlayerChange]);
 
   useEffect(() => {
     if (selectedPlayer) {
       handlePlayerChange(selectedPlayer.id);
     }
-  }, [selectedPlayer]);
+  }, [selectedPlayer, handlePlayerChange]);
 
   return (
     <Combobox

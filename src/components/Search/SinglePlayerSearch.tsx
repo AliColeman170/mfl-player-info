@@ -5,27 +5,26 @@ import { SearchInput } from "./SearchInput";
 import { useDebounceValue } from "usehooks-ts";
 
 export function SinglePlayerSearch({ id }: { id?: string }) {
-  const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const router = useRouter();
 
   const [debouncedPlayerId, setPlayerId] = useDebounceValue<string | null>(
     id,
     800
   );
 
-  function searchPlayer(id) {
-    if (id) {
-      startTransition(() => {
-        router.push(`/player/${id}`);
-      });
-    } else {
-      router.push(`/`);
-    }
-  }
-
   useEffect(() => {
+    function searchPlayer(id) {
+      if (id) {
+        startTransition(() => {
+          router.push(`/player/${id}`);
+        });
+      } else {
+        router.push(`/`);
+      }
+    }
     searchPlayer(debouncedPlayerId);
-  }, [debouncedPlayerId]);
+  }, [debouncedPlayerId, router]);
 
   function handleSearchChange(e) {
     if (e.target.value) {

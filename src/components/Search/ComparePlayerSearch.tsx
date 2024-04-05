@@ -1,7 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
-import { SearchComboBox } from "./SearchCombobox";
+import { SearchComboBox } from "./SearchComboBox";
 
 export function ComparePlayerSearch({ player1, player2 }) {
   const router = useRouter();

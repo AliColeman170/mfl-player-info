@@ -3,7 +3,7 @@
 import { cn } from "@/utils/helpers";
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { SearchComboBox } from "./SearchCombobox";
+import { SearchComboBox } from "./SearchComboBox";
 
 export function ComboSearch({
   id,
