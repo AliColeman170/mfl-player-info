@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { cn } from "@/utils/helpers";
-import { useTransition } from "react";
-import { useRouter } from "next/navigation";
-import { SearchComboBox } from "./SearchComboBox";
+import { cn } from '@/utils/helpers';
+import { useTransition } from 'react';
+import { useRouter } from 'next/navigation';
+import { SearchComboBox } from './SearchComboBox';
 
 export function ComboSearch({
   id,
-  className = "",
+  className = '',
   autofocus,
 }: {
   id?: string;
@@ -25,7 +25,7 @@ export function ComboSearch({
   }
 
   return (
-    <div className={cn("max-w-xl mx-auto w-full relative", className)}>
+    <div className={cn('relative mx-auto w-full max-w-xl', className)}>
       <SearchComboBox
         id={id}
         isLoading={isPending}
