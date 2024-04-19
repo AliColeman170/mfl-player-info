@@ -31,7 +31,7 @@ export async function PlayerContract({ player }) {
         src={`https://d13e14gtps4iwl.cloudfront.net/u/clubs/${contractData.club.id}/logo.png?v=1`}
         className='h-3.5 w-3.5'
       />
-      <span className=' truncate font-medium leading-snug contrast-[999] grayscale invert'>
+      <span className=' truncate font-medium leading-snug contrast-[999] grayscale invert dark:invert-0'>
         {contractData.club.name}
       </span>
     </Link>
