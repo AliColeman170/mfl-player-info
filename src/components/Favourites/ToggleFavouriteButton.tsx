@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { HeartIcon as FilledHeartIcon } from "@heroicons/react/24/solid";
-import { HeartIcon } from "@heroicons/react/24/outline";
-import SpinnerIcon from "../SpinnerIcon";
-import { useTransition } from "react";
-import { cn } from "@/utils/helpers";
-import { deleteFavourite, setFavourite } from "@/lib/actions";
+import { HeartIcon as FilledHeartIcon } from '@heroicons/react/24/solid';
+import { HeartIcon } from '@heroicons/react/24/outline';
+import SpinnerIcon from '../SpinnerIcon';
+import { useTransition } from 'react';
+import { cn } from '@/utils/helpers';
+import { deleteFavourite, setFavourite } from '@/lib/actions';
 
 export function ToggleFavouriteButton({
   user,
@@ -33,15 +33,15 @@ export function ToggleFavouriteButton({
   return (
     <button
       disabled={!user}
-      className={cn("flex", className)}
+      className={cn('flex', className)}
       onClick={toggleFavourite}
     >
       {isPending ? (
-        <SpinnerIcon className="h-4 w-4 sm:h-5 sm:w-5 text-slate-500 animate-spin" />
+        <SpinnerIcon className='h-4 w-4 animate-spin text-slate-500' />
       ) : isFavourite ? (
-        <FilledHeartIcon className="h-4 w-4 sm:h-5 sm:w-5 text-red-500 disabled:text-slate-500" />
+        <FilledHeartIcon className='h-4 w-4 text-red-500 disabled:text-slate-500' />
       ) : (
-        <HeartIcon className="h-4 w-4 sm:h-5 sm:w-5 hover:text-red-500" />
+        <HeartIcon className='h-4 w-4 hover:text-red-500' />
       )}
     </button>
   );

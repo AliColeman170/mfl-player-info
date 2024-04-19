@@ -23,6 +23,6 @@ async function getAveragePrice(player) {
 
 export async function MarketValue({ player }) {
   const price = await getAveragePrice(player);
-  if (!price) return "Unavailable";
+  if (!price) return 'Unavailable';
   return `> $${price}`;
 }
