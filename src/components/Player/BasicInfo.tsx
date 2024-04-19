@@ -59,7 +59,7 @@ export default async function BasicInfo({ player }) {
               <button>
                 <InformationCircleIcon className='h-5 w-5 text-slate-500' />
               </button>
-              <span className='absolute bottom-8 w-48 scale-0 rounded-lg bg-slate-950 p-2 text-center text-xs normal-case text-white shadow shadow-white/10 transition-all group-hover:scale-100'>
+              <span className='absolute bottom-6 w-48 scale-0 rounded-lg bg-slate-950 p-2 text-center text-xs normal-case text-white shadow shadow-slate-300 transition-all group-hover:scale-100 dark:shadow-slate-900'>
                 Based on average of last 3 sales for similar age, rating and
                 position.
               </span>
