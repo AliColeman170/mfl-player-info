@@ -32,6 +32,7 @@ export default function ImageCard({ playerId }) {
       />
       <div className='mt-3 flex flex-col items-center justify-center gap-1'>
         <PlayerContract player={playerId} />
+        <ForSale player={playerId} />
       </div>
       <div className='mt-4 flex items-center justify-center space-x-1.5'>
         <Suspense fallback={<LoadingFavouriteButton />}>

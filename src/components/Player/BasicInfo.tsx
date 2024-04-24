@@ -71,7 +71,6 @@ export default async function BasicInfo({ player }) {
                 <SpinnerIcon className='h-4 w-4 animate-spin text-slate-400' />
               }
             >
-              <ForSale player={player.id} />
               <MarketValue player={player} />
             </Suspense>
           </dd>
