@@ -8,7 +8,7 @@ function CareerStatItemTitle({
   return (
     <dt
       title={title}
-      className="text-xs @[16rem]/inner:text-base font-semibold leading-none text-slate-700 dark:text-slate-400 uppercase"
+      className='text-xs font-semibold uppercase leading-none text-slate-700 @[16rem]/inner:text-base dark:text-slate-400'
     >
       {children}
     </dt>
@@ -16,7 +16,7 @@ function CareerStatItemTitle({
 }
 function CareerStatItemValue({ children }: { children: React.ReactNode }) {
   return (
-    <dd className="text-sm @[16rem]/inner:text-base text-right @sm/main:text-center @sm/main:pt-2 leading-none text-slate-700 dark:text-slate-200 capitalize">
+    <dd className='text-right text-sm capitalize leading-none text-slate-700 @[16rem]/inner:text-base @sm/main:pt-2 @sm/main:text-center dark:text-slate-200'>
       {children}
     </dd>
   );
@@ -24,7 +24,7 @@ function CareerStatItemValue({ children }: { children: React.ReactNode }) {
 
 function CareerStatItem({ children }: { children: React.ReactNode }) {
   return (
-    <div className="py-3 gap-y-2 items-center grid grid-cols-[2fr_1fr] @sm/main:grid-cols-1 @sm/main:divide-y @sm/main:divide-slate-200 @sm/main:dark:divide-slate-700">
+    <div className='grid grid-cols-[2fr_1fr] items-center gap-y-2 py-3 @sm/main:grid-cols-1 @sm/main:divide-y @sm/main:divide-slate-200 @sm/main:dark:divide-slate-700'>
       {children}
     </div>
   );
@@ -88,62 +88,62 @@ export async function CareerStats({ player }) {
     minutesPerGoalAgainst: Math.round(minutes / goalsConceded),
   };
 
-  const isGoalkeeper = player.metadata.positions.includes("GK");
+  const isGoalkeeper = player.metadata.positions.includes('GK');
 
   if (stats.nbMatches === 0)
     return (
-      <div className="col-start-1 col-span-3 place-content-center">
-        <p className="text-center py-8">No games played</p>
+      <div className='col-span-3 col-start-1 place-content-center'>
+        <p className='py-8 text-center'>No games played</p>
       </div>
     );
   return (
-    <div className="col-start-1 col-span-3">
-      <h2 className="font-bold text-lg mb-1 @sm/main:hidden">Career Stats</h2>
-      <dl className="@container/inner divide-y divide-slate-200 dark:divide-slate-700 @sm/main:divide-y-0 grid grid-cols-1 @sm/main:grid-cols-none @sm/main:grid-flow-col-dense @sm/main:text-center @sm/main:rounded-xl @sm/main:ring-1 @sm/main:ring-slate-200 @sm/main:dark:ring-slate-700 @sm/main:shadow-2xl @sm/main:shadow-slate-300/20 @sm/main:dark:shadow-slate-900/20">
+    <div className='col-span-3 col-start-1'>
+      <h2 className='mb-1 text-lg font-bold @sm/main:hidden'>Career Stats</h2>
+      <dl className='grid grid-cols-1 divide-y divide-slate-200 @container/inner @sm/main:grid-flow-col-dense @sm/main:grid-cols-none @sm/main:divide-y-0 @sm/main:rounded-xl @sm/main:text-center @sm/main:shadow-2xl @sm/main:shadow-slate-300/20 @sm/main:ring-1 @sm/main:ring-slate-200 dark:divide-slate-700 @sm/main:dark:shadow-slate-900/20 @sm/main:dark:ring-slate-700'>
         <CareerStatItem>
-          <CareerStatItemTitle title="Matches Played">
-            <span className="@sm/main:hidden">Matches Played</span>
-            <span className="hidden @sm/main:inline-block">MP</span>
+          <CareerStatItemTitle title='Matches Played'>
+            <span className='@sm/main:hidden'>Matches Played</span>
+            <span className='hidden @sm/main:inline-block'>MP</span>
           </CareerStatItemTitle>
           <CareerStatItemValue>{stats.nbMatches}</CareerStatItemValue>
         </CareerStatItem>
         {isGoalkeeper ? (
           <>
             <CareerStatItem>
-              <CareerStatItemTitle title="Goals Conceded">
-                <span className="@sm/main:hidden">Goals Conceded</span>
-                <span className="hidden @sm/main:inline-block">GC</span>
+              <CareerStatItemTitle title='Goals Conceded'>
+                <span className='@sm/main:hidden'>Goals Conceded</span>
+                <span className='hidden @sm/main:inline-block'>GC</span>
               </CareerStatItemTitle>
               <CareerStatItemValue>{stats.goalsConceded}</CareerStatItemValue>
             </CareerStatItem>
             <CareerStatItem>
-              <CareerStatItemTitle title="Saves">
-                <span className="@sm/main:hidden">Saves</span>
-                <span className="hidden @sm/main:inline-block">SV</span>
+              <CareerStatItemTitle title='Saves'>
+                <span className='@sm/main:hidden'>Saves</span>
+                <span className='hidden @sm/main:inline-block'>SV</span>
               </CareerStatItemTitle>
               <CareerStatItemValue>{stats.saves}</CareerStatItemValue>
             </CareerStatItem>
             <CareerStatItem>
               <CareerStatItemTitle title="Saves Per 90'">
-                <span className="@sm/main:hidden">Saves Per 90&apos;</span>
-                <span className="hidden @sm/main:inline-block">SVP90</span>
+                <span className='@sm/main:hidden'>Saves Per 90&apos;</span>
+                <span className='hidden @sm/main:inline-block'>SVP90</span>
               </CareerStatItemTitle>
               <CareerStatItemValue>
                 {stats.savesPerGame === Infinity
-                  ? "–"
-                  : `${stats.savesPerGame}'`}
+                  ? '–'
+                  : `${stats.savesPerGame}`}
               </CareerStatItemValue>
             </CareerStatItem>
             <CareerStatItem>
-              <CareerStatItemTitle title="Minutes per Goal Against">
-                <span className="@sm/main:hidden">
+              <CareerStatItemTitle title='Minutes per Goal Against'>
+                <span className='@sm/main:hidden'>
                   Minutes Per Goal Against
                 </span>
-                <span className="hidden @sm/main:inline-block">MPGA</span>
+                <span className='hidden @sm/main:inline-block'>MPGA</span>
               </CareerStatItemTitle>
               <CareerStatItemValue>
                 {stats.minutesPerGoalAgainst === Infinity
-                  ? "–"
+                  ? '–'
                   : `${stats.minutesPerGoalAgainst}'`}
               </CareerStatItemValue>
             </CareerStatItem>
@@ -151,49 +151,49 @@ export async function CareerStats({ player }) {
         ) : (
           <>
             <CareerStatItem>
-              <CareerStatItemTitle title="Goals">
-                <span className="@sm/main:hidden">Goals</span>
-                <span className="hidden @sm/main:inline-block">G</span>
+              <CareerStatItemTitle title='Goals'>
+                <span className='@sm/main:hidden'>Goals</span>
+                <span className='hidden @sm/main:inline-block'>G</span>
               </CareerStatItemTitle>
               <CareerStatItemValue>{stats.goals}</CareerStatItemValue>
             </CareerStatItem>
             <CareerStatItem>
-              <CareerStatItemTitle title="Assists">
-                <span className="@sm/main:hidden">Assists</span>
-                <span className="hidden @sm/main:inline-block">A</span>
+              <CareerStatItemTitle title='Assists'>
+                <span className='@sm/main:hidden'>Assists</span>
+                <span className='hidden @sm/main:inline-block'>A</span>
               </CareerStatItemTitle>
               <CareerStatItemValue>{stats.assists}</CareerStatItemValue>
             </CareerStatItem>
             <CareerStatItem>
-              <CareerStatItemTitle title="Goals Contributions">
-                <span className="@sm/main:hidden">Goals Contributions</span>
-                <span className="hidden @sm/main:inline-block">G+A</span>
+              <CareerStatItemTitle title='Goals Contributions'>
+                <span className='@sm/main:hidden'>Goals Contributions</span>
+                <span className='hidden @sm/main:inline-block'>G+A</span>
               </CareerStatItemTitle>
               <CareerStatItemValue>
                 {stats.goalContributions}
               </CareerStatItemValue>
             </CareerStatItem>
             <CareerStatItem>
-              <CareerStatItemTitle title="Minutes per Goal">
-                <span className="@sm/main:hidden">Minutes Per Goal</span>
-                <span className="hidden @sm/main:inline-block">MPG</span>
+              <CareerStatItemTitle title='Minutes per Goal'>
+                <span className='@sm/main:hidden'>Minutes Per Goal</span>
+                <span className='hidden @sm/main:inline-block'>MPG</span>
               </CareerStatItemTitle>
               <CareerStatItemValue>
                 {stats.minutesPerGoal === Infinity
-                  ? "–"
+                  ? '–'
                   : `${stats.minutesPerGoal}'`}
               </CareerStatItemValue>
             </CareerStatItem>
             <CareerStatItem>
-              <CareerStatItemTitle title="Minutes Per Goal Contribution">
-                <span className="@sm/main:hidden">
+              <CareerStatItemTitle title='Minutes Per Goal Contribution'>
+                <span className='@sm/main:hidden'>
                   Minutes Per Goal Contribution
                 </span>
-                <span className="hidden @sm/main:inline-block">MPGA</span>
+                <span className='hidden @sm/main:inline-block'>MPGA</span>
               </CareerStatItemTitle>
               <CareerStatItemValue>
                 {stats.minutesPerGoalContribution === Infinity
-                  ? "–"
+                  ? '–'
                   : `${stats.minutesPerGoalContribution}'`}
               </CareerStatItemValue>
             </CareerStatItem>

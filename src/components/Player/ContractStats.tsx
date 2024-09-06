@@ -4,9 +4,9 @@ import { Player } from '../Table/schema';
 async function getContactData(player) {
   const { ageAtMint, positions, overall } = player.metadata;
   const contractData = await fetch(
-    `https://z519wdyajg.execute-api.us-east-1.amazonaws.com/prod/players?limit=400&ageAtMintMin=${
+    `https://z519wdyajg.execute-api.us-east-1.amazonaws.com/prod/players?limit=400&ageMin=${
       parseInt(ageAtMint) - 1
-    }&ageAtMintMax=${parseInt(ageAtMint) + 1}&overallMin=${
+    }&ageMax=${parseInt(ageAtMint) + 1}&overallMin=${
       parseInt(overall) - 1
     }&overallMax=${parseInt(overall) + 1}&positions=${
       positions[0]
@@ -25,6 +25,7 @@ function Division({ division }) {
     5: 'bg-[#fd7a00]',
     6: 'bg-[#865e3f]',
     7: 'bg-[#71717a]',
+    8: 'bg-[#9cb2be]',
   };
 
   const divisionNames = {
@@ -35,6 +36,7 @@ function Division({ division }) {
     5: 'Bronze',
     6: 'Iron',
     7: 'Stone',
+    8: 'Ice',
   };
 
   return (
@@ -57,6 +59,8 @@ function formatPercentage(value) {
 
 export default async function ContractStats({ player }) {
   const contractData: Player[] = await getContactData(player);
+
+  console.log({ contractData });
 
   const zeroFilteredContractData = contractData.filter(
     (c) => c.activeContract.revenueShare !== 0
