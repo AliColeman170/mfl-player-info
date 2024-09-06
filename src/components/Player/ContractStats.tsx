@@ -60,8 +60,6 @@ function formatPercentage(value) {
 export default async function ContractStats({ player }) {
   const contractData: Player[] = await getContactData(player);
 
-  console.log({ contractData });
-
   const zeroFilteredContractData = contractData.filter(
     (c) => c.activeContract.revenueShare !== 0
   );
