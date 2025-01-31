@@ -5,6 +5,7 @@ import { Popover, PopoverButton, PopoverPanel } from '@headlessui/react';
 import { PlusIcon } from '@heroicons/react/24/solid';
 import { SpinnerIcon } from '../SpinnerIcon';
 import { updateTags } from '@/actions/favourites';
+import { toast } from 'sonner';
 
 export function AddTagButton({
   tags,
@@ -20,10 +21,14 @@ export function AddTagButton({
     if (newTag) {
       const currentTags = tags || [];
       const updatedTags = [...currentTags, newTag];
-      startTransition(() => {
-        updateTags(playerId, updatedTags);
-        setNewTag('');
-        callback();
+      startTransition(async () => {
+        const result = await updateTags(playerId, updatedTags);
+        if (!result.success) {
+          toast.error(result.message);
+        } else {
+          setNewTag('');
+          callback();
+        }
       });
     }
   }

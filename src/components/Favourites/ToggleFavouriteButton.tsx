@@ -8,6 +8,7 @@ import { cn } from '@/utils/helpers';
 import { Player } from '@/types/global.types';
 import { useUser } from '../Wallet/UserProvider';
 import { deleteFavourite, setFavourite } from '@/actions/favourites';
+import { toast } from 'sonner';
 
 export function ToggleFavouriteButton({
   player,
@@ -24,9 +25,17 @@ export function ToggleFavouriteButton({
   async function toggleFavourite() {
     startTransition(async () => {
       if (!user?.user_metadata.address) return;
-      isFavourite
-        ? await deleteFavourite(player.id)
-        : await setFavourite(player.id, !isFavourite);
+      if (isFavourite) {
+        const result = await deleteFavourite(player.id);
+        if (!result.success) {
+          toast.error(result.message);
+        }
+      } else {
+        const result = await setFavourite(player.id, !isFavourite);
+        if (!result.success) {
+          toast.error(result.message);
+        }
+      }
     });
   }
 

@@ -5,13 +5,17 @@ import { ArrowRightStartOnRectangleIcon } from '@heroicons/react/24/solid';
 import { useTransition } from 'react';
 import { SpinnerIcon } from '../SpinnerIcon';
 import { logout } from '@/actions/auth';
+import { toast } from 'sonner';
 
 export function LogoutButton() {
   let [isPending, startTransition] = useTransition();
 
   async function handleLogout() {
     startTransition(async () => {
-      await logout();
+      const result = await logout();
+      if (!result.success) {
+        toast.error(result.message);
+      }
     });
   }
 

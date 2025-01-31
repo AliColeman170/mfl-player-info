@@ -4,6 +4,7 @@ import { XMarkIcon } from '@heroicons/react/20/solid';
 import { useTransition } from 'react';
 import { SpinnerIcon } from '../SpinnerIcon';
 import { updateTags } from '@/actions/favourites';
+import { toast } from 'sonner';
 
 export function RemoveTagButton({
   tags,
@@ -20,7 +21,10 @@ export function RemoveTagButton({
     const updatedTags = [...tags];
     updatedTags.splice(tagIndex, 1);
     startTransition(async () => {
-      await updateTags(playerId, updatedTags);
+      const result = await updateTags(playerId, updatedTags);
+      if (!result.success) {
+        toast.error(result.message);
+      }
     });
   }
 
