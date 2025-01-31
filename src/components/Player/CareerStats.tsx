@@ -1,3 +1,6 @@
+import { getCareerStatsByPlayer } from '@/data/players';
+import { Player, PlayerCompetitionStats } from '@/types/global.types';
+
 function CareerStatItemTitle({
   title,
   children,
@@ -30,10 +33,9 @@ function CareerStatItem({ children }: { children: React.ReactNode }) {
   );
 }
 
-export async function CareerStats({ player }) {
-  const careerStats = await fetch(
-    `https://z519wdyajg.execute-api.us-east-1.amazonaws.com/prod/players/${player.id}/competitions`
-  ).then((res) => res.json());
+export async function CareerStats({ player }: { player: Player }) {
+  const careerStats: PlayerCompetitionStats[] =
+    await getCareerStatsByPlayer(player);
 
   const competitionStats = careerStats.map((competition) => competition.stats);
 

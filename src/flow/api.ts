@@ -1,10 +1,12 @@
+import { generateNonce } from '@/actions/auth';
 import * as fcl from '@onflow/fcl';
 
+export const appIdentifier = 'MFLPlayerInfo';
+
 const accountProofDataResolver = async () => {
-  const response = await fetch('/api/generate');
-  const { nonce } = await response.json();
+  const { nonce } = await generateNonce();
   return {
-    appIdentifier: 'MFLPlayerInfo',
+    appIdentifier,
     nonce,
   };
 };
@@ -17,11 +19,12 @@ fcl.config({
   'discovery.authn.include': ['0xead892083b3e2c6c'],
   '0xMFLPlayer': '0x8ebcbfd516b1da27',
   'fcl.accountProof.resolver': accountProofDataResolver,
+  'walletconnect.projectId': '95eec771b08847aea13eff14792fe727',
 });
 
 export { fcl };
 
-export async function getPlayerData(playerID) {
+export async function getPlayerData(playerID: number) {
   try {
     if (!playerID) throw new Error('No player ID provided');
     if (isNaN(playerID) || playerID <= 0) throw new Error('Invalid player ID');
@@ -33,7 +36,7 @@ export async function getPlayerData(playerID) {
             return MFLPlayer.getPlayerData(id: playerID)
         }
       `,
-      args: (arg, t) => [arg(playerID, t.UInt64)],
+      args: (arg: any, t: any) => [arg(playerID, t.UInt64)],
     });
     return player;
   } catch (error) {
@@ -42,7 +45,7 @@ export async function getPlayerData(playerID) {
   }
 }
 
-export async function getPlayersData(playersIds) {
+export async function getPlayersData(playersIds: number[]) {
   try {
     const players = await fcl.query({
       cadence: `
@@ -58,7 +61,7 @@ export async function getPlayersData(playersIds) {
           return playersData
         }
       `,
-      args: (arg, t) => [arg(playersIds, t.Array(t.UInt64))],
+      args: (arg: any, t: any) => [arg(playersIds, t.Array(t.UInt64))],
     });
     return players;
   } catch (error) {

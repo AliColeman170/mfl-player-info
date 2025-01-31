@@ -2,37 +2,37 @@
 
 import { HeartIcon as FilledHeartIcon } from '@heroicons/react/24/solid';
 import { HeartIcon } from '@heroicons/react/24/outline';
-import SpinnerIcon from '../SpinnerIcon';
+import { SpinnerIcon } from '../SpinnerIcon';
 import { useTransition } from 'react';
 import { cn } from '@/utils/helpers';
-import { deleteFavourite, setFavourite } from '@/lib/actions';
+import { Player } from '@/types/global.types';
+import { useUser } from '../Wallet/UserProvider';
+import { deleteFavourite, setFavourite } from '@/actions/favourites';
 
 export function ToggleFavouriteButton({
-  user,
-  playerId,
+  player,
   isFavourite,
   className,
 }: {
-  user: {
-    addr?: string;
-  };
-  playerId: string | number;
+  player: Player;
   isFavourite: boolean;
   className?: string;
 }) {
+  const { user } = useUser();
   const [isPending, startTransition] = useTransition();
 
   async function toggleFavourite() {
-    startTransition(() => {
+    startTransition(async () => {
+      if (!user?.user_metadata.address) return;
       isFavourite
-        ? deleteFavourite(playerId)
-        : setFavourite(playerId, !isFavourite);
+        ? await deleteFavourite(player.id)
+        : await setFavourite(player.id, !isFavourite);
     });
   }
 
   return (
     <button
-      disabled={!user}
+      disabled={!user?.user_metadata.address}
       className={cn('flex', className)}
       onClick={toggleFavourite}
     >

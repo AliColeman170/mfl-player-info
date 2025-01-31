@@ -1,42 +1,39 @@
-import { Table } from "../Table";
-import { auth } from "@/auth";
-import { supabaseAdmin } from "@/utils/supabase";
-import { getPlayersData } from "@/flow/api";
-import { getPlayerPositionRatings } from "@/utils/helpers";
+import { Table } from '../Table';
+import { getPlayerPositionRatings } from '@/utils/helpers';
+import { getFavourites } from '@/data/favourites';
+import { getPlayerById } from '@/data/players';
+import { PlayerWithFavouriteData } from '@/types/global.types';
+import { TableWrapper } from '../Table/TableWrapper';
+import { createClient } from '@/utils/supabase/server';
 
-async function getFavourites() {
-  const session = await auth();
-  const { data: favourites, error } = await supabaseAdmin
-    .from("favourites")
-    .select()
-    .eq("wallet_address", session.user.addr);
+async function getFavouritesData() {
+  const supabase = await createClient();
+  const favourites = await getFavourites(supabase);
 
-  if (error) throw new Error("Failed to fetch favourites");
+  if (!favourites) return [];
 
-  const myFavourites = await getPlayersData(
-    favourites.map((fav) => fav.player_id.toString())
+  const players = await Promise.all(
+    favourites.map((fav) => getPlayerById(fav.player_id))
   );
 
-  const playersWithFavData = myFavourites.map((fav) => {
-    const fave = favourites.find(
-      (f) => parseInt(f.player_id) == parseInt(fav.id)
-    );
+  const playersWithFavData: PlayerWithFavouriteData[] = players.map(
+    (player) => {
+      const fave = favourites.find((f) => f.player_id == player.id);
 
-    return {
-      ...fav,
-      positionRatings: getPlayerPositionRatings(fav, true),
-      is_favourite: fave.is_favourite,
-      tags: fave.tags,
-    };
-  });
+      return {
+        ...player,
+        position_ratings: getPlayerPositionRatings(player, true),
+        is_favourite: fave!.is_favourite,
+        tags: fave!.tags,
+      };
+    }
+  );
 
-  if (error) throw new Error(error.message);
   return playersWithFavData;
 }
 
-export default async function Favourites() {
-  const session = await auth();
-  const favourites = await getFavourites();
+export async function Favourites() {
+  const favourites = await getFavouritesData();
 
-  return <Table user={session?.user} players={favourites} />;
+  return <TableWrapper players={favourites} />;
 }

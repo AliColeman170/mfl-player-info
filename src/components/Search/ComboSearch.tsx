@@ -10,7 +10,7 @@ export function ComboSearch({
   className = '',
   autofocus,
 }: {
-  id?: string;
+  id?: number;
   className?: string;
   autofocus: boolean;
 }) {
@@ -18,7 +18,7 @@ export function ComboSearch({
 
   let [isPending, startTransition] = useTransition();
 
-  function handlePlayerChange(id) {
+  function handlePlayerChange(id: number) {
     startTransition(() => {
       router.push(`/player/${id}`);
     });

@@ -1,10 +1,15 @@
-import { Combobox } from '@headlessui/react';
+import {
+  Combobox,
+  ComboboxInput,
+  ComboboxOption,
+  ComboboxOptions,
+} from '@headlessui/react';
 import Image from 'next/image';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
-import SpinnerIcon from '../SpinnerIcon';
+import { SpinnerIcon } from '../SpinnerIcon';
 import { useEffect, useState } from 'react';
 import { useDebounceValue } from 'usehooks-ts';
-import { MFLPlayer } from '@/types/global';
+import { Player } from '@/types/global.types';
 import { cn, isPositiveInteger } from '@/utils/helpers';
 
 export function SearchComboBox({
@@ -14,28 +19,26 @@ export function SearchComboBox({
   placeholder = 'Search player name or ID...',
   autofocus = false,
 }: {
-  id?: string;
+  id?: number;
   isLoading?: boolean;
-  handlePlayerChange: (id: string | number) => void;
+  handlePlayerChange: (id: number) => void;
   placeholder?: string;
   autofocus?: boolean;
 }) {
   let [query, setQuery] = useDebounceValue('', 800);
-  let [filteredOptions, setFilteredOptions] = useState<MFLPlayer[] | null>(
-    null
-  );
-  let [selectedPlayer, setSelectedPlayer] = useState<MFLPlayer | null>(null);
+  let [filteredOptions, setFilteredOptions] = useState<Player[] | null>(null);
+  let [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   let [isSearching, setIsSearching] = useState<boolean>(false);
 
   useEffect(() => {
     async function fetchSearchResults() {
-      if (isPositiveInteger(query)) {
+      if (isPositiveInteger(+query)) {
         setFilteredOptions(null);
-        handlePlayerChange(query);
+        handlePlayerChange(+query);
       } else {
         setIsSearching(true);
         if (query.length >= 3) {
-          const result: MFLPlayer[] = await fetch(
+          const result: Player[] = await fetch(
             `https://z519wdyajg.execute-api.us-east-1.amazonaws.com/prod/players?limit=10&sorts=metadata.overall&sortsOrders=DESC&name=${query}&excludingMflOwned=false`
           ).then((res) => res.json());
           setFilteredOptions(result);
@@ -67,15 +70,15 @@ export function SearchComboBox({
       <div className='mx-auto w-full divide-y divide-slate-100 overflow-hidden rounded-xl bg-white shadow-2xl shadow-slate-300 ring-1 ring-slate-900 ring-opacity-5 dark:bg-slate-900 dark:shadow-slate-900 dark:ring-slate-800'>
         <div className='relative'>
           <MagnifyingGlassIcon className='pointer-events-none absolute left-3 top-3 h-6 w-6 text-slate-400 sm:left-4 sm:top-4 sm:h-8 sm:w-8 dark:text-slate-600' />
-          <Combobox.Input
+          <ComboboxInput
             defaultValue={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={placeholder}
             className='h-12 w-full border-0 bg-transparent pl-12 pr-4 text-lg text-slate-900 placeholder:text-slate-400 focus:ring-0 disabled:text-opacity-50 sm:h-16 sm:pl-16 sm:text-xl dark:text-slate-400'
             displayValue={() => {
               if (selectedPlayer) return `${selectedPlayer.id}`;
-              if (id) return id;
-              return null;
+              if (id) return id.toString();
+              return '';
             }}
             autoFocus={autofocus}
           />
@@ -86,16 +89,16 @@ export function SearchComboBox({
       </div>
 
       {filteredOptions && (
-        <Combobox.Options className='absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-lg bg-white py-1 text-base shadow-xl shadow-slate-200 ring-1 ring-slate-950 ring-opacity-5 focus:outline-none dark:bg-slate-950 dark:shadow-slate-900 dark:ring-slate-800'>
+        <ComboboxOptions className='absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-lg bg-white py-1 text-base shadow-xl shadow-slate-200 ring-1 ring-slate-950 ring-opacity-5 focus:outline-none dark:bg-slate-950 dark:shadow-slate-900 dark:ring-slate-800'>
           {filteredOptions.length === 0 &&
           query !== '' &&
-          !isPositiveInteger(query) ? (
+          !isPositiveInteger(+query) ? (
             <div className='relative cursor-default select-none py-5 pl-6 pr-9 text-slate-900 dark:text-slate-50'>
               No players found.
             </div>
           ) : (
             filteredOptions.map((option) => (
-              <Combobox.Option
+              <ComboboxOption
                 key={option.id}
                 value={option}
                 className={({ active }) => {
@@ -152,10 +155,10 @@ export function SearchComboBox({
                     )}
                   </>
                 )}
-              </Combobox.Option>
+              </ComboboxOption>
             ))
           )}
-        </Combobox.Options>
+        </ComboboxOptions>
       )}
     </Combobox>
   );

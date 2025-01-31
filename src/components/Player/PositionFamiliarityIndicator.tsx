@@ -1,9 +1,16 @@
-import { positionalFamiliarity } from "@/config";
+import { positionalFamiliarity } from '@/config';
+import { Player } from '@/types/global.types';
 
-export function PositionFamiliarityIndicator({ positions, player }) {
+export function PositionFamiliarityIndicator({
+  positions,
+  player,
+}: {
+  positions: string[];
+  player: Player;
+}) {
   if (positions.includes(player.metadata.positions[0])) {
     return (
-      <span className="inline-flex bg-indigo-600 items-center justify-center leading-none rounded text-white text-[10px] px-2 py-1">
+      <span className='inline-flex items-center justify-center rounded bg-indigo-600 px-2 py-1 text-[10px] leading-none text-white'>
         P
       </span>
     );
@@ -13,7 +20,7 @@ export function PositionFamiliarityIndicator({ positions, player }) {
     positions.includes(player.metadata.positions[2])
   ) {
     return (
-      <span className="inline-flex bg-slate-300 items-center justify-center leading-none rounded text-slate-900 text-[10px] px-2 py-1">
+      <span className='inline-flex items-center justify-center rounded bg-slate-300 px-2 py-1 text-[10px] leading-none text-slate-900'>
         S
       </span>
     );
@@ -21,55 +28,77 @@ export function PositionFamiliarityIndicator({ positions, player }) {
   return null;
 }
 
-export function PositionalFamiliarityIndicator({ position, player }) {
+export function PositionalFamiliarityIndicator({
+  position,
+  player,
+}: {
+  position: string;
+  player: Player;
+}) {
   const familiarity = positionalFamiliarity.find(
     (pos) => pos.primaryPosition === player.metadata.positions[0]
   );
   if (player.metadata.positions.slice(1).includes(position)) {
     return (
       <span
-        title="Secondary"
-        className="inline-flex bg-lime-700 items-center justify-center leading-none rounded text-white text-[10px] px-2 py-1"
+        title='Secondary'
+        className='inline-flex items-center justify-center rounded bg-lime-700 px-2 py-1 text-[10px] leading-none text-white'
       >
         S
       </span>
     );
   }
-  if (familiarity.adjustment[position] === -20) {
+  if (
+    familiarity &&
+    familiarity.adjustment[position as keyof typeof familiarity.adjustment] ===
+      -20
+  ) {
     return (
       <span
-        title="Unfamiliar"
-        className="inline-flex bg-red-700 items-center justify-center leading-none rounded text-white text-[10px] px-2 py-1"
+        title='Unfamiliar'
+        className='inline-flex items-center justify-center rounded bg-red-700 px-2 py-1 text-[10px] leading-none text-white'
       >
         U
       </span>
     );
   }
-  if (familiarity.adjustment[position] === -8) {
+  if (
+    familiarity &&
+    familiarity.adjustment[position as keyof typeof familiarity.adjustment] ===
+      -8
+  ) {
     return (
       <span
-        title="Somewhat Familiar"
-        className="inline-flex bg-amber-600 items-center justify-center leading-none rounded text-white text-[10px] px-2 py-1"
+        title='Somewhat Familiar'
+        className='inline-flex items-center justify-center rounded bg-amber-600 px-2 py-1 text-[10px] leading-none text-white'
       >
         SF
       </span>
     );
   }
-  if (familiarity.adjustment[position] === -5) {
+  if (
+    familiarity &&
+    familiarity.adjustment[position as keyof typeof familiarity.adjustment] ===
+      -5
+  ) {
     return (
       <span
-        title="Fairly Familiar"
-        className="inline-flex bg-yellow-500 items-center justify-center leading-none rounded text-white text-[10px] px-2 py-1"
+        title='Fairly Familiar'
+        className='inline-flex items-center justify-center rounded bg-yellow-500 px-2 py-1 text-[10px] leading-none text-white'
       >
         FF
       </span>
     );
   }
-  if (familiarity.adjustment[position] === 0) {
+  if (
+    familiarity &&
+    familiarity.adjustment[position as keyof typeof familiarity.adjustment] ===
+      0
+  ) {
     return (
       <span
-        title="Primary"
-        className="inline-flex bg-green-700 items-center justify-center leading-none rounded text-white text-[10px] px-2 py-1"
+        title='Primary'
+        className='inline-flex items-center justify-center rounded bg-green-700 px-2 py-1 text-[10px] leading-none text-white'
       >
         P
       </span>

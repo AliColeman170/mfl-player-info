@@ -2,9 +2,10 @@ import {
   attributeWeighting,
   captainBoost,
   positionalFamiliarity,
-} from "@/config";
-import { clsx } from "clsx";
-import { twMerge } from "tailwind-merge";
+} from '@/config';
+import { Player } from '@/types/global.types';
+import { ClassValue, clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
 interface PlayerStats {
   pace: number;
@@ -13,59 +14,77 @@ interface PlayerStats {
   shooting: number;
   defense: number;
   physical: number;
+  goalkeeping: number;
 }
 
 export const positionOrderArray = [
-  "GK",
-  "RB",
-  "LB",
-  "CB",
-  "RWB",
-  "LWB",
-  "CDM",
-  "RM",
-  "LM",
-  "CM",
-  "CAM",
-  "RW",
-  "LW",
-  "CF",
-  "ST",
+  'GK',
+  'RB',
+  'LB',
+  'CB',
+  'RWB',
+  'LWB',
+  'CDM',
+  'RM',
+  'LM',
+  'CM',
+  'CAM',
+  'RW',
+  'LW',
+  'CF',
+  'ST',
 ];
 
-export function getRarityClassNames(rating) {
-  if (rating >= 85) return "bg-[#ca1afc] text-white";
-  if (rating >= 75) return "bg-[#016bd5] text-white";
-  if (rating >= 65) return "bg-[#35ae25] text-white";
-  return "bg-slate-200 text-slate-900";
+export function getRarityClassNames(rating: number) {
+  if (rating >= 85) return 'bg-[#ca1afc] text-white';
+  if (rating >= 75) return 'bg-[#016bd5] text-white';
+  if (rating >= 65) return 'bg-[#35ae25] text-white';
+  return 'bg-slate-200 text-slate-900';
 }
 
-export function cn(...inputs) {
+export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
 export function getPlayerPositionRatings(
-  player,
+  player: Player,
   sorted?: boolean,
   stats?: PlayerStats,
   isCaptain: boolean = false,
-  captainPosition: string = ""
+  captainPosition: string = ''
 ) {
   const positionRatings = attributeWeighting.map(({ positions, weighting }) => {
-    const adjustedStats = stats ? { ...stats } : { ...player.metadata };
+    const { metadata } = player;
+
+    const adjustedStats = stats
+      ? { ...stats }
+      : {
+          passing: metadata.passing,
+          shooting: metadata.shooting,
+          defense: metadata.defense,
+          dribbling: metadata.dribbling,
+          pace: metadata.pace,
+          physical: metadata.physical,
+          goalkeeping: metadata.goalkeeping,
+        };
 
     if (isCaptain) {
-      Object.keys(adjustedStats).forEach(function (key, index) {
-        adjustedStats[key] = +adjustedStats[key] + 2;
+      Object.keys(adjustedStats).forEach(function (key) {
+        const statKey = key as keyof PlayerStats;
+        adjustedStats[statKey] = +adjustedStats[statKey] + 2;
       });
     } else {
       if (captainPosition) {
         const boost = captainBoost.find((boost) =>
           boost.positions.includes(captainPosition)
         );
-        Object.keys(boost.adjustment).forEach(function (key, index) {
-          adjustedStats[key] = +adjustedStats[key] + boost.adjustment[key];
-        });
+        if (boost) {
+          Object.keys(boost.adjustment).forEach((key) => {
+            const statKey = key as keyof PlayerStats;
+            adjustedStats[statKey] =
+              +adjustedStats[statKey] + boost.adjustment[statKey];
+          });
+        }
       }
     }
 
@@ -101,45 +120,51 @@ export function getPlayerPositionRatings(
 }
 
 export function getPlayerPositionFamiliarityRatings(
-  player,
+  player: Player,
   sorted?: boolean,
   stats?: PlayerStats,
   isCaptain: boolean = false,
-  captainPosition: string = ""
+  captainPosition: string = ''
 ) {
   const playerPrimaryPosition = player.metadata.positions[0];
   const playerSecondaryPositions = player.metadata.positions.slice(1);
 
   const positionRatings = positionalFamiliarity.map(
     ({ primaryPosition, adjustment }) => {
-      const adjustedStats = stats ? { ...stats } : { ...player.metadata };
+      const adjustedStats: PlayerStats = stats
+        ? { ...stats }
+        : { ...player.metadata };
 
       const isSecondaryPosition =
         playerSecondaryPositions.includes(primaryPosition);
 
       const ratingAdjustment = isSecondaryPosition
         ? -1
-        : adjustment[playerPrimaryPosition];
+        : adjustment[playerPrimaryPosition as keyof typeof adjustment];
 
       const { weighting } = attributeWeighting.find((w) =>
         w.positions.includes(primaryPosition)
-      );
+      )!;
 
-      Object.keys(adjustedStats).forEach(function (key, index) {
-        adjustedStats[key] = +adjustedStats[key] + ratingAdjustment;
+      Object.keys(adjustedStats).forEach((key) => {
+        const statKey = key as keyof PlayerStats;
+        adjustedStats[statKey] = +adjustedStats[statKey] + ratingAdjustment;
       });
 
       if (isCaptain) {
-        Object.keys(adjustedStats).forEach(function (key, index) {
-          adjustedStats[key] = +adjustedStats[key] + 2;
+        Object.keys(adjustedStats).forEach((key) => {
+          const statKey = key as keyof PlayerStats;
+          adjustedStats[statKey] = +adjustedStats[statKey] + 2;
         });
       } else {
         if (captainPosition) {
           const boost = captainBoost.find((boost) =>
             boost.positions.includes(captainPosition)
-          );
-          Object.keys(boost.adjustment).forEach(function (key, index) {
-            adjustedStats[key] = +adjustedStats[key] + boost.adjustment[key];
+          )!;
+          Object.keys(boost.adjustment).forEach((key) => {
+            const statKey = key as keyof PlayerStats;
+            adjustedStats[statKey] =
+              +adjustedStats[statKey] + boost.adjustment[statKey];
           });
         }
       }
@@ -177,18 +202,7 @@ export function getPlayerPositionFamiliarityRatings(
   return positionRatings;
 }
 
-export function findByTemplate(objects, template) {
-  return (
-    objects?.filter((obj) => {
-      return Object.keys(template).every(
-        (propertyName) => obj[propertyName] === template[propertyName]
-      );
-    }) || []
-  );
-}
-
-export function isPositiveInteger(string) {
-  const number = Number(string);
+export function isPositiveInteger(number: number) {
   const isInteger = Number.isInteger(number);
   const isPositive = number > 0;
 

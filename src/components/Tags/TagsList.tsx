@@ -1,10 +1,10 @@
-import { cn } from "@/utils/helpers";
-import { AddTagButton } from "./AddTagButton";
-import RemoveTagButton from "./RemoveTagButton";
+import { cn } from '@/utils/helpers';
+import { AddTagButton } from './AddTagButton';
+import { RemoveTagButton } from './RemoveTagButton';
 
 export function Tag({ children }: { children: React.ReactNode }) {
   return (
-    <div className="group cursor-default relative bg-slate-100 dark:bg-slate-800 text-xs px-3 py-1 rounded-lg ring-1 ring-slate-950 dark:ring-slate-800 ring-opacity-5">
+    <div className='group relative cursor-default rounded-lg bg-slate-100 px-3 py-1 text-xs ring-1 ring-slate-950 ring-opacity-5 dark:bg-slate-800 dark:ring-slate-800'>
       {children}
     </div>
   );
@@ -19,9 +19,9 @@ export function TagsListWrapper({
   return (
     <div
       className={cn(
-        `flex items-center gap-1 mt-1`,
+        `mt-1 flex items-center gap-1`,
         wrap &&
-          "flex-wrap @[16rem]/inner:justify-end @[16rem]/inner:mt-0 break-all"
+          'flex-wrap break-all @[16rem]/inner:mt-0 @[16rem]/inner:justify-end'
       )}
     >
       {children}
@@ -30,31 +30,30 @@ export function TagsListWrapper({
 }
 
 export function TagsList({
+  playerId,
+  tags,
+  isFavourite,
   wrap,
-  user,
-  player,
 }: {
+  playerId: number;
+  tags: string[];
+  isFavourite: boolean;
   wrap?: boolean;
-  user;
-  player;
 }) {
-  if (!user?.addr)
-    return <span className="text-xs text-slate-500">Log in to add tags</span>;
-
-  if (!player.is_favourite)
+  if (!isFavourite)
     return (
-      <span className="text-xs text-slate-500">Favourite to add tags</span>
+      <span className='text-xs text-slate-500'>Favourite to add tags</span>
     );
 
   return (
     <TagsListWrapper wrap={wrap}>
-      {player.tags?.map((tag, index) => (
-        <Tag key={`${player.id}-${tag}`}>
+      {tags.map((tag, index) => (
+        <Tag key={`${playerId}-${tag}`}>
           {tag}
-          <RemoveTagButton player={player} tagIndex={index} />
+          <RemoveTagButton tags={tags} playerId={playerId} tagIndex={index} />
         </Tag>
       ))}
-      <AddTagButton player={player} />
+      <AddTagButton playerId={playerId} tags={tags} />
     </TagsListWrapper>
   );
 }

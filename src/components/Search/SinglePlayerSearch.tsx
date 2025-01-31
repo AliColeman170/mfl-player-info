@@ -1,20 +1,20 @@
-"use client";
-import { useRouter } from "next/navigation";
-import { useEffect, useTransition } from "react";
-import { SearchInput } from "./SearchInput";
-import { useDebounceValue } from "usehooks-ts";
+'use client';
+import { useRouter } from 'next/navigation';
+import { ChangeEvent, useEffect, useTransition } from 'react';
+import { SearchInput } from './SearchInput';
+import { useDebounceValue } from 'usehooks-ts';
 
-export function SinglePlayerSearch({ id }: { id?: string }) {
+export function SinglePlayerSearch({ id }: { id?: number }) {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
-  const [debouncedPlayerId, setPlayerId] = useDebounceValue<string | null>(
-    id,
+  const [debouncedPlayerId, setPlayerId] = useDebounceValue<string>(
+    id ? id.toString() : '',
     800
   );
 
   useEffect(() => {
-    function searchPlayer(id) {
+    function searchPlayer(id: number) {
       if (id) {
         startTransition(() => {
           router.push(`/player/${id}`);
@@ -23,21 +23,21 @@ export function SinglePlayerSearch({ id }: { id?: string }) {
         router.push(`/`);
       }
     }
-    searchPlayer(debouncedPlayerId);
+    searchPlayer(+debouncedPlayerId);
   }, [debouncedPlayerId, router]);
 
-  function handleSearchChange(e) {
+  function handleSearchChange(e: ChangeEvent<HTMLInputElement>) {
     if (e.target.value) {
       setPlayerId(e.target.value);
     } else {
-      setPlayerId(null);
+      setPlayerId('');
     }
   }
 
   return (
-    <div className="max-w-xl mx-auto w-full">
+    <div className='mx-auto w-full max-w-xl'>
       <SearchInput
-        value={id ?? ""}
+        value={id?.toString() ?? ''}
         handleSearch={handleSearchChange}
         isLoading={isPending}
         autoFocus

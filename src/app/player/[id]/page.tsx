@@ -1,28 +1,23 @@
-import Player from "@/components/Player";
-import { getPlayerData } from "@/flow/api";
-import { notFound } from "next/navigation";
-import type { Metadata } from "next";
-import { openGraph, twitter } from "@/app/shared-meta";
+import Player from '@/components/Player';
+import { notFound } from 'next/navigation';
+import type { Metadata } from 'next';
+import { openGraph, twitter } from '@/app/shared-meta';
+import { getPlayerById } from '@/data/players';
 
 type Props = {
-  params: { id: string };
-  searchParams: { [key: string]: string | string[] | undefined };
+  params: Promise<{ id: number }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  // read route params
-  const id = params.id;
+  const id = (await params).id;
 
   // fetch data
-  const result = await fetch(
-    `https://z519wdyajg.execute-api.us-east-1.amazonaws.com/prod/players/${params.id}`
-  )
-    .then((res) => res.json())
-    .catch();
+  const player = await getPlayerById(id);
 
-  if (!result.player) return;
+  if (!player) return notFound();
 
-  const { firstName, lastName } = result.player?.metadata;
+  const { firstName, lastName } = player.metadata;
 
   const title = `${firstName} ${lastName} | #${id} | MFL Player Info`;
   const url = `${process.env.NEXT_SITE_URL}/player/${id}`;
@@ -44,12 +39,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function PlayerPage({ params }) {
-  const playerId = Number(params.id ?? -1);
+export default async function PlayerPage({ params }: Props) {
+  const id = (await params).id;
 
-  if (isNaN(playerId) || playerId <= 0) notFound();
-
-  const player = await getPlayerData(params.id);
+  const player = await getPlayerById(id);
 
   if (!player) notFound();
 

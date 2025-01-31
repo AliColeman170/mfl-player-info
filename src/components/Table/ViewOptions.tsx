@@ -1,86 +1,76 @@
-"use client";
+'use client';
 
-import { Menu, Popover } from "@headlessui/react";
+import { Popover, PopoverButton, PopoverPanel } from '@headlessui/react';
 import {
   AdjustmentsHorizontalIcon,
   CheckIcon,
-} from "@heroicons/react/24/solid";
-import { usePopper } from "./usePopper";
-import { cn } from "@/utils/helpers";
-import { columnLabels } from "./columns";
-import { Portal } from "../Portal";
+} from '@heroicons/react/24/solid';
+import { cn } from '@/utils/helpers';
+import { columnLabels } from './columns';
+
+import { Table } from '@tanstack/react-table';
+import { PlayerWithFavouriteData } from '@/types/global.types';
 
 export function ViewOptions({
   table,
   className,
 }: {
-  table;
+  table: Table<PlayerWithFavouriteData>;
   className?: string;
 }) {
-  let [trigger, container] = usePopper({
-    placement: "bottom-end",
-    strategy: "fixed",
-    modifiers: [{ name: "offset", options: { offset: [0, 10] } }],
-  });
   return (
     <Popover
-      as="div"
-      className={cn("relative inline-block text-left", className)}
+      as='div'
+      className={cn('relative inline-block text-left', className)}
     >
       <div>
-        <Popover.Button
-          ref={trigger}
-          className="flex items-center justify-center space-x-2.5 text-sm font-medium bg-slate-800 hover:bg-slate-900 dark:bg-slate-900 dark:hover:bg-slate-900/60 px-4 py-3 rounded-lg cursor-pointer ring-1 ring-slate-950 dark:ring-slate-800 ring-opacity-5"
-        >
+        <PopoverButton className='flex cursor-pointer items-center justify-center space-x-2.5 rounded-lg bg-slate-800 px-4 py-3 text-sm font-medium ring-1 ring-slate-950 ring-opacity-5 hover:bg-slate-900 dark:bg-slate-900 dark:ring-slate-800 dark:hover:bg-slate-900/60'>
           {
             <AdjustmentsHorizontalIcon
-              className="h-5 w-5 text-slate-50"
-              aria-hidden="true"
+              className='h-5 w-5 text-slate-50'
+              aria-hidden='true'
             />
           }
-          <span className="text-slate-200">View</span>
-        </Popover.Button>
+          <span className='text-slate-200'>View</span>
+        </PopoverButton>
       </div>
-      <Portal>
-        <Popover.Panel
-          ref={container}
-          className="relative z-20 min-w-[12rem] mt-1 max-h-60 overflow-auto rounded-lg bg-white dark:bg-slate-950 py-1 text-sm shadow-lg ring-1 ring-slate-950 dark:ring-slate-800 ring-opacity-5 focus:outline-none"
-        >
-          <div className="py-1">
-            {table
-              .getAllColumns()
-              .filter(
-                (column) =>
-                  typeof column.accessorFn !== "undefined" &&
-                  column.getCanHide()
-              )
-              .map((column) => {
-                return (
-                  <div key={column.id}>
-                    <button
-                      onClick={() => {
-                        column.toggleVisibility(!column.getIsVisible());
-                      }}
-                      className={cn(
-                        `flex items-center py-2 px-4 capitalize w-full hover:bg-slate-900`
-                      )}
-                    >
-                      {column.getIsVisible() ? (
-                        <CheckIcon
-                          className="mr-3 h-4 w-4 text-slate-400 group-hover:text-slate-500"
-                          aria-hidden="true"
-                        />
-                      ) : (
-                        <div className="mr-3 h-4 w-4" />
-                      )}
-                      {columnLabels.find((i) => i.id === column.id).label}
-                    </button>
-                  </div>
-                );
-              })}
-          </div>
-        </Popover.Panel>
-      </Portal>
+      <PopoverPanel
+        anchor={{ to: 'bottom end' }}
+        className='relative z-20 mt-1 max-h-60 min-w-[12rem] overflow-auto rounded-lg bg-white py-1 text-sm shadow-lg ring-1 ring-slate-950 ring-opacity-5 focus:outline-none dark:bg-slate-950 dark:ring-slate-800'
+      >
+        <div className='py-1'>
+          {table
+            .getAllColumns()
+            .filter(
+              (column) =>
+                typeof column.accessorFn !== 'undefined' && column.getCanHide()
+            )
+            .map((column) => {
+              return (
+                <div key={column.id}>
+                  <button
+                    onClick={() => {
+                      column.toggleVisibility(!column.getIsVisible());
+                    }}
+                    className={cn(
+                      `group flex w-full items-center px-4 py-2 capitalize hover:bg-slate-900 hover:text-white`
+                    )}
+                  >
+                    {column.getIsVisible() ? (
+                      <CheckIcon
+                        className='mr-3 h-4 w-4 text-slate-400 group-hover:text-slate-200'
+                        aria-hidden='true'
+                      />
+                    ) : (
+                      <div className='mr-3 h-4 w-4' />
+                    )}
+                    {columnLabels.find((i) => i.id === column.id)?.label}
+                  </button>
+                </div>
+              );
+            })}
+        </div>
+      </PopoverPanel>
     </Popover>
   );
 }

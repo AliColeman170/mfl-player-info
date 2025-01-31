@@ -1,41 +1,41 @@
 export const attributeWeighting = [
   {
-    positions: ["GK"],
+    positions: ['GK'],
     weighting: [0, 0, 0, 0, 0, 0, 1],
   },
   {
-    positions: ["CB"],
+    positions: ['CB'],
     weighting: [0.05, 0, 0.64, 0.09, 0.02, 0.2, 0],
   },
   {
-    positions: ["LWB", "RWB", "LB", "RB"],
+    positions: ['LWB', 'RWB', 'LB', 'RB'],
     weighting: [0.19, 0, 0.44, 0.17, 0.1, 0.1, 0],
   },
   {
-    positions: ["CDM"],
+    positions: ['CDM'],
     weighting: [0.28, 0, 0.4, 0.17, 0, 0.15, 0],
   },
   {
-    positions: ["CM", "LM", "RM"],
+    positions: ['CM', 'LM', 'RM'],
     weighting: [0.43, 0.12, 0.1, 0.29, 0, 0.06, 0],
   },
   {
-    positions: ["CAM"],
+    positions: ['CAM'],
     weighting: [0.34, 0.21, 0, 0.38, 0.07, 0, 0],
   },
   {
-    positions: ["CF", "LW", "RW"],
+    positions: ['CF', 'LW', 'RW'],
     weighting: [0.24, 0.23, 0, 0.4, 0.13, 0, 0],
   },
   {
-    positions: ["ST"],
+    positions: ['ST'],
     weighting: [0.1, 0.46, 0, 0.29, 0.1, 0.05, 0],
   },
 ];
 
 export const positionalFamiliarity = [
   {
-    primaryPosition: "GK",
+    primaryPosition: 'GK',
     adjustment: {
       GK: 0,
       CB: -20,
@@ -55,7 +55,7 @@ export const positionalFamiliarity = [
     },
   },
   {
-    primaryPosition: "CB",
+    primaryPosition: 'CB',
     adjustment: {
       GK: -20,
       CB: 0,
@@ -75,7 +75,7 @@ export const positionalFamiliarity = [
     },
   },
   {
-    primaryPosition: "RB",
+    primaryPosition: 'RB',
     adjustment: {
       GK: -20,
       CB: -8,
@@ -95,7 +95,7 @@ export const positionalFamiliarity = [
     },
   },
   {
-    primaryPosition: "LB",
+    primaryPosition: 'LB',
     adjustment: {
       GK: -20,
       CB: -8,
@@ -115,7 +115,7 @@ export const positionalFamiliarity = [
     },
   },
   {
-    primaryPosition: "RWB",
+    primaryPosition: 'RWB',
     adjustment: {
       GK: -20,
       CB: -20,
@@ -135,7 +135,7 @@ export const positionalFamiliarity = [
     },
   },
   {
-    primaryPosition: "LWB",
+    primaryPosition: 'LWB',
     adjustment: {
       GK: -20,
       CB: -20,
@@ -155,7 +155,7 @@ export const positionalFamiliarity = [
     },
   },
   {
-    primaryPosition: "CDM",
+    primaryPosition: 'CDM',
     adjustment: {
       GK: -20,
       CB: -8,
@@ -175,7 +175,7 @@ export const positionalFamiliarity = [
     },
   },
   {
-    primaryPosition: "CM",
+    primaryPosition: 'CM',
     adjustment: {
       GK: -20,
       CB: -20,
@@ -195,7 +195,7 @@ export const positionalFamiliarity = [
     },
   },
   {
-    primaryPosition: "CAM",
+    primaryPosition: 'CAM',
     adjustment: {
       GK: -20,
       CB: -20,
@@ -215,7 +215,7 @@ export const positionalFamiliarity = [
     },
   },
   {
-    primaryPosition: "RM",
+    primaryPosition: 'RM',
     adjustment: {
       GK: -20,
       CB: -20,
@@ -235,7 +235,7 @@ export const positionalFamiliarity = [
     },
   },
   {
-    primaryPosition: "LM",
+    primaryPosition: 'LM',
     adjustment: {
       GK: -20,
       CB: -20,
@@ -255,7 +255,7 @@ export const positionalFamiliarity = [
     },
   },
   {
-    primaryPosition: "RW",
+    primaryPosition: 'RW',
     adjustment: {
       GK: -20,
       CB: -20,
@@ -275,7 +275,7 @@ export const positionalFamiliarity = [
     },
   },
   {
-    primaryPosition: "LW",
+    primaryPosition: 'LW',
     adjustment: {
       GK: -20,
       CB: -20,
@@ -295,7 +295,7 @@ export const positionalFamiliarity = [
     },
   },
   {
-    primaryPosition: "CF",
+    primaryPosition: 'CF',
     adjustment: {
       GK: -20,
       CB: -20,
@@ -315,7 +315,7 @@ export const positionalFamiliarity = [
     },
   },
   {
-    primaryPosition: "ST",
+    primaryPosition: 'ST',
     adjustment: {
       GK: -20,
       CB: -20,
@@ -338,30 +338,51 @@ export const positionalFamiliarity = [
 
 export const captainBoost = [
   {
-    positions: ["GK"],
+    positions: ['GK'],
     adjustment: {
       defense: 2,
+      physical: 0,
+      passing: 0,
+      dribbling: 0,
+      shooting: 0,
+      pace: 0,
+      goalkeeping: 0,
     },
   },
   {
-    positions: ["CB", "LWB", "RWB", "LB", "RB"],
+    positions: ['CB', 'LWB', 'RWB', 'LB', 'RB'],
     adjustment: {
       defense: 2,
       physical: 1,
+      passing: 0,
+      dribbling: 0,
+      shooting: 0,
+      pace: 0,
+      goalkeeping: 0,
     },
   },
   {
-    positions: ["CDM", "CM", "LM", "RM", "CAM"],
+    positions: ['CDM', 'CM', 'LM', 'RM', 'CAM'],
     adjustment: {
+      defense: 0,
+      physical: 0,
       passing: 2,
       dribbling: 1,
+      shooting: 0,
+      pace: 0,
+      goalkeeping: 0,
     },
   },
   {
-    positions: ["CF", "LW", "RW", "ST"],
+    positions: ['CF', 'LW', 'RW', 'ST'],
     adjustment: {
+      defense: 0,
+      physical: 0,
+      passing: 0,
+      dribbling: 0,
       shooting: 2,
       pace: 1,
+      goalkeeping: 0,
     },
   },
 ];

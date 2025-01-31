@@ -1,5 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  logging: {
+    fetches: {
+      fullUrl: true,
+    },
+  },
   images: {
     domains: ["d13e14gtps4iwl.cloudfront.net"],
     minimumCacheTTL: 2592000,

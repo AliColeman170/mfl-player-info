@@ -1,24 +1,17 @@
 import { Suspense } from 'react';
-import SpinnerIcon from '../SpinnerIcon';
+import { SpinnerIcon } from '../SpinnerIcon';
 import { InformationCircleIcon } from '@heroicons/react/20/solid';
 import { MarketValue } from './MarketValue';
 import Link from 'next/link';
 import { PlayerTags } from './PlayerTags';
-import { ForSale } from './ForSale';
+import { Player } from '@/types/global.types';
 
-export default async function BasicInfo({ player }) {
-  const {
-    name,
-    firstName,
-    lastName,
-    ageAtMint,
-    height,
-    preferredFoot,
-    positions,
-  } = player.metadata;
-  const fullName = name ? name : `${firstName} ${lastName}`;
+export async function BasicInfo({ player }: { player: Player }) {
+  const { firstName, lastName, age, height, preferredFoot, positions } =
+    player.metadata;
+  const fullName = `${firstName} ${lastName}`;
   const metadata = {
-    age: ageAtMint,
+    age,
     height: `${height}cm`,
     foot: preferredFoot.toLowerCase(),
     position: positions.join(' / '),
