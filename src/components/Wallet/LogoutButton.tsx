@@ -1,28 +1,37 @@
-"use client";
-import { fcl } from "@/flow/api";
-import { logout } from "@/lib/actions";
-import { cn } from "@/utils/helpers";
-import { ArrowRightOnRectangleIcon } from "@heroicons/react/24/solid";
-import React, { useTransition } from "react";
+'use client';
 
-export default function LogoutButton() {
+import { cn } from '@/utils/helpers';
+import { ArrowRightStartOnRectangleIcon } from '@heroicons/react/24/solid';
+import { useTransition } from 'react';
+import { SpinnerIcon } from '../SpinnerIcon';
+import { logout } from '@/actions/auth';
+import { toast } from 'sonner';
+
+export function LogoutButton() {
   let [isPending, startTransition] = useTransition();
 
   async function handleLogout() {
-    fcl.unauthenticate();
-    startTransition(() => {
-      logout();
+    startTransition(async () => {
+      const result = await logout();
+      if (!result.success) {
+        toast.error(result.message);
+      }
     });
   }
 
   return (
     <button
       onClick={handleLogout}
+      aria-disabled={isPending}
       className={cn(
-        "w-full px-4 py-3 text-base text-slate-700 dark:text-slate-100 flex items-center space-x-2 hover:bg-slate-100 hover:dark:bg-slate-900"
+        'flex w-full items-center space-x-2 px-4 py-3 text-base text-slate-700 hover:bg-slate-100 dark:text-slate-100 hover:dark:bg-slate-900'
       )}
     >
-      <ArrowRightOnRectangleIcon className="h-5 w-5 text-slate-900 dark:text-white" />
+      {isPending ? (
+        <SpinnerIcon className='h-5 w-5 animate-spin' />
+      ) : (
+        <ArrowRightStartOnRectangleIcon className='h-5 w-5 text-slate-900 dark:text-white' />
+      )}
       <span>Sign Out</span>
     </button>
   );

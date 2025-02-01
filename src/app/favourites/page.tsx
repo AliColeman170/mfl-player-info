@@ -1,24 +1,32 @@
-import { auth } from "@/auth";
-import Favourites from "@/components/Favourites";
-import NotLoggedIn from "@/components/Favourites/NotLoggedIn";
-import { Suspense } from "react";
-import FavouritesLoading from "./loading";
-import { Metadata } from "next";
+import { Favourites } from '@/components/Favourites';
+import { NotLoggedIn } from '@/components/Favourites/NotLoggedIn';
+import { Suspense } from 'react';
+import { Metadata } from 'next';
+import { createClient } from '@/utils/supabase/server';
+import { getUser } from '@/data/auth';
+import { SpinnerIcon } from '@/components/SpinnerIcon';
 
 export const metadata: Metadata = {
   title:
-    "My Favourites | MFL Player Info | Ratings Calculator & Contract Details",
+    'My Favourites | MFL Player Info | Ratings Calculator & Contract Details',
 };
 
 export default async function FavouritesPage() {
-  const session = await auth();
+  const supabase = await createClient();
+  const user = getUser(supabase);
 
-  if (!session) return <NotLoggedIn />;
+  if (!user) return <NotLoggedIn />;
 
   return (
-    <div className="mt-4">
-      <h1 className="text-4xl font-bold">My Favourites</h1>
-      <Suspense fallback={<FavouritesLoading />}>
+    <div className='mt-4'>
+      <h1 className='text-4xl font-bold'>My Favourites</h1>
+      <Suspense
+        fallback={
+          <div className='flex h-64 items-center justify-center'>
+            <SpinnerIcon className='h-8 w-8 animate-spin' />
+          </div>
+        }
+      >
         <Favourites />
       </Suspense>
     </div>

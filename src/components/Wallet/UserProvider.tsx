@@ -1,20 +1,33 @@
-"use client";
+'use client';
 
-import { fcl } from "@/flow/api";
-import { createContext, useContext, useEffect, useState } from "react";
+import { MFLUser } from '@/types/global.types';
+import { User } from '@supabase/supabase-js';
+import { createContext, useContext } from 'react';
 
-export const UserContext = createContext(null);
+type UserContextType = {
+  user: User | null;
+  userProfile: MFLUser | null;
+};
 
-export function UserProvider({ children }) {
-  const [user, setUser] = useState({ loggedIn: null, addr: "" });
-  useEffect(() => {
-    fcl.currentUser.subscribe(setUser);
-  }, []);
+export const UserContext = createContext<UserContextType>({
+  user: null,
+  userProfile: null,
+});
 
+export function UserProvider({
+  serverUser,
+  userProfile,
+  children,
+}: {
+  serverUser: User | null;
+  userProfile: MFLUser | null;
+  children: React.ReactNode;
+}) {
   return (
     <UserContext.Provider
       value={{
-        user,
+        user: serverUser,
+        userProfile,
       }}
     >
       {children}
@@ -26,7 +39,7 @@ export const useUser = () => {
   const userContext = useContext(UserContext);
 
   if (!userContext) {
-    throw new Error("useUser has to be used within <UserContext.Provider>");
+    throw new Error('useUser has to be used within <UserContext.Provider>');
   }
   return userContext;
 };

@@ -1,11 +1,11 @@
-import { getRarityClassNames } from "@/utils/helpers";
+import { getRarityClassNames } from '@/utils/helpers';
 
-export function StyledRatingValue({ rating }) {
+export function StyledRatingValue({ rating }: { rating: number }) {
   return (
     <span
       className={`${getRarityClassNames(
         rating
-      )} rounded-lg text-base sm:text-lg w-10 sm:w-12 p-2 sm:p-3 font-medium text-center`}
+      )} w-10 rounded-lg p-2 text-center text-base font-medium sm:w-12 sm:p-3 sm:text-lg`}
     >
       {rating > 0 ? rating : 0}
     </span>

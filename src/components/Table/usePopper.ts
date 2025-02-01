@@ -1,12 +1,9 @@
-import { createPopper } from "@popperjs/core";
-import { useCallback, useMemo, useRef } from "react";
+import { createPopper, Options, StrictModifiers } from '@popperjs/core';
+import { useCallback, useMemo, useRef } from 'react';
 
-/**
- * Example implementation to use Popper: https://popper.js.org/
- */
-export function usePopper(options) {
-  let reference = useRef(null);
-  let popper = useRef(null);
+export function usePopper(options: Options) {
+  let reference = useRef<Element>(undefined);
+  let popper = useRef<HTMLElement>(undefined);
 
   let cleanupCallback = useRef(() => {});
 
@@ -16,7 +13,7 @@ export function usePopper(options) {
 
     if (cleanupCallback.current) cleanupCallback.current();
 
-    cleanupCallback.current = createPopper(
+    cleanupCallback.current = createPopper<StrictModifiers>(
       reference.current,
       popper.current,
       options
@@ -25,11 +22,11 @@ export function usePopper(options) {
 
   return useMemo(
     () => [
-      (referenceDomNode) => {
+      (referenceDomNode: Element) => {
         reference.current = referenceDomNode;
         instantiatePopper();
       },
-      (popperDomNode) => {
+      (popperDomNode: HTMLElement) => {
         popper.current = popperDomNode;
         instantiatePopper();
       },

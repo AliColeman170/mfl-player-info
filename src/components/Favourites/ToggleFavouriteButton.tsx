@@ -2,37 +2,46 @@
 
 import { HeartIcon as FilledHeartIcon } from '@heroicons/react/24/solid';
 import { HeartIcon } from '@heroicons/react/24/outline';
-import SpinnerIcon from '../SpinnerIcon';
+import { SpinnerIcon } from '../SpinnerIcon';
 import { useTransition } from 'react';
 import { cn } from '@/utils/helpers';
-import { deleteFavourite, setFavourite } from '@/lib/actions';
+import { Player } from '@/types/global.types';
+import { useUser } from '../Wallet/UserProvider';
+import { deleteFavourite, setFavourite } from '@/actions/favourites';
+import { toast } from 'sonner';
 
 export function ToggleFavouriteButton({
-  user,
-  playerId,
+  player,
   isFavourite,
   className,
 }: {
-  user: {
-    addr?: string;
-  };
-  playerId: string | number;
+  player: Player;
   isFavourite: boolean;
   className?: string;
 }) {
+  const { user } = useUser();
   const [isPending, startTransition] = useTransition();
 
   async function toggleFavourite() {
-    startTransition(() => {
-      isFavourite
-        ? deleteFavourite(playerId)
-        : setFavourite(playerId, !isFavourite);
+    startTransition(async () => {
+      if (!user?.user_metadata.address) return;
+      if (isFavourite) {
+        const result = await deleteFavourite(player.id);
+        if (!result.success) {
+          toast.error(result.message);
+        }
+      } else {
+        const result = await setFavourite(player.id, !isFavourite);
+        if (!result.success) {
+          toast.error(result.message);
+        }
+      }
     });
   }
 
   return (
     <button
-      disabled={!user}
+      disabled={!user?.user_metadata.address}
       className={cn('flex', className)}
       onClick={toggleFavourite}
     >

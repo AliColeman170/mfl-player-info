@@ -12,8 +12,8 @@ export interface Player {
 
 export interface Metadata {
   id: number;
-  firstName?: string;
-  lastName?: string;
+  firstName: string;
+  lastName: string;
   name?: string;
   overall: number;
   nationalities: string[];

@@ -1,23 +1,9 @@
+import { getContactDataByPlayer } from '@/data/players';
+import { Player } from '@/types/global.types';
 import { InformationCircleIcon } from '@heroicons/react/24/solid';
-import { Player } from '../Table/schema';
 
-async function getContactData(player) {
-  const { ageAtMint, positions, overall } = player.metadata;
-  const contractData = await fetch(
-    `https://z519wdyajg.execute-api.us-east-1.amazonaws.com/prod/players?limit=400&ageMin=${
-      parseInt(ageAtMint) - 1
-    }&ageMax=${parseInt(ageAtMint) + 1}&overallMin=${
-      parseInt(overall) - 1
-    }&overallMax=${parseInt(overall) + 1}&positions=${
-      positions[0]
-    }&excludingMflOwned=true&isFreeAgent=false`
-  ).then((res) => res.json());
-
-  return contractData;
-}
-
-function Division({ division }) {
-  const divisionClasses = {
+function Division({ division }: { division: number }) {
+  const divisionClasses: { [key: number]: string } = {
     1: 'bg-[#3be9f8]',
     2: 'bg-[#13d389]',
     3: 'bg-[#ffd23e]',
@@ -28,7 +14,7 @@ function Division({ division }) {
     8: 'bg-[#9cb2be]',
   };
 
-  const divisionNames = {
+  const divisionNames: { [key: number]: string } = {
     1: 'Diamond',
     2: 'Platinum',
     3: 'Gold',
@@ -49,7 +35,7 @@ function Division({ division }) {
   );
 }
 
-function formatPercentage(value) {
+function formatPercentage(value: number) {
   return new Intl.NumberFormat('default', {
     style: 'percent',
     minimumFractionDigits: 1,
@@ -57,15 +43,15 @@ function formatPercentage(value) {
   }).format(value / 100 / 100);
 }
 
-export default async function ContractStats({ player }) {
-  const contractData: Player[] = await getContactData(player);
+export async function ContractStats({ player }: { player: Player }) {
+  const contractData: Player[] = await getContactDataByPlayer(player);
 
   const zeroFilteredContractData = contractData.filter(
-    (c) => c.activeContract.revenueShare !== 0
+    (c) => c.activeContract!.revenueShare !== 0
   );
 
   const groupedByDivision = zeroFilteredContractData.reduce((map, contract) => {
-    const division = contract.activeContract.club.division;
+    const division = contract.activeContract!.club.division;
     if (!map.has(division)) {
       map.set(division, []);
     }
@@ -77,11 +63,18 @@ export default async function ContractStats({ player }) {
     [...groupedByDivision.entries()].sort()
   );
 
-  let contractInfo = [];
+  let contractInfo: Array<{
+    division: number;
+    total: number;
+    minRevenueShare: number;
+    maxRevenueShare: number;
+    averageRevenueShare: number;
+  }> = [];
 
   groupedByDivisionSorted.forEach((contracts, division) => {
     const sortedByRevenueShare = contracts.sort(
-      (a, b) => a.activeContract.revenueShare - b.activeContract.revenueShare
+      (a: Player, b: Player) =>
+        a.activeContract!.revenueShare - b.activeContract!.revenueShare
     );
 
     const minRevenueShare = sortedByRevenueShare[0].activeContract.revenueShare;
@@ -90,7 +83,8 @@ export default async function ContractStats({ player }) {
         .revenueShare;
     const averageRevenueShare =
       contracts.reduce(
-        (sum, contract) => sum + contract.activeContract.revenueShare,
+        (sum: number, contract: Player) =>
+          sum + contract.activeContract!.revenueShare,
         0
       ) / contracts.length;
 
