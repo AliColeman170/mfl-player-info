@@ -23,6 +23,7 @@ import { Pagination } from './Pagination';
 import { Toolbar } from './Toolbar';
 import { useLocalStorage } from 'usehooks-ts';
 import { PlayerWithFavouriteData } from '@/types/global.types';
+import { cn } from '@/utils/helpers';
 
 export function Table({ players }: { players: PlayerWithFavouriteData[] }) {
   const [{ pageIndex, pageSize }, setPagination] = useState<PaginationState>({
@@ -113,9 +114,9 @@ export function Table({ players }: { players: PlayerWithFavouriteData[] }) {
   return (
     <>
       <Toolbar table={table} />
-      <div className='h-full w-full overflow-y-hidden overflow-x-scroll pb-4'>
+      <div className='h-full w-full overflow-x-scroll overflow-y-hidden pb-4'>
         <table
-          className='w-full min-w-[800px] divide-y divide-slate-200 dark:divide-slate-800'
+          className='divide-border w-full min-w-[800px] divide-y'
           suppressHydrationWarning
         >
           <thead>
@@ -124,11 +125,14 @@ export function Table({ players }: { players: PlayerWithFavouriteData[] }) {
                 {headerGroup.headers.map((header) => (
                   <th
                     key={header.id}
-                    className={`px-1 py-2.5 text-left text-sm font-semibold text-slate-950 dark:text-white ${
-                      ['id'].includes(header.id) ? 'w-20' : ''
-                    } ${['name'].includes(header.id) ? 'w-40' : ''} ${
+                    className={cn(
+                      'text-muted-foreground px-2 py-2.5',
+                      ['id'].includes(header.id) && 'min-w-20',
+                      ['nationality', 'favourite'].includes(header.id) &&
+                        'min-w-9',
+                      ['name'].includes(header.id) && 'w-full',
+                      ['height'].includes(header.id) && 'min-w-16',
                       [
-                        'age',
                         'overall',
                         'pace',
                         'shooting',
@@ -136,14 +140,9 @@ export function Table({ players }: { players: PlayerWithFavouriteData[] }) {
                         'dribbling',
                         'defense',
                         'physical',
-                      ].includes(header.id)
-                        ? 'w-16'
-                        : ''
-                    } ${
-                      ['nationality', 'favourite'].includes(header.id)
-                        ? 'w-9 min-w-[36px]'
-                        : ''
-                    }`}
+                      ].includes(header.id) && 'w-9 text-center',
+                      ['age'].includes(header.id) && 'min-w-15'
+                    )}
                   >
                     {header.isPlaceholder
                       ? null
@@ -164,7 +163,7 @@ export function Table({ players }: { players: PlayerWithFavouriteData[] }) {
                     {row.getVisibleCells().map((cell) => (
                       <td
                         key={cell.id}
-                        className='h-11 whitespace-nowrap px-2 py-1 text-sm text-slate-700 dark:text-slate-300'
+                        className='h-11 px-1.5 py-1 text-sm whitespace-nowrap'
                       >
                         {flexRender(
                           cell.column.columnDef.cell,
@@ -176,26 +175,20 @@ export function Table({ players }: { players: PlayerWithFavouriteData[] }) {
                 ))
               ) : (
                 <tr>
-                  <td
-                    colSpan={columns.length}
-                    className='h-24 text-center text-slate-700 dark:text-slate-300'
-                  >
+                  <td colSpan={columns.length} className='h-24 text-center'>
                     No Results.
                   </td>
                 </tr>
               )
             ) : (
               <tr>
-                <td
-                  colSpan={columns.length}
-                  className='h-24 text-center text-slate-700 dark:text-slate-300'
-                >
+                <td colSpan={columns.length} className='h-24 text-center'>
                   <div className='m-24 flex flex-1 flex-col justify-center text-center'>
-                    <HeartIcon className='mx-auto h-12 w-12 text-red-500' />
-                    <h3 className='mt-2 text-3xl font-semibold text-slate-900 dark:text-white'>
+                    <HeartIcon className='mx-auto size-12 text-red-500' />
+                    <h3 className='mt-2 text-3xl font-semibold'>
                       No Favourites
                     </h3>
-                    <p className='mt-1 text-base text-slate-500 dark:text-slate-400'>
+                    <p className='text-muted mt-1 text-base'>
                       Click the heart beside players to add to your favourites.
                     </p>
                   </div>

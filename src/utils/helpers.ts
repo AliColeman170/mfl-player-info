@@ -36,9 +36,12 @@ export const positionOrderArray = [
 ];
 
 export function getRarityClassNames(rating: number) {
-  if (rating >= 85) return 'bg-[#ca1afc] text-white';
-  if (rating >= 75) return 'bg-[#016bd5] text-white';
-  if (rating >= 65) return 'bg-[#35ae25] text-white';
+  if (rating >= 95)
+    return 'bg-black text-yellow-400 outline-yellow-400 outline-1 -outline-offset-1';
+  if (rating >= 85) return 'bg-fuchsia-500 text-fuchsia-50';
+  if (rating >= 75) return 'bg-blue-500 text-blue-50';
+  if (rating >= 65) return 'bg-lime-500 text-lime-950';
+  if (rating >= 55) return 'bg-yellow-400 text-yellow-950';
   return 'bg-slate-200 text-slate-900';
 }
 

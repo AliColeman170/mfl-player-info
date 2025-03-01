@@ -9,6 +9,7 @@ import { Player } from '@/types/global.types';
 import { useUser } from '../Wallet/UserProvider';
 import { deleteFavourite, setFavourite } from '@/actions/favourites';
 import { toast } from 'sonner';
+import { Button } from '../UI/Button';
 
 export function ToggleFavouriteButton({
   player,
@@ -41,16 +42,16 @@ export function ToggleFavouriteButton({
 
   return (
     <button
-      disabled={!user?.user_metadata.address}
-      className={cn('flex', className)}
+      disabled={!user?.user_metadata.address || isPending}
+      className={cn('flex cursor-pointer', className)}
       onClick={toggleFavourite}
     >
       {isPending ? (
-        <SpinnerIcon className='h-4 w-4 animate-spin text-slate-500' />
+        <SpinnerIcon className='size-4 animate-spin' />
       ) : isFavourite ? (
-        <FilledHeartIcon className='h-4 w-4 text-red-500 disabled:text-slate-500' />
+        <FilledHeartIcon className='size-4 text-red-500 disabled:text-slate-500' />
       ) : (
-        <HeartIcon className='h-4 w-4 hover:text-red-500' />
+        <HeartIcon className='size-4 group-hover:text-red-500' />
       )}
     </button>
   );

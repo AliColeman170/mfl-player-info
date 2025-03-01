@@ -1,8 +1,16 @@
+'use client';
+
+import { ArrowRightStartOnRectangleIcon } from '@heroicons/react/24/solid';
+import { useTransition } from 'react';
+import { SpinnerIcon } from '../SpinnerIcon';
+import { logout } from '@/actions/auth';
+import { toast } from 'sonner';
 import {
   Menu,
   MenuButton,
   MenuItem,
   MenuItems,
+  MenuSeparator,
   Transition,
 } from '@headlessui/react';
 import {
@@ -13,7 +21,6 @@ import {
 import Link from 'next/link';
 import { Fragment } from 'react';
 import { cn } from '@/utils/helpers';
-import { LogoutButton } from './LogoutButton';
 import Image from 'next/image';
 import { MFLUser } from '@/types/global.types';
 import { User } from '@supabase/supabase-js';
@@ -25,14 +32,24 @@ export function UserProfile({
   user: User;
   userProfile: MFLUser | null;
 }) {
+  let [isPending, startTransition] = useTransition();
+
+  async function handleLogout() {
+    startTransition(async () => {
+      const result = await logout();
+      if (!result.success) {
+        toast.error(result.message);
+      }
+    });
+  }
   return (
     <Menu as='div' className='relative'>
       <div>
-        <MenuButton className='relative flex rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-slate-200 focus:ring-offset-2 focus:ring-offset-slate-50 dark:focus:ring-slate-800 dark:focus:ring-offset-slate-950'>
+        <MenuButton className='focus:ring-primary focus:ring-offset-background relative flex rounded-full text-sm focus:ring-2 focus:ring-offset-2 focus:outline-hidden'>
           <span className='sr-only'>Open user menu</span>
           {userProfile?.avatar ? (
             <Image
-              className='h-12 w-12 rounded-full'
+              className='size-10 rounded-full'
               src={userProfile.avatar}
               alt={
                 userProfile.name
@@ -59,15 +76,15 @@ export function UserProfile({
         leaveFrom='transform opacity-100 scale-100'
         leaveTo='transform opacity-0 scale-95'
       >
-        <MenuItems className='absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-slate-50 py-1 shadow-2xl shadow-slate-300 ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-slate-950 dark:shadow-slate-900 dark:ring-slate-800'>
+        <MenuItems className='bg-popover focus:outline-primary ring-ring shadow-secondary-foreground/5 absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md py-1 shadow-2xl ring-1 focus:outline-2 focus:outline-offset-4'>
           <MenuItem>
             <Link
               href='/favourites'
               className={cn(
-                'flex items-center space-x-2 px-4 py-2 text-base text-slate-700 data-[focus]:bg-slate-100 dark:text-slate-100 dark:data-[focus]:bg-slate-900'
+                'group data-focus:bg-accent text-accent-foreground flex items-center gap-x-3 px-3 py-2 text-sm'
               )}
             >
-              <HeartIcon className='h-5 w-5 text-slate-900 dark:text-white' />
+              <HeartIcon className='group-data-focus:text-primary size-5' />
               <span>Favourites</span>
             </Link>
           </MenuItem>
@@ -75,15 +92,29 @@ export function UserProfile({
             <Link
               href={`/user/${user.user_metadata.address}`}
               className={cn(
-                'flex items-center space-x-2 px-4 py-3 text-base text-slate-700 data-[focus]:bg-slate-100 dark:text-slate-100 dark:data-[focus]:bg-slate-900'
+                'group data-focus:bg-accent text-accent-foreground flex items-center gap-x-3 px-3 py-2 text-sm'
               )}
             >
-              <UserGroupIcon className='h-5 w-5 text-slate-900 dark:text-white' />
+              <UserGroupIcon className='group-data-focus:text-primary size-5' />
               <span>My Players</span>
             </Link>
           </MenuItem>
+          <MenuSeparator className='border-border my-1 border-t' />
           <MenuItem>
-            <LogoutButton />
+            <button
+              onClick={handleLogout}
+              aria-disabled={isPending}
+              className={cn(
+                'group data-focus:bg-accent text-accent-foreground flex w-full cursor-pointer items-center gap-x-3 px-3 py-2 text-sm'
+              )}
+            >
+              {isPending ? (
+                <SpinnerIcon className='size-5 animate-spin' />
+              ) : (
+                <ArrowRightStartOnRectangleIcon className='group-data-focus:text-primary size-5' />
+              )}
+              <span>Sign Out</span>
+            </button>
           </MenuItem>
         </MenuItems>
       </Transition>

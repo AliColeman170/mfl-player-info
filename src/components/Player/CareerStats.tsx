@@ -11,7 +11,7 @@ function CareerStatItemTitle({
   return (
     <dt
       title={title}
-      className='text-xs font-semibold uppercase leading-none text-slate-700 @[16rem]/inner:text-base dark:text-slate-400'
+      className='text-muted-foreground py-2 text-xs leading-none font-semibold uppercase @[16rem]/inner:text-base'
     >
       {children}
     </dt>
@@ -19,7 +19,7 @@ function CareerStatItemTitle({
 }
 function CareerStatItemValue({ children }: { children: React.ReactNode }) {
   return (
-    <dd className='text-right text-sm capitalize leading-none text-slate-700 @[16rem]/inner:text-base @sm/main:pt-2 @sm/main:text-center dark:text-slate-200'>
+    <dd className='py-3 text-right text-sm leading-none capitalize @[16rem]/inner:text-base @sm/main:py-4 @sm/main:text-center'>
       {children}
     </dd>
   );
@@ -27,7 +27,7 @@ function CareerStatItemValue({ children }: { children: React.ReactNode }) {
 
 function CareerStatItem({ children }: { children: React.ReactNode }) {
   return (
-    <div className='grid grid-cols-[2fr_1fr] items-center gap-y-2 py-3 @sm/main:grid-cols-1 @sm/main:divide-y @sm/main:divide-slate-200 @sm/main:dark:divide-slate-700'>
+    <div className='@sm/main:divide-border grid grid-cols-[2fr_1fr] items-center @sm/main:grid-cols-1 @sm/main:divide-y'>
       {children}
     </div>
   );
@@ -101,7 +101,7 @@ export async function CareerStats({ player }: { player: Player }) {
   return (
     <div className='col-span-3 col-start-1'>
       <h2 className='mb-1 text-lg font-bold @sm/main:hidden'>Career Stats</h2>
-      <dl className='grid grid-cols-1 divide-y divide-slate-200 @container/inner @sm/main:grid-flow-col-dense @sm/main:grid-cols-none @sm/main:divide-y-0 @sm/main:rounded-xl @sm/main:text-center @sm/main:shadow-2xl @sm/main:shadow-slate-300/20 @sm/main:ring-1 @sm/main:ring-slate-200 dark:divide-slate-700 @sm/main:dark:shadow-slate-900/20 @sm/main:dark:ring-slate-700'>
+      <dl className='divide-border @sm/main:ring-border @container/inner grid grid-cols-1 divide-y @sm/main:grid-flow-col-dense @sm/main:grid-cols-none @sm/main:divide-y-0 @sm/main:rounded-lg @sm/main:text-center @sm/main:ring-1'>
         <CareerStatItem>
           <CareerStatItemTitle title='Matches Played'>
             <span className='@sm/main:hidden'>Matches Played</span>

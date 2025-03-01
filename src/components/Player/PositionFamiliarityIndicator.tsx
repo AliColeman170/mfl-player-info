@@ -10,7 +10,7 @@ export function PositionFamiliarityIndicator({
 }) {
   if (positions.includes(player.metadata.positions[0])) {
     return (
-      <span className='inline-flex items-center justify-center rounded bg-indigo-600 px-2 py-1 text-[10px] leading-none text-white'>
+      <span className='inline-flex items-center justify-center rounded-sm bg-indigo-600 px-2 py-1 text-[10px] leading-none text-white'>
         P
       </span>
     );
@@ -20,7 +20,7 @@ export function PositionFamiliarityIndicator({
     positions.includes(player.metadata.positions[2])
   ) {
     return (
-      <span className='inline-flex items-center justify-center rounded bg-slate-300 px-2 py-1 text-[10px] leading-none text-slate-900'>
+      <span className='inline-flex items-center justify-center rounded-sm bg-slate-300 px-2 py-1 text-[10px] leading-none text-slate-900'>
         S
       </span>
     );
@@ -42,7 +42,7 @@ export function PositionalFamiliarityIndicator({
     return (
       <span
         title='Secondary'
-        className='inline-flex items-center justify-center rounded bg-lime-700 px-2 py-1 text-[10px] leading-none text-white'
+        className='inline-flex items-center justify-center rounded-sm bg-lime-700 px-2 py-1 text-[10px] leading-none text-white'
       >
         S
       </span>
@@ -56,7 +56,7 @@ export function PositionalFamiliarityIndicator({
     return (
       <span
         title='Unfamiliar'
-        className='inline-flex items-center justify-center rounded bg-red-700 px-2 py-1 text-[10px] leading-none text-white'
+        className='inline-flex items-center justify-center rounded-sm bg-red-700 px-2 py-1 text-[10px] leading-none text-white'
       >
         U
       </span>
@@ -70,7 +70,7 @@ export function PositionalFamiliarityIndicator({
     return (
       <span
         title='Somewhat Familiar'
-        className='inline-flex items-center justify-center rounded bg-amber-600 px-2 py-1 text-[10px] leading-none text-white'
+        className='inline-flex items-center justify-center rounded-sm bg-amber-600 px-2 py-1 text-[10px] leading-none text-white'
       >
         SF
       </span>
@@ -84,7 +84,7 @@ export function PositionalFamiliarityIndicator({
     return (
       <span
         title='Fairly Familiar'
-        className='inline-flex items-center justify-center rounded bg-yellow-500 px-2 py-1 text-[10px] leading-none text-white'
+        className='inline-flex items-center justify-center rounded-sm bg-yellow-500 px-2 py-1 text-[10px] leading-none text-white'
       >
         FF
       </span>
@@ -98,7 +98,7 @@ export function PositionalFamiliarityIndicator({
     return (
       <span
         title='Primary'
-        className='inline-flex items-center justify-center rounded bg-green-700 px-2 py-1 text-[10px] leading-none text-white'
+        className='inline-flex items-center justify-center rounded-sm bg-green-700 px-2 py-1 text-[10px] leading-none text-white'
       >
         P
       </span>

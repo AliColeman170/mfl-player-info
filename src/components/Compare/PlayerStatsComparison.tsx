@@ -46,36 +46,26 @@ export async function PlayerStatsComparison({
   };
 
   return (
-    <div className='col-span-2 mx-auto w-full transform rounded-xl bg-white p-4 shadow-2xl shadow-slate-300 ring-1 ring-slate-950 ring-opacity-5 sm:p-6 lg:p-8 dark:bg-slate-900 dark:shadow-slate-900 dark:ring-slate-800'>
-      <div className='grid divide-y divide-slate-200 dark:divide-slate-700'>
+    <div className='bg-card shadow-foreground/3 ring-border col-span-2 mx-auto w-full transform rounded-xl p-4 shadow-2xl ring-1 sm:p-6'>
+      <div className='divide-border -my-2 grid divide-y sm:-my-3'>
         {!isGKComparision &&
           stats.map((stat) => (
-            <div key={stat} className='grid grid-cols-3 gap-x-1.5 py-2 sm:p-2'>
+            <div key={stat} className='grid grid-cols-3 gap-x-1.5 py-2'>
               <div className='flex items-center gap-x-1.5 sm:gap-x-3'>
                 <StyledRatingValue rating={player1Stats[stat as StatKey]} />
-                <StarIcon
-                  className={cn(
-                    'h-4 w-4',
-                    player1Stats[stat as StatKey] >
-                      player2Stats[stat as StatKey]
-                      ? 'text-yellow-400'
-                      : 'text-white dark:text-slate-900'
-                  )}
-                />
+                {player1Stats[stat as StatKey] >
+                  player2Stats[stat as StatKey] && (
+                  <StarIcon className='size-4 text-yellow-400' />
+                )}
               </div>
-              <span className='flex items-center justify-center text-sm font-semibold uppercase leading-6 text-slate-700 sm:text-base dark:text-slate-400'>
+              <span className='text-muted-foreground flex items-center justify-center text-sm leading-6 font-semibold uppercase sm:text-base'>
                 {stat}
               </span>
               <div className='flex items-center justify-end gap-x-3'>
-                <StarIcon
-                  className={cn(
-                    'h-4 w-4',
-                    player2Stats[stat as StatKey] >
-                      player1Stats[stat as StatKey]
-                      ? 'text-yellow-400'
-                      : 'text-white dark:text-slate-900'
-                  )}
-                />
+                {player2Stats[stat as StatKey] >
+                  player1Stats[stat as StatKey] && (
+                  <StarIcon className='size-4 text-yellow-400' />
+                )}
                 <StyledRatingValue rating={player2Stats[stat as StatKey]} />
               </div>
             </div>
@@ -84,27 +74,17 @@ export async function PlayerStatsComparison({
           <div className='grid grid-cols-3 gap-x-1.5 py-2 sm:p-2'>
             <div className='flex items-center gap-x-1.5 sm:gap-x-3'>
               <StyledRatingValue rating={player1.metadata.goalkeeping} />
-              <StarIcon
-                className={cn(
-                  'h-4 w-4',
-                  player1.metadata.goalkeeping > player2.metadata.goalkeeping
-                    ? 'text-yellow-400'
-                    : 'text-white dark:text-slate-900'
-                )}
-              />
+              {player1.metadata.goalkeeping > player2.metadata.goalkeeping && (
+                <StarIcon className='size-4 text-yellow-400' />
+              )}
             </div>
-            <span className='flex items-center justify-center text-sm font-semibold uppercase leading-6 text-slate-700 sm:text-base dark:text-slate-400'>
+            <span className='text-muted-foreground flex items-center justify-center text-sm leading-6 font-semibold uppercase sm:text-base'>
               Goalkeeping
             </span>
             <div className='flex items-center justify-end gap-x-3'>
-              <StarIcon
-                className={cn(
-                  'h-4 w-4',
-                  player2.metadata.goalkeeping > player1.metadata.goalkeeping
-                    ? 'text-yellow-400'
-                    : 'text-white dark:text-slate-900'
-                )}
-              />
+              {player2.metadata.goalkeeping > player1.metadata.goalkeeping && (
+                <StarIcon className='size-4 text-yellow-400' />
+              )}
               <StyledRatingValue rating={player2.metadata.goalkeeping} />
             </div>
           </div>

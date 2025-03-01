@@ -38,26 +38,26 @@ export function FavouriteToggle({
   return (
     <div
       className={cn(
-        'relative inline-flex h-9 w-16 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-slate-200 transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 focus:ring-offset-slate-50 dark:bg-slate-800 dark:focus:ring-offset-slate-950',
+        'bg-secondary focus:ring-primary focus:ring-offset-background relative inline-flex h-9 w-16 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:ring-2 focus:ring-offset-2 focus:outline-hidden',
         enabled !== undefined && 'bg-indigo-600'
       )}
     >
       <span className='sr-only'>Filter Favourites</span>
-      <div className='absolute inset-0 flex h-full w-full items-center justify-center'>
-        <button className='flex h-full w-full' onClick={toggleNotFav}></button>
+      <div className='absolute inset-0 flex size-full items-center justify-center'>
+        <button className='flex size-full' onClick={toggleNotFav}></button>
         <button className='flex h-full w-8' onClick={toggleDisableFav}></button>
-        <button className='flex h-full w-full' onClick={toggleFav}></button>
+        <button className='flex size-full' onClick={toggleFav}></button>
       </div>
       <span
         className={cn(
-          'pointer-events-none relative inline-block h-8 w-8 translate-x-3.5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out',
+          'pointer-events-none relative inline-block size-8 translate-x-3.5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out',
           enabled === true && 'translate-x-7',
           enabled === false && 'translate-x-0'
         )}
       >
         <span
           className={cn(
-            'absolute inset-0 flex h-full w-full items-center justify-center opacity-0 transition-opacity duration-100 ease-out',
+            'absolute inset-0 flex size-full items-center justify-center opacity-0 transition-opacity duration-100 ease-out',
             enabled === false && 'opacity-100 duration-200 ease-in'
           )}
           aria-hidden='true'
@@ -78,7 +78,7 @@ export function FavouriteToggle({
         </span>
         <span
           className={cn(
-            'absolute inset-0 flex h-full w-full items-center justify-center opacity-0 transition-opacity duration-100 ease-out',
+            'absolute inset-0 flex size-full items-center justify-center opacity-0 transition-opacity duration-100 ease-out',
             enabled === undefined && 'opacity-100 duration-200 ease-in'
           )}
           aria-hidden='true'

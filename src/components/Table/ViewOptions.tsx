@@ -10,6 +10,7 @@ import { columnLabels } from './columns';
 
 import { Table } from '@tanstack/react-table';
 import { PlayerWithFavouriteData } from '@/types/global.types';
+import { Button } from '../UI/Button';
 
 export function ViewOptions({
   table,
@@ -24,19 +25,14 @@ export function ViewOptions({
       className={cn('relative inline-block text-left', className)}
     >
       <div>
-        <PopoverButton className='flex cursor-pointer items-center justify-center space-x-2.5 rounded-lg bg-slate-800 px-4 py-3 text-sm font-medium ring-1 ring-slate-950 ring-opacity-5 hover:bg-slate-900 dark:bg-slate-900 dark:ring-slate-800 dark:hover:bg-slate-900/60'>
-          {
-            <AdjustmentsHorizontalIcon
-              className='h-5 w-5 text-slate-50'
-              aria-hidden='true'
-            />
-          }
-          <span className='text-slate-200'>View</span>
+        <PopoverButton as={Button} size='lg'>
+          <AdjustmentsHorizontalIcon className='size-5' aria-hidden='true' />
+          View
         </PopoverButton>
       </div>
       <PopoverPanel
         anchor={{ to: 'bottom end' }}
-        className='relative z-20 mt-1 max-h-60 min-w-[12rem] overflow-auto rounded-lg bg-white py-1 text-sm shadow-lg ring-1 ring-slate-950 ring-opacity-5 focus:outline-none dark:bg-slate-950 dark:ring-slate-800'
+        className='bg-popover ring-border relative z-20 mt-1 max-h-60 min-w-[12rem] overflow-auto rounded-lg py-1 text-sm shadow-lg ring-1 focus:outline-hidden'
       >
         <div className='py-1'>
           {table
@@ -53,12 +49,12 @@ export function ViewOptions({
                       column.toggleVisibility(!column.getIsVisible());
                     }}
                     className={cn(
-                      `group flex w-full items-center px-4 py-2 capitalize hover:bg-slate-900 hover:text-white`
+                      `group hover:bg-accent flex w-full items-center px-4 py-2 capitalize`
                     )}
                   >
                     {column.getIsVisible() ? (
                       <CheckIcon
-                        className='mr-3 h-4 w-4 text-slate-400 group-hover:text-slate-200'
+                        className='text-primary mr-3 size-4 stroke-2'
                         aria-hidden='true'
                       />
                     ) : (

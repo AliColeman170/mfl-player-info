@@ -11,10 +11,10 @@ export async function PlayerTags({ player }: { player: Player }) {
 
   return (
     <div className='grid px-1 py-1.5 @[10rem]/inner:grid-cols-3 @[10rem]/inner:gap-8 @[16rem]/inner:px-0 @[16rem]/inner:py-2'>
-      <dt className='flex items-center space-x-2 text-xs font-semibold uppercase leading-none text-slate-700 @[16rem]/inner:text-base dark:text-slate-400'>
+      <dt className='text-muted-foreground flex items-center space-x-2 text-xs leading-none font-semibold uppercase @[16rem]/inner:text-base'>
         <span>Tags</span>
       </dt>
-      <dd className='col-span-2 flex items-center text-left text-sm capitalize leading-none text-slate-700 @[10rem]/inner:justify-end @[10rem]/inner:text-right @[16rem]/inner:text-base dark:text-slate-200'>
+      <dd className='col-span-2 flex items-center text-left text-sm leading-none capitalize @[10rem]/inner:justify-end @[10rem]/inner:text-right @[16rem]/inner:text-base'>
         <TagsList
           playerId={player.id}
           tags={favourite.tags}

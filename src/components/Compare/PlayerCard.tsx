@@ -16,7 +16,7 @@ export async function PlayerCard({
   return (
     <div
       className={cn(
-        `mx-auto w-full max-w-xl transform self-stretch rounded-xl bg-white p-4 shadow-2xl shadow-slate-300 ring-1 ring-slate-950 ring-opacity-5 @container/main sm:p-6 lg:p-8 dark:bg-slate-900 dark:shadow-slate-900 dark:ring-slate-800`,
+        `bg-card shadow-foreground/3 ring-border @container/main mx-auto w-full max-w-xl transform self-stretch rounded-xl p-4 shadow-2xl ring-1 sm:p-6`,
         className
       )}
     >
@@ -26,7 +26,7 @@ export async function PlayerCard({
         <Suspense
           fallback={
             <div className='col-span-3 flex justify-center py-2'>
-              <SpinnerIcon className='h-6 w-6 animate-spin text-slate-400' />
+              <SpinnerIcon className='text-muted h-6 w-6 animate-spin' />
             </div>
           }
         >

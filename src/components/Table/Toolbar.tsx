@@ -14,6 +14,7 @@ import Image from 'next/image';
 import { FavouriteToggle } from './FavouriteToggle';
 import { Table } from '@tanstack/react-table';
 import { PlayerWithFavouriteData } from '@/types/global.types';
+import { Button } from '../UI/Button';
 
 export function Toolbar({ table }: { table: Table<PlayerWithFavouriteData> }) {
   const [showFilterControls, setShowFilterControls] = useState(false);
@@ -100,20 +101,21 @@ export function Toolbar({ table }: { table: Table<PlayerWithFavouriteData> }) {
   return (
     <>
       <div className='mb-6 grid gap-4 md:grid-cols-2'>
-        <div className='relative z-10 flex items-center justify-between gap-x-3 md:order-2 md:justify-end'>
-          <div className='flex items-center md:flex-row-reverse'>
+        <div className='relative z-10 flex items-center justify-between gap-x-2 md:order-2 md:justify-end'>
+          <div className='flex items-center gap-x-2 md:flex-row-reverse'>
             <FilterOptions
               count={table.getState().columnFilters.length}
               handleClick={() => setShowFilterControls(!showFilterControls)}
             />
             {isFiltered && (
-              <button
+              <Button
+                variant='secondary'
+                size='lg'
                 onClick={() => table.resetColumnFilters()}
-                className='ml-3 flex cursor-pointer items-center justify-center space-x-2.5 rounded-lg bg-slate-100 px-4 py-3 text-sm font-medium ring-1 ring-slate-950 ring-opacity-5 hover:bg-slate-200 md:mr-3 dark:bg-slate-900 dark:ring-slate-800 dark:hover:bg-slate-900/60'
               >
-                <XMarkIcon className='mr-1.5 h-5 w-5' />
-                Reset
-              </button>
+                <XMarkIcon />
+                Clear All
+              </Button>
             )}
           </div>
           <ViewOptions table={table} />
@@ -123,7 +125,7 @@ export function Toolbar({ table }: { table: Table<PlayerWithFavouriteData> }) {
           <DebouncedInput
             value={table.getState().globalFilter ?? ''}
             onChange={(value) => table.setGlobalFilter(String(value))}
-            className='block w-full rounded-lg border-0 bg-white px-4 py-3 text-slate-900 shadow-2xl shadow-slate-200 ring-1 ring-slate-950 ring-opacity-5 placeholder:text-slate-400 focus:ring-0 dark:bg-slate-900 dark:text-white dark:shadow-slate-900 dark:ring-slate-800'
+            className='bg-card outline-border focus:outline-primary placeholder:text-muted block h-10 w-full rounded-lg px-4 py-3 text-sm outline-1 -outline-offset-1 focus:ring-0 focus:outline-2 focus:-outline-offset-2'
             placeholder='Search by name or id...'
           />
           <FacetedFilter
@@ -137,7 +139,7 @@ export function Toolbar({ table }: { table: Table<PlayerWithFavouriteData> }) {
         </div>
       </div>
       {showFilterControls && (
-        <div className='relative my-8 space-y-4 rounded-lg bg-white p-6 text-sm shadow-2xl shadow-slate-200 ring-1 ring-slate-950 ring-opacity-5 sm:p-8 dark:bg-slate-950 dark:shadow-slate-900 dark:ring-slate-800'>
+        <div className='bg-popover shadow-foreground/3 ring-border relative my-6 grid gap-y-4 rounded-lg p-6 text-sm shadow-2xl ring-1 sm:p-6'>
           <div className='grid grid-cols-12 gap-x-4 gap-y-4 sm:gap-x-6 md:gap-x-8'>
             <NumberFilter
               column={table.getColumn('overall')}

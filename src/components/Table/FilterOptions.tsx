@@ -1,5 +1,6 @@
 import { cn } from '@/utils/helpers';
 import { FunnelIcon } from '@heroicons/react/24/solid';
+import { Button } from '../UI/Button';
 
 export function FilterOptions({
   count,
@@ -12,15 +13,12 @@ export function FilterOptions({
 }) {
   return (
     <div className={cn(`relative`, className)}>
-      <button
-        onClick={() => handleClick()}
-        className='flex items-center justify-center space-x-2.5 rounded-lg bg-slate-800 px-4 py-3 text-sm font-medium ring-1 ring-slate-950 ring-opacity-5 hover:bg-slate-900 dark:bg-slate-900 dark:ring-slate-800 dark:hover:bg-slate-900/60'
-      >
-        {<FunnelIcon className='h-5 w-5 text-slate-50' aria-hidden='true' />}
-        <span className='text-slate-200'>Advanced</span>
-      </button>
+      <Button onClick={() => handleClick()} size='lg'>
+        <FunnelIcon className='size-5' aria-hidden='true' />
+        Advanced
+      </Button>
       {count > 0 && (
-        <div className='absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-indigo-500 text-xs font-semibold text-white'>
+        <div className='absolute -top-2 -right-2 flex size-5 items-center justify-center rounded-full bg-red-500 text-[11px] font-bold text-white'>
           {count}
         </div>
       )}

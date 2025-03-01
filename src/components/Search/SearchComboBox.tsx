@@ -51,12 +51,6 @@ export function SearchComboBox({
     }
   }, [query, handlePlayerChange]);
 
-  useEffect(() => {
-    if (selectedPlayer) {
-      handlePlayerChange(selectedPlayer.id);
-    }
-  }, [selectedPlayer, handlePlayerChange]);
-
   return (
     <Combobox
       disabled={isLoading}
@@ -64,17 +58,18 @@ export function SearchComboBox({
       onChange={(option) => {
         setQuery('');
         setSelectedPlayer(option);
+        if (option) handlePlayerChange(option.id);
       }}
       as='div'
     >
-      <div className='mx-auto w-full divide-y divide-slate-100 overflow-hidden rounded-xl bg-white shadow-2xl shadow-slate-300 ring-1 ring-slate-900 ring-opacity-5 dark:bg-slate-900 dark:shadow-slate-900 dark:ring-slate-800'>
+      <div className='bg-card outline-border focus-within:outline-primary shadow-foreground/5 mx-auto w-full overflow-hidden rounded-xl shadow-2xl outline-1 -outline-offset-1 focus-within:outline-2 focus-within:-outline-offset-2'>
         <div className='relative'>
-          <MagnifyingGlassIcon className='pointer-events-none absolute left-3 top-3 h-6 w-6 text-slate-400 sm:left-4 sm:top-4 sm:h-8 sm:w-8 dark:text-slate-600' />
+          <MagnifyingGlassIcon className='text-muted pointer-events-none absolute top-3 left-3 h-6 w-6 sm:top-4 sm:left-4 sm:h-8 sm:w-8' />
           <ComboboxInput
             defaultValue={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={placeholder}
-            className='h-12 w-full border-0 bg-transparent pl-12 pr-4 text-lg text-slate-900 placeholder:text-slate-400 focus:ring-0 disabled:text-opacity-50 sm:h-16 sm:pl-16 sm:text-xl dark:text-slate-400'
+            className='disabled:text-opacity-50 text-foreground placeholder:text-muted h-12 w-full bg-transparent pr-4 pl-12 text-lg sm:h-16 sm:pl-16 sm:text-xl'
             displayValue={() => {
               if (selectedPlayer) return `${selectedPlayer.id}`;
               if (id) return id.toString();
@@ -83,17 +78,17 @@ export function SearchComboBox({
             autoFocus={autofocus}
           />
           {(isSearching || isLoading) && (
-            <SpinnerIcon className='absolute right-4 top-3 h-6 w-6 animate-spin text-slate-400 sm:right-5 sm:top-5' />
+            <SpinnerIcon className='text-muted absolute top-3 right-4 h-6 w-6 animate-spin sm:top-5 sm:right-5' />
           )}
         </div>
       </div>
 
       {filteredOptions && (
-        <ComboboxOptions className='absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-lg bg-white py-1 text-base shadow-xl shadow-slate-200 ring-1 ring-slate-950 ring-opacity-5 focus:outline-none dark:bg-slate-950 dark:shadow-slate-900 dark:ring-slate-800'>
+        <ComboboxOptions className='bg-popover shadow-foreground/5 ring-ring absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-lg py-1 text-base shadow-xl ring-1 focus:outline-hidden'>
           {filteredOptions.length === 0 &&
           query !== '' &&
           !isPositiveInteger(+query) ? (
-            <div className='relative cursor-default select-none py-5 pl-6 pr-9 text-slate-900 dark:text-slate-50'>
+            <div className='text-popover-foreground relative cursor-default py-5 pr-9 pl-6 select-none'>
               No players found.
             </div>
           ) : (
@@ -101,16 +96,9 @@ export function SearchComboBox({
               <ComboboxOption
                 key={option.id}
                 value={option}
-                className={({ active }) => {
-                  return cn(
-                    'relative cursor-default select-none py-2 pl-4 pr-9 focus:outline-none',
-                    active
-                      ? 'bg-slate-50 text-slate-950 dark:bg-slate-900 dark:text-white'
-                      : 'text-slate-900 dark:text-slate-50'
-                  );
-                }}
+                className='group data-active:bg-accent data-active:text-accent-foreground relative cursor-default py-2 pr-9 pl-4 select-none focus:outline-hidden'
               >
-                {({ active, selected }) => (
+                {() => (
                   <>
                     <div className='flex items-center space-x-3'>
                       <Image
@@ -125,23 +113,20 @@ export function SearchComboBox({
                       <div
                         className={cn(
                           'block truncate',
-                          selected ? 'font-semibold' : 'font-normal'
+                          option.id === id ? 'font-semibold' : 'font-normal'
                         )}
                       >
                         {`${option.metadata.firstName} ${option.metadata.lastName}`}
                       </div>
                     </div>
-                    {selected && (
+                    {option.id === id && (
                       <span
-                        className={cn(
-                          'absolute inset-y-0 right-0 flex items-center pr-4',
-                          active
-                            ? 'text-indigo-600 dark:text-white'
-                            : 'text-indigo-500 dark:text-slate-100'
-                        )}
+                        className={
+                          'group-data-active:text-primary absolute inset-y-0 right-0 flex items-center pr-4'
+                        }
                       >
                         <svg
-                          className='h-5 w-5'
+                          className='size-5'
                           viewBox='0 0 20 20'
                           fill='currentColor'
                         >

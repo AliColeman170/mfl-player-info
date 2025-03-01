@@ -1,4 +1,3 @@
-import { Table } from '../Table';
 import { getPlayerPositionRatings } from '@/utils/helpers';
 import { getFavourites } from '@/data/favourites';
 import { getPlayerById } from '@/data/players';

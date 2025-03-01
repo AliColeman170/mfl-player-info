@@ -66,10 +66,10 @@ export default async function UserPage({ params }: Props) {
   return (
     <div className='mt-4'>
       {user ? (
-        <div className='flex items-start space-x-3 sm:space-x-4'>
+        <div className='flex items-start gap-x-3 sm:gap-x-4'>
           {user.avatar && (
             <Image
-              className='h-10 w-10 rounded-full sm:h-12 sm:w-12'
+              className='size-10 rounded-full sm:size-12'
               src={user.avatar}
               width={745}
               height={745}
@@ -91,17 +91,17 @@ export default async function UserPage({ params }: Props) {
                   ? user.discordUser?.username
                   : user.walletAddress}
             </h1>
-            <div className='flex items-center space-x-2'>
-              <div className='inline-flex items-center space-x-2 rounded-md bg-indigo-600 px-3 py-1 text-white'>
-                <WalletIcon className='h-4 w-4' />
-                <span className='text-xs'>{address}</span>
+            <div className='flex items-center gap-x-2'>
+              <div className='bg-primary inline-flex items-center gap-x-2 rounded-md px-2.5 py-1 text-white'>
+                <WalletIcon className='size-3.5' />
+                <span className='text-[11px]'>{address}</span>
               </div>
               <Link
                 href={`https://app.playmfl.com/users/${address}`}
-                className='flex items-center space-x-1 rounded-md bg-slate-800 px-2 text-white ring-1 ring-slate-950 ring-opacity-5 hover:bg-slate-900 dark:bg-slate-900 dark:ring-slate-800 dark:hover:bg-slate-900/60'
+                className='bg-secondary outline-border text-foreground flex items-center gap-x-1 rounded-md px-2 outline-1 -outline-offset-1'
               >
-                <ArrowTopRightOnSquareIcon className='h-3.5 w-3.5' />
-                <MFLIcon className='h-6 w-6' />
+                <ArrowTopRightOnSquareIcon className='size-3.5' />
+                <MFLIcon className='size-6' />
               </Link>
             </div>
           </div>

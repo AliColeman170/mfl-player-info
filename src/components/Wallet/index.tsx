@@ -1,4 +1,4 @@
-import ConnectButton from './ConnectButton';
+import { ConnectButton } from './ConnectButton';
 import { UserProfile } from './UserProfile';
 import { createClient } from '@/utils/supabase/server';
 import { getUser } from '@/data/auth';

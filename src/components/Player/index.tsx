@@ -12,14 +12,14 @@ export default function Player({ player }: { player: Player }) {
   const isGoalkeeper = player.metadata.positions.includes('GK');
 
   return (
-    <div className='mx-auto w-full max-w-xl transform rounded-xl bg-white p-4 shadow-2xl shadow-slate-300 ring-1 ring-slate-950 ring-opacity-5 @container/main sm:p-6 lg:p-8 dark:bg-slate-900 dark:shadow-slate-900 dark:ring-slate-800'>
+    <div className='bg-card shadow-foreground/5 outline-border @container/main mx-auto w-full max-w-xl transform rounded-xl p-4 shadow-2xl outline-1 -outline-offset-1 sm:p-6 lg:p-8'>
       <div className='grid grid-cols-1 gap-y-8 @sm/main:grid-cols-3 @sm/main:items-center @sm/main:gap-8'>
         <ImageCard player={player} />
         <BasicInfo player={player} />
         <Suspense
           fallback={
             <div className='col-span-3 flex justify-center py-2'>
-              <SpinnerIcon className='h-6 w-6 animate-spin text-slate-400' />
+              <SpinnerIcon className='text-muted size-6 animate-spin' />
             </div>
           }
         >
@@ -31,7 +31,7 @@ export default function Player({ player }: { player: Player }) {
       <Suspense
         fallback={
           <div className='flex justify-center py-8'>
-            <SpinnerIcon className='h-6 w-6 animate-spin text-slate-400' />
+            <SpinnerIcon className='text-muted size-6 animate-spin' />
           </div>
         }
       >
