@@ -4,13 +4,17 @@ export function Footer() {
   return (
     <footer className='mx-auto mt-8 w-full max-w-xl px-6 py-8 text-center lg:px-8'>
       <div className='flex items-center justify-center space-x-3'>
-        <Link href={process.env.NEXT_BUY_ME_A_COFFEE_URL!} target='_blank'>
+        <Link
+          href={process.env.NEXT_BUY_ME_A_COFFEE_URL!}
+          target='_blank'
+          className='text-muted-foreground/80 hover:text-muted-foreground/70'
+        >
           <svg
             width='884'
             height='1279'
             viewBox='0 0 884 1279'
             fill='currentColor'
-            className='h-7 w-7 text-slate-500 hover:text-slate-400'
+            className='size-7'
           >
             <path
               fill='#FFDD00'
@@ -21,14 +25,10 @@ export function Footer() {
         </Link>
         <Link
           href='https://github.com/AliColeman170/mfl-player-info'
-          className='inline-flex'
+          className='text-muted-foreground/80 hover:text-muted-foreground/70 inline-flex'
           target='_blank'
         >
-          <svg
-            viewBox='0 0 24 24'
-            aria-hidden='true'
-            className='h-8 w-8 text-slate-500 hover:text-slate-400'
-          >
+          <svg viewBox='0 0 24 24' aria-hidden='true' className='size-8'>
             <path
               fill='currentColor'
               fillRule='evenodd'
@@ -38,12 +38,12 @@ export function Footer() {
           </svg>
         </Link>
       </div>
-      <p className='mt-2 text-sm text-slate-600'>
+      <p className='text-muted-foreground mt-2 text-sm'>
         Built by{' '}
         <Link
           href='https://twitter.com/alicoleman170'
           target='_blank'
-          className='text-slate-500 hover:text-slate-400'
+          className='text-muted-foreground/80 hover:text-muted-foreground/70'
         >
           @AliColeman170
         </Link>

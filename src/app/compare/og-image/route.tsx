@@ -83,7 +83,7 @@ export async function GET(req: NextRequest) {
                 }
               />
               {!player1 && (
-                <div tw="absolute bottom-4 left-1/2 -ml-12 text-white text-6xl shadow-sm font-bold">
+                <div tw="absolute bottom-4 left-1/2 -ml-12 text-white text-6xl shadow-xs font-bold">
                   ???
                 </div>
               )}
@@ -102,7 +102,7 @@ export async function GET(req: NextRequest) {
                 }
               />
               {!player2 && (
-                <div tw="absolute bottom-4 left-1/2 -ml-12 text-white text-6xl shadow-sm font-bold">
+                <div tw="absolute bottom-4 left-1/2 -ml-12 text-white text-6xl shadow-xs font-bold">
                   ???
                 </div>
               )}

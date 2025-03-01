@@ -21,8 +21,8 @@ export function PositionRatingsComparison({
   if (isGKComparision) return null;
 
   return (
-    <div className='col-span-2 mx-auto w-full transform rounded-xl bg-white p-4 shadow-2xl shadow-slate-300 ring-1 ring-slate-950 ring-opacity-5 sm:p-6 lg:p-8 dark:bg-slate-900 dark:shadow-slate-900 dark:ring-slate-800'>
-      <div className='grid divide-y divide-slate-200 dark:divide-slate-700'>
+    <div className='bg-card shadow-foreground/3 ring-border ring-opacity-5 col-span-2 mx-auto w-full transform rounded-xl p-4 shadow-2xl ring-1 sm:p-6'>
+      <div className='divide-border -my-2 grid divide-y sm:-my-3'>
         {player1PositionRatings.map(({ positions }, index) => {
           if (
             positions.includes('GK') &&
@@ -33,7 +33,7 @@ export function PositionRatingsComparison({
           return (
             <div
               key={index}
-              className='grid grid-cols-[auto_1fr_auto] gap-x-1.5 py-2 sm:p-2'
+              className='grid grid-cols-[auto_1fr_auto] gap-x-1.5 py-2'
             >
               <div className='flex items-center justify-start gap-x-1.5 sm:gap-x-3'>
                 <StyledRatingValue
@@ -43,7 +43,7 @@ export function PositionRatingsComparison({
                   difference={player1PositionRatings[index].difference}
                 />
               </div>
-              <div className='grid grid-cols-[1fr_3fr_1fr] items-center gap-x-1.5 space-x-2 text-center text-sm font-semibold uppercase leading-6 text-slate-700 sm:gap-x-8 sm:text-base dark:text-slate-400'>
+              <div className='text-muted-foreground grid grid-cols-[1fr_3fr_1fr] items-center gap-x-1.5 space-x-2 text-center text-sm leading-6 font-semibold uppercase sm:gap-x-8 sm:text-base'>
                 <div className='flex justify-end'>
                   <PositionFamiliarityIndicator
                     positions={player1PositionRatings[index].positions}

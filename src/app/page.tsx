@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function Home() {
   return (
-    <div className='flex h-full flex-1 flex-col items-center justify-start space-y-8'>
+    <div className='flex h-full flex-1 flex-col items-center justify-start gap-y-8'>
       <ComboSearch key='search' autofocus={true} />
     </div>
   );

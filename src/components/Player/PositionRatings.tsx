@@ -21,6 +21,8 @@ import { StyledRatingValue } from './StyledRatingValue';
 import { positionalFamiliarity } from '@/config';
 import { Cog8ToothIcon } from '@heroicons/react/24/outline';
 import type { Player, PlayerStats, StatKey } from '@/types/global.types';
+import { Button } from '../UI/Button';
+import { ChevronDownIcon } from '@heroicons/react/20/solid';
 
 export const DifferenceBadge = ({ difference }: { difference: number }) => {
   let colorClass = '';
@@ -124,16 +126,16 @@ export function PositionRatings({ player }: { player: Player }) {
       </div>
 
       <div className='mt-8'>
-        <div className='flex items-center justify-between pr-1.5 sm:pr-2'>
-          <h2 className='text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl dark:text-slate-200'>
+        <div className='flex items-center justify-between'>
+          <h2 className='text-2xl font-bold tracking-tight sm:text-3xl'>
             Position Ratings
           </h2>
           <Popover className='relative'>
-            <PopoverButton className='cursor-pointer rounded-lg bg-slate-100 px-4 py-3 ring-1 ring-slate-950 ring-opacity-5 hover:bg-slate-200 dark:bg-slate-900 dark:ring-slate-800 dark:hover:bg-slate-900/60'>
-              <Cog8ToothIcon className='h-5 w-5' />
+            <PopoverButton as={Button} variant='outline' size='lg'>
+              <Cog8ToothIcon />
             </PopoverButton>
 
-            <PopoverPanel className='absolute right-0 z-10 mt-1 w-60 space-y-4 rounded-lg bg-white p-4 text-sm shadow-2xl shadow-slate-200 ring-1 ring-slate-950 ring-opacity-5 dark:bg-slate-950 dark:shadow-slate-900 dark:ring-slate-800'>
+            <PopoverPanel className='bg-popover shadow-foreground/5 ring-border absolute right-0 z-10 mt-1 w-60 space-y-4 rounded-lg p-4 text-sm shadow-2xl ring-1'>
               <div className='grid grid-cols-1 gap-y-4'>
                 <div className='flex items-center justify-between gap-x-3'>
                   <label
@@ -147,17 +149,15 @@ export function PositionRatings({ player }: { player: Player }) {
                     checked={isTrainingMode}
                     onChange={handleToggleSwitch}
                     className={cn(
-                      isTrainingMode
-                        ? 'bg-indigo-600'
-                        : 'bg-slate-300 dark:bg-slate-800',
-                      'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 dark:focus:ring-offset-slate-900'
+                      isTrainingMode ? 'bg-primary' : 'bg-secondary',
+                      'focus:ring-primary focus:ring-offset-popover relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:ring-2 focus:ring-offset-2 focus:outline-hidden'
                     )}
                   >
                     <span
                       aria-hidden='true'
                       className={cn(
                         isTrainingMode ? 'translate-x-5' : 'translate-x-0',
-                        'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out'
+                        'pointer-events-none inline-block size-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out'
                       )}
                     />
                   </Switch>
@@ -165,7 +165,7 @@ export function PositionRatings({ player }: { player: Player }) {
                 <div className='flex items-center justify-between gap-x-3'>
                   <label
                     htmlFor='training-toggle'
-                    className='text-nowrap text-sm font-semibold'
+                    className='text-sm font-semibold text-nowrap'
                   >
                     Pos. Familiarity
                   </label>
@@ -175,9 +175,9 @@ export function PositionRatings({ player }: { player: Player }) {
                     onChange={setEnablePositionalFamiliarity}
                     className={cn(
                       enablePositionalFamiliarity
-                        ? 'bg-indigo-600'
-                        : 'bg-slate-300 dark:bg-slate-800',
-                      'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 dark:focus:ring-offset-slate-900'
+                        ? 'bg-primary'
+                        : 'bg-secondary',
+                      'focus:ring-primary focus:ring-offset-popover relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:ring-2 focus:ring-offset-2 focus:outline-hidden'
                     )}
                   >
                     <span
@@ -186,7 +186,7 @@ export function PositionRatings({ player }: { player: Player }) {
                         enablePositionalFamiliarity
                           ? 'translate-x-5'
                           : 'translate-x-0',
-                        'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out'
+                        'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out'
                       )}
                     />
                   </Switch>
@@ -194,7 +194,7 @@ export function PositionRatings({ player }: { player: Player }) {
                 <div className='flex items-center justify-between gap-x-3'>
                   <label
                     htmlFor='training-toggle'
-                    className='text-nowrap text-right text-sm font-semibold'
+                    className='text-right text-sm font-semibold text-nowrap'
                   >
                     Make Captain
                   </label>
@@ -203,17 +203,15 @@ export function PositionRatings({ player }: { player: Player }) {
                     checked={isCaptain}
                     onChange={setIsCaptain}
                     className={cn(
-                      isCaptain
-                        ? 'bg-indigo-600'
-                        : 'bg-slate-300 dark:bg-slate-800',
-                      'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 dark:focus:ring-offset-slate-900'
+                      isCaptain ? 'bg-primary' : 'bg-secondary',
+                      'focus:ring-primary focus:ring-offset-popover relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:ring-2 focus:ring-offset-2 focus:outline-hidden'
                     )}
                   >
                     <span
                       aria-hidden='true'
                       className={cn(
                         isCaptain ? 'translate-x-5' : 'translate-x-0',
-                        'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out'
+                        'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out'
                       )}
                     />
                   </Switch>
@@ -222,105 +220,99 @@ export function PositionRatings({ player }: { player: Player }) {
                   <div className='flex items-center justify-between gap-x-3'>
                     <label
                       htmlFor='captainPosition'
-                      className='text-nowrap text-right text-sm font-semibold'
+                      className='text-right text-sm font-semibold text-nowrap'
                     >
                       Captain Pos.
                     </label>
-                    <select
-                      id='captainPosition'
-                      name='captainPosition'
-                      className='block w-auto rounded-md border-0 bg-white py-1.5 pl-3 pr-10 text-slate-900 shadow-2xl shadow-slate-200 ring-1 ring-slate-950 ring-opacity-5 placeholder:text-slate-400 focus:ring-0 dark:bg-slate-900 dark:text-white dark:shadow-slate-900 dark:ring-slate-800'
-                      value={captainPosition}
-                      onChange={(e) => setCaptainPosition(e.target.value)}
-                    >
-                      <option value=''></option>
-                      {positionalFamiliarity.map((pos) => (
-                        <option
-                          key={pos.primaryPosition}
-                          value={pos.primaryPosition}
-                        >
-                          {pos.primaryPosition}
-                        </option>
-                      ))}
-                    </select>
+                    <div className='grid grid-cols-1'>
+                      <select
+                        id='captainPosition'
+                        name='captainPosition'
+                        className='focus:outline-primary bg-card outline-border col-start-1 row-start-1 w-full appearance-none rounded-md py-1.5 pr-8 pl-3 text-base outline-1 -outline-offset-1 focus:outline-2 focus:-outline-offset-2'
+                        value={captainPosition}
+                        onChange={(e) => setCaptainPosition(e.target.value)}
+                      >
+                        <option value=''></option>
+                        {positionalFamiliarity.map((pos) => (
+                          <option
+                            key={pos.primaryPosition}
+                            value={pos.primaryPosition}
+                          >
+                            {pos.primaryPosition}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDownIcon
+                        aria-hidden='true'
+                        className='pointer-events-none col-start-1 row-start-1 mr-2 size-5 self-center justify-self-end text-gray-500 sm:size-4'
+                      />
+                    </div>
                   </div>
                 )}
               </div>
             </PopoverPanel>
           </Popover>
         </div>
-        <div className='mt-5 flow-root'>
-          <div className='-my-2 overflow-x-auto'>
-            <div className='inline-block min-w-full align-middle'>
-              <table className='min-w-full divide-y divide-slate-300 dark:divide-slate-700'>
-                <tbody className='divide-y divide-slate-200 dark:divide-slate-700'>
-                  {enablePositionalFamiliarity ? (
-                    <>
-                      {playerPositionFamiliarityRatings.map(
-                        ({ position, rating, difference }) => {
-                          if (
-                            position === 'GK' &&
-                            !player.metadata.positions.includes('GK')
-                          )
-                            return null;
-                          return (
-                            <tr key={position}>
-                              <td className='w-full whitespace-nowrap px-1.5 py-4 text-left font-medium text-slate-700 sm:px-2 sm:py-5 sm:pl-1 dark:text-slate-200'>
-                                <div className='flex items-center space-x-3'>
-                                  <span className='text-sm sm:text-base'>
-                                    {position}
-                                  </span>
-                                  <PositionalFamiliarityIndicator
-                                    player={player}
-                                    position={position}
-                                  />
-                                </div>
-                              </td>
-                              <td className='flex items-center space-x-3 whitespace-nowrap px-1.5 py-2.5 text-center font-medium text-slate-500 sm:px-2 dark:text-slate-200'>
-                                <DifferenceBadge difference={difference} />
-                                <StyledRatingValue rating={rating} />
-                              </td>
-                            </tr>
-                          );
-                        }
-                      )}
-                    </>
-                  ) : (
-                    <>
-                      {positionRatings.map(
-                        ({ positions, rating, difference }) => {
-                          if (
-                            positions.includes('GK') &&
-                            !player.metadata.positions.includes('GK')
-                          )
-                            return null;
-                          return (
-                            <tr key={positions.join('-')}>
-                              <td className='w-full whitespace-nowrap px-1.5 py-4 text-left font-medium text-slate-700 sm:px-2 sm:py-5 sm:pl-1 dark:text-slate-200'>
-                                <div className='flex items-center space-x-3'>
-                                  <span className='text-sm sm:text-base'>
-                                    {positions.join(' / ')}
-                                  </span>
-                                  <PositionFamiliarityIndicator
-                                    player={player}
-                                    positions={positions}
-                                  />
-                                </div>
-                              </td>
-                              <td className='flex items-center space-x-3 whitespace-nowrap px-1.5 py-2.5 text-center font-medium text-slate-500 sm:px-2 dark:text-slate-200'>
-                                <DifferenceBadge difference={difference} />
-                                <StyledRatingValue rating={rating} />
-                              </td>
-                            </tr>
-                          );
-                        }
-                      )}
-                    </>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
+        <div className='divide-border mt-5 grid divide-y'>
+          {enablePositionalFamiliarity ? (
+            <>
+              {playerPositionFamiliarityRatings.map(
+                ({ position, rating, difference }) => {
+                  if (
+                    position === 'GK' &&
+                    !player.metadata.positions.includes('GK')
+                  ) {
+                    return null;
+                  }
+                  return (
+                    <div key={position} className='grid grid-cols-2 py-1.5'>
+                      <div className='flex items-center gap-3'>
+                        <span className='text-sm sm:text-base'>{position}</span>
+                        <PositionalFamiliarityIndicator
+                          player={player}
+                          position={position}
+                        />
+                      </div>
+                      <div className='flex items-center justify-end gap-3 text-center font-medium whitespace-nowrap'>
+                        <DifferenceBadge difference={difference} />
+                        <StyledRatingValue rating={rating} />
+                      </div>
+                    </div>
+                  );
+                }
+              )}
+            </>
+          ) : (
+            <>
+              {positionRatings.map(({ positions, rating, difference }) => {
+                if (
+                  positions.includes('GK') &&
+                  !player.metadata.positions.includes('GK')
+                )
+                  return null;
+                return (
+                  <div
+                    key={positions.join('-')}
+                    className='grid grid-cols-2 py-1.5'
+                  >
+                    <div className='flex w-full items-center gap-3 text-left font-medium whitespace-nowrap'>
+                      <span className='text-sm sm:text-base'>
+                        {positions.join(' / ')}
+                      </span>
+                      <PositionFamiliarityIndicator
+                        player={player}
+                        positions={positions}
+                      />
+                    </div>
+                    <div className='flex items-center justify-end gap-3 text-center font-medium whitespace-nowrap'>
+                      <DifferenceBadge difference={difference} />
+                      <StyledRatingValue rating={rating} />
+                    </div>
+                  </div>
+                );
+              })}
+            </>
+          )}
         </div>
       </div>
     </>

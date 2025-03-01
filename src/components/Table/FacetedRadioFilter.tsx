@@ -20,15 +20,13 @@ export function FacetedRadioFilter({
   return (
     <div className={cn('w-full', className)}>
       <div className='flex items-center justify-between'>
-        <h2 className='block text-sm font-semibold leading-6 text-slate-900 dark:text-slate-50'>
-          {label}
-        </h2>
+        <h2 className='block text-xs/5 font-semibold'>{label}</h2>
         <button
           onClick={() => {
             setValue('');
             column?.setFilterValue(undefined);
           }}
-          className='text-indigo-500'
+          className='text-primary text-sm'
         >
           Clear
         </button>
@@ -49,9 +47,9 @@ export function FacetedRadioFilter({
               <Radio
                 value={option.value}
                 className={cn(
-                  'flex cursor-pointer items-center justify-center rounded-lg border-0 bg-white px-4 py-3 text-sm font-semibold text-slate-900 shadow-2xl shadow-slate-200 ring-1 ring-slate-900 ring-opacity-5 hover:bg-slate-50 focus:outline-none focus:ring-0 sm:flex-1 dark:bg-slate-900 dark:text-slate-100 dark:shadow-slate-900 dark:ring-slate-800 dark:hover:bg-slate-950',
-                  'ring-inset data-[checked]:text-slate-950 data-[checked]:ring-2 data-[checked]:ring-indigo-600 hover:data-[checked]:bg-slate-50 dark:data-[checked]:text-white dark:hover:data-[checked]:bg-slate-950',
-                  'data-[focus]:ring-1 data-[focus]:ring-indigo-600'
+                  'bg-card hover:bg-accent text-foreground/80 focus:outline-primary outline-border flex cursor-pointer items-center justify-center rounded-lg border-0 px-4 py-3 text-sm font-medium outline-1 -outline-offset-1 focus:outline-2 focus:-outline-offset-2 sm:flex-1',
+                  'data-checked:text-foreground data-checked:outline-primary hover:data-checked:bg-accent data-checked:outline-2 data-checked:-outline-offset-2',
+                  'data-focus:outline-primary data-focus:outline-2 data-focus:-outline-offset-2'
                 )}
               >
                 <Label as='span'>{option.label}</Label>

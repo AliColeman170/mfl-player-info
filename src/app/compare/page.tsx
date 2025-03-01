@@ -76,7 +76,7 @@ export default async function ComparePage({
   const player2Id = (await searchParams).player2;
 
   return (
-    <div className='flex h-full flex-1 flex-col items-center justify-start space-y-4 md:space-y-8'>
+    <div className='flex h-full flex-1 flex-col items-center justify-start gap-y-4 md:gap-y-8'>
       <ComparePlayerSearch
         key={`player1=${player1Id}&player2=${player2Id}`}
         player1={player1Id}

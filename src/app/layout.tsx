@@ -63,7 +63,9 @@ export default async function RootLayout({
 
   return (
     <html lang='en'>
-      <body className={`${inter.className} flex min-h-screen flex-col`}>
+      <body
+        className={`${inter.className} bg-background text-foreground flex min-h-screen flex-col`}
+      >
         <UserProvider serverUser={user} userProfile={userProfile}>
           <Header />
           <main className='mx-auto w-full max-w-7xl flex-1 px-4 sm:px-6 lg:px-8'>

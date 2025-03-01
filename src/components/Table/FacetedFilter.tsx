@@ -11,6 +11,7 @@ import { ChevronDownIcon } from '@heroicons/react/24/solid';
 import { ReactNode, useState } from 'react';
 import { PlayerWithFavouriteData } from '@/types/global.types';
 import { Column } from '@tanstack/react-table';
+import { CheckIcon } from '@heroicons/react/20/solid';
 
 export function FacetedFilter({
   column,
@@ -61,14 +62,14 @@ export function FacetedFilter({
       >
         <div className='flex items-center justify-between'>
           {label && (
-            <Label className='block text-sm font-semibold leading-6 text-slate-900 dark:text-slate-50'>
+            <Label htmlFor={label} className='block text-xs/5 font-semibold'>
               {label}
             </Label>
           )}
           {showClear && (
             <button
               onClick={() => column?.setFilterValue(undefined)}
-              className='text-indigo-500'
+              className='text-primary text-sm'
             >
               Clear
             </button>
@@ -76,8 +77,9 @@ export function FacetedFilter({
         </div>
 
         <div className={cn(`relative`, label && 'mt-1')}>
-          <div className='relative flex flex-row overflow-hidden rounded-lg bg-white shadow-2xl shadow-slate-200 ring-1 ring-slate-900 ring-opacity-5 dark:bg-slate-900 dark:shadow-slate-900 dark:ring-slate-800'>
+          <div className='bg-card outline-border focus-within:outline-primary relative flex flex-row overflow-hidden rounded-lg outline-1 -outline-offset-1 focus-within:outline-2 focus-within:-outline-offset-2'>
             <ComboboxInput
+              id={label}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={
@@ -85,67 +87,52 @@ export function FacetedFilter({
                   ? `${selectedValues.length} Selected`
                   : placeholder
               }
-              className='block w-full rounded-lg border-0 bg-white px-3 py-3 text-slate-900 placeholder:text-slate-400 focus:ring-0 dark:bg-slate-900 dark:text-white'
+              className={cn(
+                'placeholder:text-muted block h-10 w-full rounded-lg px-4 py-3 text-sm outline-none',
+                selectedValues.length && 'placeholder:text-foreground'
+              )}
             />
-            <ComboboxButton className='cursor-default border-l border-slate-100 px-1 focus:outline-none dark:border-slate-800'>
+            <ComboboxButton className='border-border cursor-default border-l px-1 focus:outline-hidden'>
               <span className='pointer-events-none flex items-center px-2'>
-                <ChevronDownIcon className='h-5 w-5' />
+                <ChevronDownIcon className='size-5' />
               </span>
             </ComboboxButton>
           </div>
 
           <ComboboxOptions
             anchor={{ to: 'bottom start', gap: 8 }}
-            className='relative max-h-60 w-[calc(var(--input-width)_+_var(--button-width))] overflow-auto rounded-lg bg-white py-1 text-sm shadow-xl shadow-slate-200 ring-1 ring-slate-950 ring-opacity-5 focus:outline-none dark:bg-slate-950 dark:shadow-slate-900 dark:ring-slate-800'
+            className='bg-popover shadow-foreground/3 ring-border relative max-h-60 w-[calc(var(--input-width)_+_var(--button-width))] overflow-auto rounded-lg py-1 text-sm shadow-xl ring-1 focus:outline-hidden'
           >
             {filteredOptions?.map((option) => (
               <ComboboxOption
                 key={option.value}
                 value={option.value}
                 className={cn(
-                  'group relative cursor-default select-none py-2 pl-4 pr-9 text-slate-900 focus:outline-none dark:text-slate-50',
-                  'data-[focus]:bg-slate-50 data-[focus]:text-slate-950 dark:data-[focus]:bg-slate-900 dark:data-[focus]:text-white'
+                  'group relative cursor-default py-2 pr-9 pl-4 select-none focus:outline-hidden',
+                  'data-focus:bg-accent'
                 )}
               >
                 {({ selected }) => (
-                  <>
-                    <div className='flex items-center space-x-3'>
-                      {option.icon && option.icon}
-                      <div
-                        className={cn(
-                          'block truncate font-normal',
-                          'group-data-[selected]:font-semibold'
-                        )}
-                      >
-                        {option.label}
-                      </div>
-                      {showCount && facets?.get(option.value) && (
-                        <span className='ml-auto flex h-4 w-4 items-center justify-center'>
-                          ({facets.get(option.value)})
-                        </span>
+                  <div className='flex items-center gap-x-3'>
+                    {option.icon && option.icon}
+                    <div
+                      className={cn(
+                        'block truncate font-normal',
+                        'group-data-selected:font-semibold'
                       )}
+                    >
+                      {`${option.label} ${showCount && `(${facets?.get(option.value)})`}`}
                     </div>
                     {selected && (
                       <span
                         className={cn(
-                          'absolute inset-y-0 right-0 flex items-center pr-4 text-indigo-500 dark:text-slate-100',
-                          'group-data-[focus]:text-indigo-600 dark:group-data-[focus]:text-white'
+                          'text-primary absolute inset-y-0 right-0 flex items-center pr-4'
                         )}
                       >
-                        <svg
-                          className='h-5 w-5'
-                          viewBox='0 0 20 20'
-                          fill='currentColor'
-                        >
-                          <path
-                            fillRule='evenodd'
-                            d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z'
-                            clipRule='evenodd'
-                          />
-                        </svg>
+                        <CheckIcon className='size-5' />
                       </span>
                     )}
-                  </>
+                  </div>
                 )}
               </ComboboxOption>
             ))}

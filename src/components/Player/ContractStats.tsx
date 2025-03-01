@@ -46,6 +46,8 @@ function formatPercentage(value: number) {
 export async function ContractStats({ player }: { player: Player }) {
   const contractData: Player[] = await getContactDataByPlayer(player);
 
+  if (!contractData[0]) return null;
+
   const zeroFilteredContractData = contractData.filter(
     (c) => c.activeContract!.revenueShare !== 0
   );
@@ -97,80 +99,58 @@ export async function ContractStats({ player }: { player: Player }) {
     });
   });
 
-  if (!contractData[0]) return null;
   return (
     <div className='mt-12'>
-      <h2 className='flex items-center space-x-2 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl dark:text-slate-200'>
+      <h2 className='flex items-center space-x-2 text-2xl font-bold tracking-tight sm:text-3xl'>
         <span>Contract Info</span>
         <div className='group relative flex justify-center'>
-          <button>
-            <InformationCircleIcon className='h-6 w-6 text-slate-500' />
-          </button>
-          <span className='absolute bottom-8 w-48 scale-0 rounded-lg bg-slate-950 p-2 text-center text-xs normal-case text-white shadow shadow-slate-300 transition-all group-hover:scale-100 dark:shadow-slate-900'>
+          <InformationCircleIcon className='text-muted-foreground size-6' />
+          <span className='bg-background text-foreground shadow-foreground/2 absolute bottom-8 w-48 scale-0 rounded-lg p-2 text-center text-xs normal-case shadow-xl transition-all group-hover:scale-100'>
             Based on revenue share on active contracts for players of similar
             age, rating and position.
           </span>
         </div>
       </h2>
-      <div className='mt-4 flow-root'>
-        <div className='-my-2 overflow-x-auto'>
-          <div className='inline-block min-w-full align-middle'>
-            <table className='min-w-full divide-y divide-slate-300 dark:divide-slate-700'>
-              <thead>
-                <tr>
-                  <th scope='col'></th>
-                  <th
-                    scope='col'
-                    className='whitespace-nowrap px-1.5 py-1 text-center text-sm font-semibold uppercase tracking-wide text-slate-700 last:pr-0 sm:px-2 sm:text-base dark:text-slate-200'
-                  >
-                    Min
-                  </th>
-                  <th
-                    scope='col'
-                    className='whitespace-nowrap px-1.5 py-1 text-center text-sm font-semibold uppercase tracking-wide text-slate-700 last:pr-0 sm:px-2 sm:text-base dark:text-slate-200'
-                  >
-                    Avg
-                  </th>
-                  <th
-                    scope='col'
-                    className='whitespace-nowrap px-1.5 py-1 text-center text-sm font-semibold uppercase tracking-wide text-slate-700 sm:px-2 sm:text-base dark:text-slate-200'
-                  >
-                    Max
-                  </th>
-                </tr>
-              </thead>
-              <tbody className='divide-y divide-slate-200 dark:divide-slate-700'>
-                {contractInfo.map(
-                  ({
-                    division,
-                    total,
-                    minRevenueShare,
-                    maxRevenueShare,
-                    averageRevenueShare,
-                  }) => (
-                    <tr key={division}>
-                      <td className='w-full whitespace-nowrap px-1.5 py-4 text-left font-medium text-slate-700 sm:px-2 sm:py-5 sm:pl-1 dark:text-slate-200'>
-                        <div className='flex items-center space-x-1'>
-                          <Division division={division} />
-                          <span title='Total Players'>({total})</span>
-                        </div>
-                      </td>
-                      <td className='whitespace-nowrap px-1.5 py-4 text-center font-medium text-slate-500 sm:px-2 sm:py-5 dark:text-slate-200'>
-                        {formatPercentage(minRevenueShare)}
-                      </td>
-                      <td className='whitespace-nowrap px-1.5 py-4 text-center font-medium text-slate-500 sm:px-2 sm:py-5 dark:text-slate-200'>
-                        {formatPercentage(averageRevenueShare)}
-                      </td>
-                      <td className='whitespace-nowrap px-1.5 py-4 text-center font-medium text-slate-500 sm:px-2 sm:py-5 dark:text-slate-200'>
-                        {formatPercentage(maxRevenueShare)}
-                      </td>
-                    </tr>
-                  )
-                )}
-              </tbody>
-            </table>
+      <div className='divide-border mt-4 grid divide-y'>
+        <div className='grid grid-cols-[1fr_4rem_4rem_4rem]'>
+          <div></div>
+          <div className='text-muted-foreground px-1.5 py-1 text-center text-sm font-semibold tracking-wide whitespace-nowrap uppercase sm:px-2 sm:text-base'>
+            Min
+          </div>
+          <div className='text-muted-foreground px-1.5 py-1 text-center text-sm font-semibold tracking-wide whitespace-nowrap uppercase sm:px-2 sm:text-base'>
+            Avg
+          </div>
+          <div className='text-muted-foreground px-1.5 py-1 text-center text-sm font-semibold tracking-wide whitespace-nowrap uppercase sm:px-2 sm:text-base'>
+            Max
           </div>
         </div>
+        {contractInfo.map(
+          ({
+            division,
+            total,
+            minRevenueShare,
+            maxRevenueShare,
+            averageRevenueShare,
+          }) => (
+            <div className='grid grid-cols-[1fr_4rem_4rem_4rem]' key={division}>
+              <div className='w-full px-1.5 py-4 text-left font-medium whitespace-nowrap sm:px-2 sm:pl-1'>
+                <div className='flex items-center space-x-1'>
+                  <Division division={division} />
+                  <span title='Total Players'>({total})</span>
+                </div>
+              </div>
+              <div className='px-1.5 py-4 text-center font-medium whitespace-nowrap sm:px-2'>
+                {formatPercentage(minRevenueShare)}
+              </div>
+              <div className='px-1.5 py-4 text-center font-medium whitespace-nowrap sm:px-2'>
+                {formatPercentage(averageRevenueShare)}
+              </div>
+              <div className='px-1.5 py-4 text-center font-medium whitespace-nowrap sm:px-2'>
+                {formatPercentage(maxRevenueShare)}
+              </div>
+            </div>
+          )
+        )}
       </div>
     </div>
   );

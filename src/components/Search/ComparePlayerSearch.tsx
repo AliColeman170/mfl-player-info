@@ -2,7 +2,6 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTransition } from 'react';
 import { SearchComboBox } from './SearchComboBox';
-import { Player } from '@/types/global.types';
 
 export function ComparePlayerSearch({
   player1,

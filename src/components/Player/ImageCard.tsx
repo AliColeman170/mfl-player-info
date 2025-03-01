@@ -10,18 +10,19 @@ import { FavouriteButton } from './FavouriteButton';
 import { ForSale } from './ForSale';
 import { PlayerContract } from './PlayerContract';
 import { Player } from '@/types/global.types';
+import { Button } from '../UI/Button';
 
 function LoadingFavouriteButton() {
   return (
-    <div className='flex cursor-pointer items-center justify-center space-x-1.5 rounded-lg bg-slate-100 px-3 py-2 text-sm font-medium ring-1 ring-slate-950 ring-opacity-5 hover:bg-slate-200 disabled:pointer-events-none disabled:opacity-50 dark:bg-slate-800 dark:ring-slate-800 dark:hover:bg-slate-800/50'>
-      <SpinnerIcon className='h-5 w-5 animate-spin text-slate-500' />
+    <div className='rounded-md bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-600 opacity-50 shadow-xs ring-1 ring-slate-300 ring-inset dark:bg-white/10 dark:text-white dark:ring-slate-700'>
+      <SpinnerIcon className='size-4 animate-spin' />
     </div>
   );
 }
 
 export function ImageCard({ player }: { player: Player }) {
   return (
-    <div className='mx-auto w-full max-w-xs @container/image @sm:mx-0'>
+    <div className='@container/image mx-auto w-full max-w-xs @sm:mx-0'>
       <Image
         className='mx-auto -mt-2 w-full max-w-[200px] px-2 @sm:max-w-none'
         src={`https://d13e14gtps4iwl.cloudfront.net/players/${player.id}/card_512.png`}
@@ -41,25 +42,27 @@ export function ImageCard({ player }: { player: Player }) {
         <Suspense fallback={<LoadingFavouriteButton />}>
           <FavouriteButton player={player} />
         </Suspense>
-        <Link
-          href={{
-            pathname: '/compare',
-            query: {
-              player1: player.id,
-              player2: '',
-            },
-          }}
-          className='flex cursor-pointer items-center justify-center space-x-1.5 rounded-lg bg-slate-100 px-2.5 py-2 text-sm font-semibold ring-1 ring-slate-950 ring-opacity-5 hover:bg-slate-200 sm:px-3 dark:bg-slate-800 dark:ring-slate-800 dark:hover:bg-slate-800/50'
-        >
-          <ArrowsRightLeftIcon className='h-4 w-4' />
-        </Link>
-        <Link
-          href={`https://app.playmfl.com/players/${player.id}`}
-          target='_blank'
-          className='hidden cursor-pointer items-center justify-center space-x-1.5 rounded-lg bg-slate-100 px-2.5 py-2 text-sm font-semibold ring-1 ring-slate-950 ring-opacity-5 hover:bg-slate-200 @[124px]/image:flex sm:px-3 dark:bg-slate-800 dark:ring-slate-800 dark:hover:bg-slate-800/50'
-        >
-          <ArrowTopRightOnSquareIcon className='-mr-0.5 h-4 w-4' />
-        </Link>
+        <Button asChild size='sm' variant='secondary'>
+          <Link
+            href={{
+              pathname: '/compare',
+              query: {
+                player1: player.id,
+                player2: '',
+              },
+            }}
+          >
+            <ArrowsRightLeftIcon className='h-4 w-4' />
+          </Link>
+        </Button>
+        <Button asChild size='sm' variant='secondary'>
+          <Link
+            href={`https://app.playmfl.com/players/${player.id}`}
+            target='_blank'
+          >
+            <ArrowTopRightOnSquareIcon className='-mr-0.5' />
+          </Link>
+        </Button>
       </div>
     </div>
   );

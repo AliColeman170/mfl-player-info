@@ -5,6 +5,8 @@ import {
   ChevronUpDownIcon,
 } from '@heroicons/react/24/solid';
 import { Column } from '@tanstack/react-table';
+import { Button } from '../UI/Button';
+import { cn } from '@/utils/helpers';
 
 export function SortableColumnHeader({
   column,
@@ -14,14 +16,29 @@ export function SortableColumnHeader({
   label: string;
 }) {
   return (
-    <button
-      className='flex items-center space-x-1'
-      onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-    >
-      <span className='text-sm uppercase'>{label}</span>
-      {column.getIsSorted() === 'asc' && <ArrowDownIcon className='h-3 w-3' />}
+    <div className='-mx-1.5'>
+      <Button
+        variant='ghost'
+        size='sm'
+        className={cn(
+          'flex w-full items-center justify-start gap-x-1 px-1.5',
+          [
+            'overall',
+            'pace',
+            'shooting',
+            'passing',
+            'dribbling',
+            'defense',
+            'physical',
+          ].includes(column.id) && 'justify-center'
+        )}
+        onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+      >
+        <span className='text-xs uppercase'>{label}</span>
+        {/* {column.getIsSorted() === 'asc' && <ArrowDownIcon className='h-3 w-3' />}
       {column.getIsSorted() === 'desc' && <ArrowUpIcon className='h-3 w-3' />}
-      {!column.getIsSorted() && <ChevronUpDownIcon className='h-4 w-4' />}
-    </button>
+      {!column.getIsSorted() && <ChevronUpDownIcon className='h-4 w-4' />} */}
+      </Button>
+    </div>
   );
 }

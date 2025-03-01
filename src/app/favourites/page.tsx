@@ -23,7 +23,7 @@ export default async function FavouritesPage() {
       <Suspense
         fallback={
           <div className='flex h-64 items-center justify-center'>
-            <SpinnerIcon className='h-8 w-8 animate-spin' />
+            <SpinnerIcon className='size-8 animate-spin' />
           </div>
         }
       >

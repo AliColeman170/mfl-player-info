@@ -1,5 +1,8 @@
 import type { Player, PlayerStats, StatKey } from '@/types/global.types';
 import { cn, getRarityClassNames } from '@/utils/helpers';
+import { StyledRatingValue } from './StyledRatingValue';
+import { Button } from '../UI/Button';
+import { MinusIcon, PlusIcon } from '@heroicons/react/20/solid';
 
 export function PlayerStatsTable({
   player,
@@ -17,88 +20,70 @@ export function PlayerStatsTable({
   resetStatValue: (key: StatKey) => void;
 }) {
   return (
-    <div className='flow-root'>
-      <div className='-my-3 overflow-x-auto'>
-        <div className='inline-block min-w-full py-2 align-middle'>
-          <table className='min-w-full divide-y divide-slate-300 dark:divide-slate-700'>
-            <thead>
-              <tr>
-                {Object.entries(stats).map(([key]) => {
-                  if (key === 'goalkeeping') return null;
-                  return (
-                    <th
-                      key={key}
-                      scope='col'
-                      className='whitespace-nowrap px-1.5 py-1 text-center text-sm font-semibold uppercase tracking-wide text-slate-700 first:pl-0 last:pr-0 sm:px-2 sm:text-base dark:text-slate-400'
-                    >
-                      {key.substring(0, 3)}
-                    </th>
-                  );
-                })}
-              </tr>
-            </thead>
-            <tbody className='divide-y divide-slate-950'>
-              <tr>
-                {Object.entries(stats).map(([key, val]) => {
-                  if (key === 'goalkeeping') return null;
-                  const diff = val - player.metadata[key as StatKey];
-                  return (
-                    <td
-                      key={`${key}-${val}`}
-                      className='whitespace-nowrap px-1.5 py-4 text-center align-top text-base text-slate-500 first:pl-0 last:pr-0 sm:px-2 sm:py-5 sm:text-lg dark:text-slate-200'
-                    >
-                      <div
-                        className={`${getRarityClassNames(
-                          val
-                        )} relative inline-flex rounded-lg p-2.5 font-medium leading-6 sm:p-3`}
-                      >
-                        {val >= 0 ? val : '–'}
-                      </div>
-                      {isTrainingMode && (
-                        <div className='mt-2 grid grid-cols-2 gap-x-1 gap-y-1'>
-                          <button
-                            onClick={() => minusStatValue(key as StatKey)}
-                            className='flex cursor-pointer items-center justify-center rounded-md bg-slate-100 py-1 text-sm font-semibold ring-1 ring-slate-950 ring-opacity-5 hover:bg-slate-200 dark:bg-slate-800 dark:ring-slate-800 dark:hover:bg-slate-800/50'
-                          >
-                            -
-                          </button>
-                          <button
-                            onClick={() => plusStatValue(key as StatKey)}
-                            className='flex cursor-pointer items-center justify-center rounded-md bg-slate-100 py-1 text-sm font-semibold ring-1 ring-slate-950 ring-opacity-5 hover:bg-slate-200 dark:bg-slate-800 dark:ring-slate-800 dark:hover:bg-slate-800/50'
-                          >
-                            +
-                          </button>
-                          <div className='col-span-2'>
-                            <span
-                              className={cn(
-                                'rounded-md px-2 py-0.5 text-sm',
-                                diff > 0 && 'bg-green-600 text-white',
-                                diff === 0 && 'bg-white text-slate-900',
-                                diff < 0 && 'bg-red text-slate-900'
-                              )}
-                            >
-                              {diff > 0 && '+'}
-                              {diff}
-                            </span>
-                          </div>
-                          {diff !== 0 && (
-                            <button
-                              onClick={() => resetStatValue(key as StatKey)}
-                              className='col-span-2 text-xs text-indigo-500 hover:text-indigo-400'
-                            >
-                              Reset
-                            </button>
-                          )}
-                        </div>
-                      )}
-                    </td>
-                  );
-                })}
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+    <div className='grid grid-flow-row grid-cols-6 items-start justify-center'>
+      {Object.entries(stats).map(([key]) => {
+        if (key === 'goalkeeping') return null;
+        return (
+          <div
+            key={key}
+            className='border-border text-muted-foreground border-b px-1.5 py-1 text-center text-sm font-semibold tracking-wide whitespace-nowrap uppercase first:pl-0 last:pr-0 sm:px-2 sm:text-base'
+          >
+            {key.substring(0, 3)}
+          </div>
+        );
+      })}
+      {Object.entries(stats).map(([key, val]) => {
+        if (key === 'goalkeeping') return null;
+        const diff = val - player.metadata[key as StatKey];
+        return (
+          <div
+            key={`${key}-${val}`}
+            className='my-4 flex flex-col items-center justify-start gap-1.5 px-1'
+          >
+            <StyledRatingValue rating={val} />
+            {isTrainingMode && (
+              <div className='grid grid-cols-2 justify-center gap-x-1 gap-y-1.5'>
+                <Button
+                  variant='secondary'
+                  size='sm'
+                  onClick={() => minusStatValue(key as StatKey)}
+                >
+                  <MinusIcon className='size-4' />
+                </Button>
+                <Button
+                  variant='secondary'
+                  size='sm'
+                  onClick={() => plusStatValue(key as StatKey)}
+                >
+                  <PlusIcon className='size-4' />
+                </Button>
+                <div className='col-span-2 flex justify-center'>
+                  <div
+                    className={cn(
+                      'rounded-md px-2 py-0.5 text-[11px]',
+                      diff > 0 && 'bg-green-600 text-green-50',
+                      diff === 0 && 'bg-secondary text-secondary-foreground',
+                      diff < 0 && 'bg-red-500 text-white'
+                    )}
+                  >
+                    {diff > 0 && '+'}
+                    {diff}
+                  </div>
+                </div>
+                {diff !== 0 && (
+                  <Button
+                    variant='link'
+                    onClick={() => resetStatValue(key as StatKey)}
+                    className='col-span-2 h-auto py-0.5 text-xs'
+                  >
+                    Reset
+                  </Button>
+                )}
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }

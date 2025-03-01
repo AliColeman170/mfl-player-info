@@ -1,4 +1,4 @@
-import { InputHTMLAttributes, useEffect } from 'react';
+import { InputHTMLAttributes } from 'react';
 import { useDebounceValue } from 'usehooks-ts';
 
 export function DebouncedInput({

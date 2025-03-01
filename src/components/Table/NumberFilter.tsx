@@ -15,12 +15,13 @@ export function NumberFilter({
   const columnFilterValue = (column?.getFilterValue() as Array<number>) || null;
 
   return (
-    <div className={cn('w-full @container', className)}>
-      <label className='block text-sm font-semibold leading-6 text-slate-900 dark:text-slate-50'>
+    <div className={cn('@container w-full', className)}>
+      <label htmlFor={label} className='block text-xs/5 font-semibold'>
         {label}
       </label>
       <div className='mt-1 grid grid-cols-1 gap-2 @[180px]:grid-cols-2'>
         <DebouncedInput
+          id={label}
           type='number'
           pattern='[0-9]*'
           inputMode='numeric'
@@ -37,7 +38,7 @@ export function NumberFilter({
               ? `(${column.getFacetedMinMaxValues()?.[0]})`
               : ''
           }`}
-          className='block w-full rounded-lg border-0 bg-white px-3 py-3 text-slate-900 shadow-2xl shadow-slate-200 ring-1 ring-slate-900 ring-opacity-5 placeholder:text-slate-400 focus:ring-0 dark:bg-slate-900 dark:text-white dark:shadow-slate-900 dark:ring-slate-800'
+          className='bg-card outline-border placeholder:text-muted focus:outline-primary block h-10 w-full rounded-lg px-4 py-3 shadow-2xl outline-1 -outline-offset-1 focus:outline-2 focus:-outline-offset-2'
         />
         <DebouncedInput
           type='number'
@@ -54,10 +55,9 @@ export function NumberFilter({
               ? `(${column.getFacetedMinMaxValues()?.[1]})`
               : ''
           }`}
-          className='block w-full rounded-lg border-0 bg-white px-3 py-3 text-slate-900 shadow-2xl shadow-slate-200 ring-1 ring-slate-900 ring-opacity-5 placeholder:text-slate-400 focus:ring-0 dark:bg-slate-900 dark:text-white dark:shadow-slate-900 dark:ring-slate-800'
+          className='bg-card outline-border placeholder:text-muted focus:outline-primary block h-10 w-full rounded-lg px-4 py-3 shadow-2xl outline-1 -outline-offset-1 focus:outline-2 focus:-outline-offset-2'
         />
       </div>
-      <div className='h-1' />
     </div>
   );
 }

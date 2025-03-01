@@ -4,7 +4,7 @@ import { RemoveTagButton } from './RemoveTagButton';
 
 export function Tag({ children }: { children: React.ReactNode }) {
   return (
-    <div className='group relative cursor-default rounded-lg bg-slate-100 px-3 py-1 text-xs ring-1 ring-slate-950 ring-opacity-5 dark:bg-slate-800 dark:ring-slate-800'>
+    <div className='group bg-secondary ring-ring relative cursor-default rounded-md px-3 py-1 text-xs ring-1 ring-inset'>
       {children}
     </div>
   );
@@ -41,9 +41,7 @@ export function TagsList({
   wrap?: boolean;
 }) {
   if (!isFavourite)
-    return (
-      <span className='text-xs text-slate-500'>Favourite to add tags</span>
-    );
+    return <span className='text-xs'>Favourite to add tags</span>;
 
   return (
     <TagsListWrapper wrap={wrap}>

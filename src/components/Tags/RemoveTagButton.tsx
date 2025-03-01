@@ -30,8 +30,8 @@ export function RemoveTagButton({
 
   if (isPending) {
     return (
-      <div className='absolute inset-0 flex items-center justify-center rounded-lg bg-slate-800'>
-        <SpinnerIcon className='h-3 w-3 animate-spin text-white' />
+      <div className='bg-secondary absolute inset-0 flex items-center justify-center rounded-lg'>
+        <SpinnerIcon className='size-3 animate-spin' />
       </div>
     );
   }
@@ -39,9 +39,9 @@ export function RemoveTagButton({
   return (
     <button
       onClick={deleteTag}
-      className='absolute -right-1 -top-1 hidden rounded-lg bg-indigo-600 p-0.5 text-xs ring-1 ring-slate-950 ring-opacity-5 hover:bg-indigo-600 group-hover:block dark:ring-slate-800'
+      className='bg-primary ring-border hover:bg-primary/80 absolute -top-1 -right-1 hidden rounded-lg p-0.5 text-xs ring-1 group-hover:block'
     >
-      <XMarkIcon className='h-3 w-3 text-white' />
+      <XMarkIcon className='size-3 text-white' />
     </button>
   );
 }
