@@ -9,6 +9,8 @@ type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
+export const experimental_ppr = true;
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const id = (await params).id;
 

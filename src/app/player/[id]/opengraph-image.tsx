@@ -248,6 +248,7 @@ export default async function Image({ params }: { params: { id: string } }) {
                 width='384'
                 height='561'
                 src={`https://d13e14gtps4iwl.cloudfront.net/players/${params.id}/card_512.png`}
+                alt=''
               />
             </div>
           </div>

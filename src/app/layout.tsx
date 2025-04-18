@@ -7,9 +7,7 @@ import { UserProvider } from '@/components/Wallet/UserProvider';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { openGraph, twitter } from './shared-meta';
-import { getUser } from '@/data/auth';
-import { createClient } from '@/utils/supabase/server';
-import { getUserProfile } from '@/data/user';
+import { getAuthUserProfile } from '@/data/auth';
 import { Toaster } from 'sonner';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -52,21 +50,21 @@ export const metadata: Metadata = {
   twitter,
 };
 
+export const experimental_ppr = true;
+
 export default async function RootLayout({
   children,
 }: {
   children: ReactNode;
 }) {
-  const supabase = await createClient();
-  const user = await getUser(supabase);
-  const userProfile = await getUserProfile(user?.user_metadata.address);
+  const userPromise = getAuthUserProfile();
 
   return (
     <html lang='en'>
       <body
         className={`${inter.className} bg-background text-foreground flex min-h-screen flex-col`}
       >
-        <UserProvider serverUser={user} userProfile={userProfile}>
+        <UserProvider userPromise={userPromise}>
           <Header />
           <main className='mx-auto w-full max-w-7xl flex-1 px-4 sm:px-6 lg:px-8'>
             {children}

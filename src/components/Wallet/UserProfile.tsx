@@ -1,5 +1,3 @@
-'use client';
-
 import { ArrowRightStartOnRectangleIcon } from '@heroicons/react/24/solid';
 import { useTransition } from 'react';
 import { SpinnerIcon } from '../SpinnerIcon';
@@ -22,16 +20,9 @@ import Link from 'next/link';
 import { Fragment } from 'react';
 import { cn } from '@/utils/helpers';
 import Image from 'next/image';
-import { MFLUser } from '@/types/global.types';
-import { User } from '@supabase/supabase-js';
+import { AuthUserProfile } from '@/data/auth';
 
-export function UserProfile({
-  user,
-  userProfile,
-}: {
-  user: User;
-  userProfile: MFLUser | null;
-}) {
+export function UserProfile({ user }: { user: NonNullable<AuthUserProfile> }) {
   let [isPending, startTransition] = useTransition();
 
   async function handleLogout() {
@@ -47,16 +38,16 @@ export function UserProfile({
       <div>
         <MenuButton className='focus:ring-primary focus:ring-offset-background relative flex rounded-full text-sm focus:ring-2 focus:ring-offset-2 focus:outline-hidden'>
           <span className='sr-only'>Open user menu</span>
-          {userProfile?.avatar ? (
+          {user?.profile?.avatar ? (
             <Image
               className='size-10 rounded-full'
-              src={userProfile.avatar}
+              src={user.profile.avatar}
               alt={
-                userProfile.name
-                  ? userProfile.name
-                  : userProfile.discordUser?.username
-                    ? userProfile.discordUser?.username
-                    : userProfile.walletAddress
+                user.profile.name
+                  ? user.profile.name
+                  : user.profile.discordUser?.username
+                    ? user.profile.discordUser?.username
+                    : user.profile.walletAddress
               }
               width={745}
               height={745}
