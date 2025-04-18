@@ -1,6 +1,9 @@
 import Link from 'next/link';
 import { MFLIcon } from '../MFLIcon';
 import { Wallet } from '../Wallet';
+import { Suspense } from 'react';
+import { Button } from '../UI/Button';
+import { SpinnerIcon } from '../SpinnerIcon';
 
 export function Header() {
   return (
@@ -17,7 +20,15 @@ export function Header() {
             </h1>
           </div>
           <div>
-            <Wallet />
+            <Suspense
+              fallback={
+                <Button size='lg' disabled>
+                  <SpinnerIcon className='animate-spin' />
+                </Button>
+              }
+            >
+              <Wallet />
+            </Suspense>
           </div>
         </div>
       </div>

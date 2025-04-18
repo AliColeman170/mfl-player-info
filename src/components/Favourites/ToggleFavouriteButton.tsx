@@ -3,13 +3,12 @@
 import { HeartIcon as FilledHeartIcon } from '@heroicons/react/24/solid';
 import { HeartIcon } from '@heroicons/react/24/outline';
 import { SpinnerIcon } from '../SpinnerIcon';
-import { useTransition } from 'react';
+import { use, useTransition } from 'react';
 import { cn } from '@/utils/helpers';
 import { Player } from '@/types/global.types';
 import { useUser } from '../Wallet/UserProvider';
 import { deleteFavourite, setFavourite } from '@/actions/favourites';
 import { toast } from 'sonner';
-import { Button } from '../UI/Button';
 
 export function ToggleFavouriteButton({
   player,
@@ -20,7 +19,8 @@ export function ToggleFavouriteButton({
   isFavourite: boolean;
   className?: string;
 }) {
-  const { user } = useUser();
+  const { userPromise } = useUser();
+  const user = use(userPromise);
   const [isPending, startTransition] = useTransition();
 
   async function toggleFavourite() {

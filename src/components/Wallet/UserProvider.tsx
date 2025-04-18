@@ -1,33 +1,25 @@
 'use client';
 
-import { MFLUser } from '@/types/global.types';
-import { User } from '@supabase/supabase-js';
+import { AuthUserProfile } from '@/data/auth';
 import { createContext, useContext } from 'react';
 
 type UserContextType = {
-  user: User | null;
-  userProfile: MFLUser | null;
+  userPromise: Promise<AuthUserProfile | null>;
 };
 
-export const UserContext = createContext<UserContextType>({
-  user: null,
-  userProfile: null,
-});
+export const UserContext = createContext<UserContextType | null>(null);
 
 export function UserProvider({
-  serverUser,
-  userProfile,
+  userPromise,
   children,
 }: {
-  serverUser: User | null;
-  userProfile: MFLUser | null;
+  userPromise: Promise<AuthUserProfile | null>;
   children: React.ReactNode;
 }) {
   return (
     <UserContext.Provider
       value={{
-        user: serverUser,
-        userProfile,
+        userPromise,
       }}
     >
       {children}

@@ -26,8 +26,11 @@ export default function Player({ player }: { player: Player }) {
           <CareerStats player={player} />
         </Suspense>
       </div>
-      {isGoalkeeper && <GoalkeeperStats player={player} />}
-      {!isGoalkeeper && <PositionRatings player={player} />}
+      {isGoalkeeper ? (
+        <GoalkeeperStats player={player} />
+      ) : (
+        <PositionRatings player={player} />
+      )}
       <Suspense
         fallback={
           <div className='flex justify-center py-8'>
