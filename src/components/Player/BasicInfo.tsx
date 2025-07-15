@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import { SpinnerIcon } from '../SpinnerIcon';
 import { InformationCircleIcon } from '@heroicons/react/20/solid';
-import { MarketValue } from './MarketValue';
+import { MarketValue, getMarketValueTooltip } from './MarketValue';
 import Link from 'next/link';
 import { PlayerTags } from './PlayerTags';
 import { Player } from '@/types/global.types';
@@ -16,6 +16,9 @@ export async function BasicInfo({ player }: { player: Player }) {
     foot: preferredFoot.toLowerCase(),
     position: positions.join(' / '),
   };
+  
+  // Get dynamic tooltip text for market value
+  const tooltipText = await getMarketValueTooltip(player);
   return (
     <div className='col-start-1 @sm/main:col-span-2 @sm/main:col-start-2'>
       <dl className='divide-border @container/inner divide-y'>
@@ -52,9 +55,8 @@ export async function BasicInfo({ player }: { player: Player }) {
               <button>
                 <InformationCircleIcon className='text-muted-foreground size-5' />
               </button>
-              <span className='bg-background text-foreground shadow-foreground/5 absolute bottom-6 w-48 scale-0 rounded-lg p-2 text-center text-xs normal-case shadow-sm transition-all group-hover:scale-100'>
-                Based on average of last 3 sales for similar age, rating and
-                position.
+              <span className='bg-background text-foreground shadow-foreground/5 absolute bottom-6 w-64 scale-0 rounded-lg p-2 text-center text-xs normal-case shadow-sm transition-all group-hover:scale-100'>
+                {tooltipText}
               </span>
             </div>
           </dt>
