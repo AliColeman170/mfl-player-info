@@ -2,7 +2,8 @@
 
 import { appIdentifier, fcl } from '@/flow/api';
 import { addNonce, checkNonce, removeNonce } from '@/utils/nonces';
-import { createClient } from '@/utils/supabase/server';
+import { adminAuthClient } from '@/lib/supabase/admin';
+import { createClient } from '@/lib/supabase/server';
 import { CurrentUser, Service } from '@onflow/typedefs';
 import { randomBytes } from 'crypto';
 import { revalidatePath } from 'next/cache';
@@ -45,7 +46,7 @@ export async function login(credentials: CurrentUser, redirectTo?: string) {
 
   console.log('Account proof verified successfully.');
 
-  const { error } = await supabase.auth.signInAnonymously({
+  const { error, data } = await supabase.auth.signInAnonymously({
     options: {
       data: {
         address: credentials.addr,
@@ -53,11 +54,31 @@ export async function login(credentials: CurrentUser, redirectTo?: string) {
     },
   });
 
+  console.log({ data, error });
+
+  if (!data.user) {
+    console.log('No user signed in.');
+    return { success: false, message: 'Error signing in.' };
+  }
+
   if (error) {
     console.log('Error signing in anonymously.');
     return { success: false, message: error.message };
   }
+
+  const { error: updateError } =
+    await adminAuthClient.auth.admin.updateUserById(data.user.id, {
+      app_metadata: { address: credentials.addr },
+    });
+
+  if (updateError) {
+    console.log('Error updating user app_metadata.');
+    return { success: false, message: updateError.message };
+  }
+
   console.log('Signed in anonymously.');
+
+  await supabase.auth.refreshSession();
 
   await removeNonce(accountProofService.data.nonce);
   revalidatePath('/', 'layout');

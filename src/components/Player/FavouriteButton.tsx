@@ -1,7 +1,7 @@
 import { ToggleFavouriteButton } from '../Favourites/ToggleFavouriteButton';
 import { Player } from '@/types/global.types';
 import { getFavouriteByPlayer } from '@/data/favourites';
-import { createClient } from '@/utils/supabase/server';
+import { createClient } from '@/lib/supabase/server';
 import { Button } from '../UI/Button';
 
 export async function FavouriteButton({ player }: { player: Player }) {

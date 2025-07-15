@@ -12,7 +12,7 @@ import { PlayerWithFavouriteData } from '@/types/global.types';
 import { getAllPlayersByOwner } from '@/data/players';
 import { TableWrapper } from '@/components/Table/TableWrapper';
 import { getUserProfile } from '@/data/user';
-import { createClient } from '@/utils/supabase/server';
+import { createClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
 
 type Props = {

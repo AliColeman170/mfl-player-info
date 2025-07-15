@@ -1,7 +1,7 @@
 'use server';
 
 import { getUser } from '@/data/auth';
-import { createClient } from '@/utils/supabase/server';
+import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 
 export async function setFavourite(player_id: number, isFavourite: boolean) {

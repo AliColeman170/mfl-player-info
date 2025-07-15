@@ -3,7 +3,7 @@ import { getFavourites } from '@/data/favourites';
 import { getPlayerById } from '@/data/players';
 import { PlayerWithFavouriteData } from '@/types/global.types';
 import { TableWrapper } from '../Table/TableWrapper';
-import { createClient } from '@/utils/supabase/server';
+import { createClient } from '@/lib/supabase/server';
 
 async function getFavouritesData() {
   const supabase = await createClient();

@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { admin as supabase } from './supabase/admin';
+import { adminAuthClient as supabase } from '@/lib/supabase/admin';
 
 export async function addNonce(nonce: string) {
   const { data: nonces } = await supabase
