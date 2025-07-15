@@ -13,6 +13,7 @@ function Division({ division }: { division: number }) {
     7: 'bg-[#71717a]',
     8: 'bg-[#82a1b7]',
     9: 'bg-[#ffd939]',
+    10: 'bg-[#757061]',
   };
 
   const divisionNames: { [key: number]: string } = {
@@ -25,6 +26,7 @@ function Division({ division }: { division: number }) {
     7: 'Stone',
     8: 'Ice',
     9: 'Spark',
+    10: 'Flint',
   };
 
   return (

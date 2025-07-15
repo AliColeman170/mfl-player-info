@@ -40,32 +40,7 @@ export async function getPlayerData(playerID: number) {
     });
     return player;
   } catch (error) {
-    console.log(error);
     return null;
   }
 }
 
-export async function getPlayersData(playersIds: number[]) {
-  try {
-    const players = await fcl.query({
-      cadence: `
-        import MFLPlayer from 0xMFLPlayer
-
-        access(all) fun main(playersIds: [UInt64]): [MFLPlayer.PlayerData] {
-          let playersData: [MFLPlayer.PlayerData] = []
-          for id in playersIds {
-              if let playerData = MFLPlayer.getPlayerData(id: id) {
-                  playersData.append(playerData)
-              }
-          }
-          return playersData
-        }
-      `,
-      args: (arg: any, t: any) => [arg(playersIds, t.Array(t.UInt64))],
-    });
-    return players;
-  } catch (error) {
-    console.log(error);
-    return null;
-  }
-}
