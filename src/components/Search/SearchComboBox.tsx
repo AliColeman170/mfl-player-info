@@ -25,40 +25,69 @@ export function SearchComboBox({
   placeholder?: string;
   autofocus?: boolean;
 }) {
-  let [query, setQuery] = useDebounceValue('', 800);
+  let [query, setQuery] = useState(id ? id.toString() : '');
+  let [debouncedQuery] = useDebounceValue(query, 800);
   let [filteredOptions, setFilteredOptions] = useState<Player[] | null>(null);
   let [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   let [isSearching, setIsSearching] = useState<boolean>(false);
+  
+  // Update query when id prop changes
+  useEffect(() => {
+    if (id && query !== id.toString()) {
+      setQuery(id.toString());
+    }
+  }, [id]); // Only depend on id, not query to avoid infinite loops
 
   useEffect(() => {
     async function fetchSearchResults() {
-      if (isPositiveInteger(+query)) {
+      if (debouncedQuery === '') {
         setFilteredOptions(null);
-        handlePlayerChange(+query);
-      } else {
+        setIsSearching(false);
+        return;
+      }
+      
+      if (isPositiveInteger(+debouncedQuery)) {
+        setFilteredOptions(null);
+        setIsSearching(false);
+        // Only trigger player change if it's different from current player
+        if (+debouncedQuery !== id) {
+          handlePlayerChange(+debouncedQuery);
+        }
+      } else if (debouncedQuery.length >= 3) {
         setIsSearching(true);
-        if (query.length >= 3) {
+        try {
           const result: Player[] = await fetch(
-            `https://z519wdyajg.execute-api.us-east-1.amazonaws.com/prod/players?limit=10&sorts=metadata.overall&sortsOrders=DESC&name=${query}&excludingMflOwned=false`
+            `https://z519wdyajg.execute-api.us-east-1.amazonaws.com/prod/players?limit=10&sorts=metadata.overall&sortsOrders=DESC&name=${encodeURIComponent(debouncedQuery)}&excludingMflOwned=false`
           ).then((res) => res.json());
           setFilteredOptions(result);
+        } catch (error) {
+          console.error('Search failed:', error);
+          setFilteredOptions([]);
         }
+        setIsSearching(false);
+      } else {
+        setFilteredOptions(null);
         setIsSearching(false);
       }
     }
-    if (query !== '') {
-      fetchSearchResults();
-    }
-  }, [query, handlePlayerChange]);
+    
+    fetchSearchResults();
+  }, [debouncedQuery, handlePlayerChange]);
 
   return (
     <Combobox
       disabled={isLoading}
       value={selectedPlayer}
       onChange={(option) => {
-        setQuery('');
-        setSelectedPlayer(option);
-        if (option) handlePlayerChange(option.id);
+        if (option) {
+          setSelectedPlayer(option);
+          setQuery(option.id.toString());
+          setFilteredOptions(null);
+          // Only trigger player change if it's different from current player
+          if (option.id !== id) {
+            handlePlayerChange(option.id);
+          }
+        }
       }}
       as='div'
     >
@@ -66,14 +95,16 @@ export function SearchComboBox({
         <div className='relative'>
           <MagnifyingGlassIcon className='text-muted pointer-events-none absolute top-3 left-3 h-6 w-6 sm:top-4 sm:left-4 sm:h-8 sm:w-8' />
           <ComboboxInput
-            defaultValue={query}
-            onChange={(e) => setQuery(e.target.value)}
+            value={query}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setSelectedPlayer(null);
+            }}
             placeholder={placeholder}
             className='disabled:text-opacity-50 text-foreground placeholder:text-muted h-12 w-full bg-transparent pr-4 pl-12 text-lg sm:h-16 sm:pl-16 sm:text-xl'
-            displayValue={() => {
-              if (selectedPlayer) return `${selectedPlayer.id}`;
-              if (id) return id.toString();
-              return '';
+            displayValue={(player: Player | null) => {
+              if (player) return `${player.metadata.firstName} ${player.metadata.lastName}`;
+              return query;
             }}
             autoFocus={autofocus}
           />
@@ -86,8 +117,8 @@ export function SearchComboBox({
       {filteredOptions && (
         <ComboboxOptions className='bg-popover shadow-foreground/5 ring-ring absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-lg py-1 text-base shadow-xl ring-1 focus:outline-hidden'>
           {filteredOptions.length === 0 &&
-          query !== '' &&
-          !isPositiveInteger(+query) ? (
+          debouncedQuery !== '' &&
+          !isPositiveInteger(+debouncedQuery) ? (
             <div className='text-popover-foreground relative cursor-default py-5 pr-9 pl-6 select-none'>
               No players found.
             </div>

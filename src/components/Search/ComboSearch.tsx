@@ -18,10 +18,13 @@ export function ComboSearch({
 
   let [isPending, startTransition] = useTransition();
 
-  function handlePlayerChange(id: number) {
-    startTransition(() => {
-      router.push(`/player/${id}`);
-    });
+  function handlePlayerChange(newId: number) {
+    // Only navigate if we're going to a different player
+    if (newId !== id) {
+      startTransition(() => {
+        router.push(`/player/${newId}`);
+      });
+    }
   }
 
   return (
