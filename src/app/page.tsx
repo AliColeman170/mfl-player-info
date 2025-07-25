@@ -1,9 +1,10 @@
 import { Metadata } from 'next';
 import { MarketOverviewCard } from '@/components/Dashboard/MarketOverviewCard';
 import { RecentSalesCard } from '@/components/Dashboard/RecentSalesCard';
-import { TopPlayersByValueCard } from '@/components/Dashboard/TopPlayersByValueCard';
-import { BestValuePlayersCard } from '@/components/Dashboard/BestValuePlayersCard';
-import { RisingStarsCard } from '@/components/Dashboard/RisingStarsCard';
+import { RecentListingsCard } from '@/components/Dashboard/RecentListingsCard';
+import { TopRatedPlayersCard } from '@/components/Dashboard/TopRatedPlayersCard';
+import { FavoritePlayersCard } from '@/components/Dashboard/FavoritePlayersCard';
+import { TopOwnersCard } from '@/components/Dashboard/TopOwnersCard';
 
 export const metadata: Metadata = {
   alternates: {
@@ -14,40 +15,37 @@ export const metadata: Metadata = {
 
 export default function Home() {
   return (
-    <div className="container mx-auto px-4 py-8 space-y-8">
-      {/* Welcome Section */}
-      <div className="text-center space-y-4">
-        <h1 className="text-4xl font-bold tracking-tight">MFL Player Info</h1>
-        <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-          Discover, analyze, and track Metaverse Football League players with comprehensive market data and insights.
-        </p>
-      </div>
-
+    <div className='container mx-auto flex flex-col gap-y-8'>
       {/* Dashboard Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className='grid grid-cols-1 gap-6 lg:grid-cols-12'>
         {/* Market Overview - Full width on mobile, spans 12 cols on large screens */}
-        <div className="lg:col-span-12">
+        <div className='lg:col-span-12'>
           <MarketOverviewCard />
         </div>
 
+        {/* Top Rated Players - 3-column layout */}
+        <div className='lg:col-span-4'>
+          <TopRatedPlayersCard />
+        </div>
+
+        {/* Favorite Players - 3-column layout */}
+        <div className='lg:col-span-4'>
+          <FavoritePlayersCard />
+        </div>
+
+        {/* Top Owners - 3-column layout */}
+        <div className='lg:col-span-4'>
+          <TopOwnersCard />
+        </div>
+
         {/* Recent Sales - Left column on large screens */}
-        <div className="lg:col-span-6">
+        <div className='lg:col-span-6'>
           <RecentSalesCard />
         </div>
 
-        {/* Top Players by Value - Right column on large screens */}
-        <div className="lg:col-span-6">
-          <TopPlayersByValueCard />
-        </div>
-
-        {/* Best Value Players - Left column */}
-        <div className="lg:col-span-6">
-          <BestValuePlayersCard />
-        </div>
-
-        {/* Rising Stars - Right column */}
-        <div className="lg:col-span-6">
-          <RisingStarsCard />
+        {/* Recent Listings - Right column on large screens */}
+        <div className='lg:col-span-6'>
+          <RecentListingsCard />
         </div>
       </div>
     </div>

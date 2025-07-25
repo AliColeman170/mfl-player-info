@@ -8,7 +8,7 @@ import { Trophy } from 'lucide-react';
 function TopPlayersSkeleton() {
   return (
     <div className="space-y-3">
-      {Array.from({ length: 8 }).map((_, i) => (
+      {Array.from({ length: 5 }).map((_, i) => (
         <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
           <div className="flex items-center space-x-3">
             <Skeleton className="w-8 h-8 rounded-full" />
@@ -29,7 +29,7 @@ function TopPlayersSkeleton() {
 }
 
 async function TopPlayersContent() {
-  const players = await getTopPlayersByValue(8);
+  const players = await getTopPlayersByValue(5);
 
   if (players.length === 0) {
     return (

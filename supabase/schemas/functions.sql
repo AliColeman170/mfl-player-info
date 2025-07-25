@@ -623,3 +623,67 @@ BEGIN
   RETURN result;
 END;
 $$;
+
+-- Function to get top owners by player count
+CREATE OR REPLACE FUNCTION get_top_owners (limit_count INTEGER DEFAULT 5) RETURNS TABLE (
+  owner_wallet_address TEXT,
+  owner_name TEXT,
+  player_count INTEGER,
+  total_value INTEGER,
+  avg_overall INTEGER
+) LANGUAGE plpgsql security definer
+set
+  search_path = '' AS $$
+BEGIN
+  RETURN QUERY
+  SELECT 
+    p.owner_wallet_address::TEXT,
+    p.owner_name::TEXT,
+    COUNT(*)::INTEGER as player_count,
+    COALESCE(SUM(p.market_value_estimate), 0)::INTEGER as total_value,
+    ROUND(AVG(p.overall), 0)::INTEGER as avg_overall
+  FROM public.players p
+  WHERE 
+    p.owner_wallet_address IS NOT NULL
+    AND p.market_value_estimate IS NOT NULL
+    AND p.overall IS NOT NULL
+  GROUP BY p.owner_wallet_address, p.owner_name
+  ORDER BY player_count DESC
+  LIMIT limit_count;
+END;
+$$;
+
+-- Function to get most favorited players
+CREATE OR REPLACE FUNCTION get_favorite_players (limit_count INTEGER DEFAULT 5) RETURNS TABLE (
+  id BIGINT,
+  first_name TEXT,
+  last_name TEXT,
+  overall INTEGER,
+  primary_position TEXT,
+  market_value_estimate INTEGER,
+  age INTEGER,
+  club_name TEXT,
+  favorite_count INTEGER
+) LANGUAGE plpgsql security definer
+set
+  search_path = '' AS $$
+BEGIN
+  RETURN QUERY
+  SELECT 
+    p.id,
+    p.first_name::TEXT,
+    p.last_name::TEXT,
+    p.overall,
+    p.primary_position::TEXT,
+    p.market_value_estimate,
+    p.age,
+    p.club_name::TEXT,
+    COUNT(f.player_id)::INTEGER as favorite_count
+  FROM public.players p
+  INNER JOIN public.favourites f ON p.id = f.player_id
+  WHERE f.is_favourite = true
+  GROUP BY p.id, p.first_name, p.last_name, p.overall, p.primary_position, p.market_value_estimate, p.age, p.club_name
+  ORDER BY favorite_count DESC
+  LIMIT limit_count;
+END;
+$$;

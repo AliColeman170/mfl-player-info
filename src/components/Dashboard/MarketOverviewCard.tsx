@@ -3,7 +3,14 @@ import { DashboardCard } from './DashboardCard';
 import { Badge } from '@/components/UI/badge';
 import { Skeleton } from '@/components/UI/skeleton';
 import { getMarketOverview } from '@/data/dashboard';
-import { TrendingUp, Users, ListIcon, FileText, DollarSign } from 'lucide-react';
+import {
+  TrendingUp,
+  Users,
+  ListIcon,
+  FileText,
+  DollarSign,
+} from 'lucide-react';
+import { Card, CardContent } from '../UI/card';
 
 interface MetricItemProps {
   icon: React.ReactNode;
@@ -12,31 +19,35 @@ interface MetricItemProps {
   className?: string;
 }
 
-function MetricItem({ icon, label, value, className = "" }: MetricItemProps) {
+function MetricItem({ icon, label, value, className = '' }: MetricItemProps) {
   return (
-    <div className={`flex items-center space-x-3 p-3 rounded-lg bg-muted/50 ${className}`}>
-      <div className="flex-shrink-0 text-primary">
-        {icon}
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-muted-foreground">{label}</p>
-        <p className="text-lg font-semibold">{typeof value === 'number' ? value.toLocaleString() : value}</p>
-      </div>
-    </div>
+    <Card className={`${className}`}>
+      <CardContent className='flex flex-col items-start gap-2'>
+        <div className='text-primary flex-shrink-0'>{icon}</div>
+        <div className='min-w-0 flex-1'>
+          <p className='text-4xl font-bold'>
+            {typeof value === 'number' ? value.toLocaleString() : value}
+          </p>
+          <p className='text-muted-foreground text-sm font-medium'>{label}</p>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
 function MarketOverviewSkeleton() {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <div key={i} className="flex items-center space-x-3 p-3 rounded-lg bg-muted/50">
-          <Skeleton className="h-5 w-5 rounded" />
-          <div className="flex-1 space-y-2">
-            <Skeleton className="h-4 w-20" />
-            <Skeleton className="h-6 w-16" />
-          </div>
-        </div>
+    <div className='grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4'>
+      {Array.from({ length: 4 }).map((_, i) => (
+        <Card key={i}>
+          <CardContent className='flex flex-col items-start gap-3.5'>
+            <Skeleton className='size-5 flex-shrink-0 rounded' />
+            <div className='flex min-w-0 flex-1 flex-col gap-1'>
+              <Skeleton className='h-9 w-16' />
+              <Skeleton className='h-3.5 w-20' />
+            </div>
+          </CardContent>
+        </Card>
       ))}
     </div>
   );
@@ -46,32 +57,26 @@ async function MarketOverviewContent() {
   const data = await getMarketOverview();
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className='grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4'>
       <MetricItem
-        icon={<Users className="h-5 w-5" />}
-        label="Total Players"
+        icon={<Users className='size-5' />}
+        label='Total Players'
         value={data.totalPlayers}
       />
       <MetricItem
-        icon={<DollarSign className="h-5 w-5" />}
-        label="Avg Market Value"
+        icon={<DollarSign className='size-5' />}
+        label='Avg Market Value'
         value={`$${data.avgMarketValue}`}
       />
       <MetricItem
-        icon={<ListIcon className="h-5 w-5" />}
-        label="Active Listings" 
+        icon={<ListIcon className='size-5' />}
+        label='Active Listings'
         value={data.activeListings}
       />
       <MetricItem
-        icon={<FileText className="h-5 w-5" />}
-        label="Contracted Players"
+        icon={<FileText className='size-5' />}
+        label='Contracted Players'
         value={data.contractedPlayers}
-      />
-      <MetricItem
-        icon={<TrendingUp className="h-5 w-5" />}
-        label="Total Market Cap"
-        value={`$${(data.totalMarketCap / 1000000).toFixed(1)}M`}
-        className="md:col-span-2 lg:col-span-1"
       />
     </div>
   );
@@ -79,14 +84,8 @@ async function MarketOverviewContent() {
 
 export function MarketOverviewCard() {
   return (
-    <DashboardCard
-      title="Market Overview"
-      description="Current market statistics and player data"
-      headerAction={<Badge variant="secondary">Live</Badge>}
-    >
-      <Suspense fallback={<MarketOverviewSkeleton />}>
-        <MarketOverviewContent />
-      </Suspense>
-    </DashboardCard>
+    <Suspense fallback={<MarketOverviewSkeleton />}>
+      <MarketOverviewContent />
+    </Suspense>
   );
 }

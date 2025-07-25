@@ -143,3 +143,63 @@ export async function getRisingStars(limit: number = 10): Promise<TopPlayer[]> {
 
   return data || [];
 }
+
+export async function getTopRatedPlayers(limit: number = 5): Promise<TopPlayer[]> {
+  const supabase = await createClient();
+  
+  const { data, error } = await supabase
+    .from('players')
+    .select('id, first_name, last_name, overall, primary_position, market_value_estimate, age, club_name')
+    .not('overall', 'is', null)
+    .order('overall', { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    console.error('Error fetching top rated players:', error);
+    return [];
+  }
+
+  return data || [];
+}
+
+export interface TopOwner {
+  owner_wallet_address: string;
+  owner_name: string | null;
+  player_count: number;
+  total_value: number;
+  avg_overall: number;
+}
+
+export async function getTopOwners(limit: number = 5): Promise<TopOwner[]> {
+  const supabase = await createClient();
+  
+  const { data, error } = await supabase.rpc('get_top_owners', {
+    limit_count: limit
+  });
+
+  if (error) {
+    console.error('Error fetching top owners:', error);
+    return [];
+  }
+
+  return data || [];
+}
+
+export interface FavoritePlayer extends TopPlayer {
+  favorite_count: number;
+}
+
+export async function getFavoritePlayers(limit: number = 5): Promise<FavoritePlayer[]> {
+  const supabase = await createClient();
+  
+  const { data, error } = await supabase.rpc('get_favorite_players', {
+    limit_count: limit
+  });
+
+  if (error) {
+    console.error('Error fetching favorite players:', error);
+    return [];
+  }
+
+  return data || [];
+}

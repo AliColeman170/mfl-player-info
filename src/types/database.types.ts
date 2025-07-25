@@ -382,6 +382,20 @@ export type Database = {
           avg_revenue_share: number
         }[]
       }
+      get_favorite_players: {
+        Args: { limit_count?: number }
+        Returns: {
+          id: number
+          first_name: string
+          last_name: string
+          overall: number
+          primary_position: string
+          market_value_estimate: number
+          age: number
+          club_name: string
+          favorite_count: number
+        }[]
+      }
       get_filter_counts: {
         Args: {
           search_text?: string
@@ -436,6 +450,16 @@ export type Database = {
           search_term?: string
         }
         Returns: Json
+      }
+      get_top_owners: {
+        Args: { limit_count?: number }
+        Returns: {
+          owner_wallet_address: string
+          owner_name: string
+          player_count: number
+          total_value: number
+          avg_overall: number
+        }[]
       }
     }
     Enums: {
