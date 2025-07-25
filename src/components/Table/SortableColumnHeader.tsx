@@ -5,7 +5,7 @@ import {
   ChevronUpDownIcon,
 } from '@heroicons/react/24/solid';
 import { Column } from '@tanstack/react-table';
-import { Button } from '../UI/Button';
+import { Button } from '../UI/button';
 import { cn } from '@/utils/helpers';
 
 export function SortableColumnHeader({
@@ -32,7 +32,7 @@ export function SortableColumnHeader({
             'physical',
           ].includes(column.id) && 'justify-center'
         )}
-        onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        onClick={column.getToggleSortingHandler()}
       >
         <span className='text-xs uppercase'>{label}</span>
         {/* {column.getIsSorted() === 'asc' && <ArrowDownIcon className='h-3 w-3' />}

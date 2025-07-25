@@ -1,16 +1,21 @@
 import './globals.css';
-import { Inter } from 'next/font/google';
+import { Titillium_Web } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/react';
 import { Metadata, Viewport } from 'next';
 import { ReactNode } from 'react';
 import { UserProvider } from '@/components/Wallet/UserProvider';
+import { QueryProvider } from '@/providers/QueryProvider';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { openGraph, twitter } from './shared-meta';
 import { getAuthUserProfile } from '@/data/auth';
 import { Toaster } from 'sonner';
+import { NuqsAdapter } from 'nuqs/adapters/next/app';
 
-const inter = Inter({ subsets: ['latin'] });
+const titilliumWeb = Titillium_Web({
+  weight: ['400', '600', '700'],
+  subsets: ['latin'],
+});
 
 export const viewport: Viewport = {
   themeColor: [
@@ -62,15 +67,19 @@ export default async function RootLayout({
   return (
     <html lang='en'>
       <body
-        className={`${inter.className} bg-background text-foreground flex min-h-screen flex-col`}
+        className={`${titilliumWeb.className} bg-background text-foreground flex min-h-screen flex-col`}
       >
-        <UserProvider userPromise={userPromise}>
-          <Header />
-          <main className='mx-auto w-full max-w-7xl flex-1 px-4 sm:px-6 lg:px-8'>
-            {children}
-          </main>
-          <Footer />
-        </UserProvider>
+        <QueryProvider>
+          <UserProvider userPromise={userPromise}>
+            <NuqsAdapter>
+              <Header />
+              <main className='mx-auto w-full max-w-7xl flex-1 px-4 sm:px-6 lg:px-8'>
+                {children}
+              </main>
+              <Footer />
+            </NuqsAdapter>
+          </UserProvider>
+        </QueryProvider>
         <Toaster richColors />
         <Analytics />
       </body>

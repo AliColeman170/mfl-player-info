@@ -18,7 +18,7 @@ export const getAuthUserProfile = async () => {
 
   if (!user) return null;
 
-  const userProfile = await getUserProfile(user?.user_metadata.address);
+  const userProfile = await getUserProfile(user?.app_metadata.address);
 
   if (!userProfile) return null;
 

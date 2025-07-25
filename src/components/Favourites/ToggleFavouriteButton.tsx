@@ -1,58 +1,69 @@
 'use client';
 
-import { HeartIcon as FilledHeartIcon } from '@heroicons/react/24/solid';
-import { HeartIcon } from '@heroicons/react/24/outline';
 import { SpinnerIcon } from '../SpinnerIcon';
-import { use, useTransition } from 'react';
+import { use } from 'react';
 import { cn } from '@/utils/helpers';
 import { Player } from '@/types/global.types';
 import { useUser } from '../Wallet/UserProvider';
-import { deleteFavourite, setFavourite } from '@/actions/favourites';
-import { toast } from 'sonner';
+import { Button } from '../UI/button';
+import { HeartIcon } from 'lucide-react';
+import { useToggleFavourite } from '@/hooks/useFavouriteMutations';
 
 export function ToggleFavouriteButton({
   player,
   isFavourite,
   className,
+  variant = 'ghost',
 }: {
   player: Player;
   isFavourite: boolean;
   className?: string;
+  variant?:
+    | 'ghost'
+    | 'link'
+    | 'default'
+    | 'destructive'
+    | 'outline'
+    | 'secondary'
+    | null;
 }) {
   const { userPromise } = useUser();
   const user = use(userPromise);
-  const [isPending, startTransition] = useTransition();
+  const toggleFavouriteMutation = useToggleFavourite();
+
+  console.log({ player });
 
   async function toggleFavourite() {
-    startTransition(async () => {
-      if (!user?.user_metadata.address) return;
-      if (isFavourite) {
-        const result = await deleteFavourite(player.id);
-        if (!result.success) {
-          toast.error(result.message);
-        }
-      } else {
-        const result = await setFavourite(player.id, !isFavourite);
-        if (!result.success) {
-          toast.error(result.message);
-        }
-      }
+    if (!user?.app_metadata.address) return;
+
+    console.log({
+      player_id: player.id,
+      is_favourite: !isFavourite,
+    });
+
+    toggleFavouriteMutation.mutate({
+      player_id: player.id,
+      is_favourite: !isFavourite,
     });
   }
 
   return (
-    <button
-      disabled={!user?.user_metadata.address || isPending}
-      className={cn('flex cursor-pointer', className)}
+    <Button
+      disabled={
+        !user?.app_metadata.address || toggleFavouriteMutation.isPending
+      }
+      className={cn('group flex cursor-pointer', className)}
       onClick={toggleFavourite}
+      variant={variant}
+      size='sm'
     >
-      {isPending ? (
-        <SpinnerIcon className='size-4 animate-spin' />
+      {toggleFavouriteMutation.isPending ? (
+        <SpinnerIcon className='animate-spin' />
       ) : isFavourite ? (
-        <FilledHeartIcon className='size-4 text-red-500 disabled:text-slate-500' />
+        <HeartIcon className='fill-red-500 text-red-500 disabled:text-slate-500' />
       ) : (
-        <HeartIcon className='size-4 group-hover:text-red-500' />
+        <HeartIcon className='group-hover:text-red-500' />
       )}
-    </button>
+    </Button>
   );
 }

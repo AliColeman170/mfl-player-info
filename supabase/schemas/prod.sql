@@ -84,6 +84,7 @@ ADD CONSTRAINT "favourites_pkey" PRIMARY KEY ("wallet_address", "player_id");
 ALTER TABLE ONLY "public"."nonces"
 ADD CONSTRAINT "nonces_pkey" PRIMARY KEY ("id");
 
+
 ALTER TABLE "public"."favourites" ENABLE ROW LEVEL SECURITY;
 
 ALTER TABLE "public"."nonces" ENABLE ROW LEVEL SECURITY;

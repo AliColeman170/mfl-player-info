@@ -10,7 +10,7 @@ import { FavouriteButton } from './FavouriteButton';
 import { ForSale } from './ForSale';
 import { PlayerContract } from './PlayerContract';
 import { Player } from '@/types/global.types';
-import { Button } from '../UI/Button';
+import { Button } from '../UI/button';
 
 function LoadingFavouriteButton() {
   return (

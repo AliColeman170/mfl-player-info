@@ -9,7 +9,7 @@ const nextConfig = {
     },
   },
   images: {
-    domains: ['d13e14gtps4iwl.cloudfront.net'],
+    domains: ['d13e14gtps4iwl.cloudfront.net', 'app.playmfl.com'],
     minimumCacheTTL: 2592000,
   },
 };

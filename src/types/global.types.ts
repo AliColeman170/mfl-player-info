@@ -34,7 +34,7 @@ export interface Player {
   id: number;
   metadata: Metadata;
   season?: Season;
-  ownedBy: OwnedBy;
+  ownedBy?: OwnedBy;
   activeContract?: ActiveContract;
   hasPreContract: boolean;
   energy: number;
@@ -197,8 +197,31 @@ export interface PositionRating {
   difference: number;
 }
 
+export interface MarketValue {
+  estimate: number;
+  low: number;
+  high: number;
+  confidence: 'high' | 'medium' | 'low';
+  method: string;
+  basedOn: string;
+  sampleSize: number;
+}
+
+export interface CurrentListing {
+  price: number;
+}
+
 export type PlayerWithFavouriteData = Player & {
   position_ratings: PositionRating[];
   is_favourite: boolean;
   tags: string[];
+  marketValue?: MarketValue;
+  currentListing?: CurrentListing;
+  club?: Club;
+  lastSyncedAt?: string;
+  // Computed fields from database
+  bestPosition?: string;
+  bestOvr?: number;
+  ovrDifference?: number;
+  priceDifference?: number | null;
 };

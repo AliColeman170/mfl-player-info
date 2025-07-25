@@ -1,7 +1,6 @@
 'use client';
 
 import {
-  cn,
   getPlayerPositionFamiliarityRatings,
   getPlayerPositionRatings,
 } from '@/utils/helpers';
@@ -9,20 +8,39 @@ import { PlayerStatsTable } from './PlayerStats';
 import { useMemo, useState } from 'react';
 import {
   Popover,
-  PopoverButton,
-  PopoverPanel,
-  Switch,
-} from '@headlessui/react';
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/UI/popover';
+import { Switch } from '@/components/UI/switch';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/UI/select';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/UI/collapsible';
 import {
   PositionFamiliarityIndicator,
   PositionalFamiliarityIndicator,
 } from './PositionFamiliarityIndicator';
 import { StyledRatingValue } from './StyledRatingValue';
 import { positionalFamiliarity } from '@/config';
-import { Cog8ToothIcon } from '@heroicons/react/24/outline';
 import type { Player, PlayerStats, StatKey } from '@/types/global.types';
-import { Button } from '../UI/Button';
-import { ChevronDownIcon } from '@heroicons/react/20/solid';
+import { Button } from '../UI/button';
+import {
+  SettingsIcon,
+  ChevronDownIcon,
+  FoldVerticalIcon,
+  UnfoldVerticalIcon,
+  ArrowDownFromLineIcon,
+  ArrowUpToLineIcon,
+  ChevronsUpDownIcon,
+} from 'lucide-react';
 
 export const DifferenceBadge = ({ difference }: { difference: number }) => {
   let colorClass = '';
@@ -38,7 +56,7 @@ export const DifferenceBadge = ({ difference }: { difference: number }) => {
   }
   return (
     <span
-      className={`inline-flex w-7 justify-center text-sm font-medium sm:text-base ${colorClass}`}
+      className={`inline-flex justify-center text-sm font-medium tabular-nums ${colorClass}`}
     >
       {text}
     </span>
@@ -60,6 +78,7 @@ export function PositionRatings({ player }: { player: Player }) {
     useState<boolean>(true);
   const [isCaptain, setIsCaptain] = useState<boolean>(false);
   const [captainPosition, setCaptainPosition] = useState<string>('');
+  const [isExpanded, setIsExpanded] = useState<boolean>(false);
 
   const [stats, setStats] = useState<PlayerStats>(defaultPlayerStats);
 
@@ -114,7 +133,7 @@ export function PositionRatings({ player }: { player: Player }) {
 
   return (
     <>
-      <div className='mt-8'>
+      <div className='mt-6'>
         <PlayerStatsTable
           player={player}
           stats={stats}
@@ -125,149 +144,126 @@ export function PositionRatings({ player }: { player: Player }) {
         />
       </div>
 
-      <div className='mt-8'>
-        <div className='flex items-center justify-between'>
-          <h2 className='text-2xl font-bold tracking-tight sm:text-3xl'>
-            Position Ratings
-          </h2>
-          <Popover className='relative'>
-            <PopoverButton as={Button} variant='outline' size='lg'>
-              <Cog8ToothIcon />
-            </PopoverButton>
+      <div className='mt-6'>
+        <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
+          <div className='bg-card border-border flex items-center justify-between rounded-md border py-1.5 pr-2 pl-4'>
+            <div className='flex items-center gap-1.5'>
+              <h2 className='text-base font-semibold'>Position Ratings</h2>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant='ghost' size='icon' className='size-7 p-1'>
+                    <SettingsIcon className='size-3.5' />
+                  </Button>
+                </PopoverTrigger>
 
-            <PopoverPanel className='bg-popover shadow-foreground/5 ring-border absolute right-0 z-10 mt-1 w-60 space-y-4 rounded-lg p-4 text-sm shadow-2xl ring-1'>
-              <div className='grid grid-cols-1 gap-y-4'>
-                <div className='flex items-center justify-between gap-x-3'>
-                  <label
-                    htmlFor='training-toggle'
-                    className='text-right text-sm font-semibold'
-                  >
-                    Training
-                  </label>
-                  <Switch
-                    id='training-toggle'
-                    checked={isTrainingMode}
-                    onChange={handleToggleSwitch}
-                    className={cn(
-                      isTrainingMode ? 'bg-primary' : 'bg-secondary',
-                      'focus:ring-primary focus:ring-offset-popover relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:ring-2 focus:ring-offset-2 focus:outline-hidden'
-                    )}
-                  >
-                    <span
-                      aria-hidden='true'
-                      className={cn(
-                        isTrainingMode ? 'translate-x-5' : 'translate-x-0',
-                        'pointer-events-none inline-block size-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out'
-                      )}
-                    />
-                  </Switch>
-                </div>
-                <div className='flex items-center justify-between gap-x-3'>
-                  <label
-                    htmlFor='training-toggle'
-                    className='text-sm font-semibold text-nowrap'
-                  >
-                    Pos. Familiarity
-                  </label>
-                  <Switch
-                    id='training-toggle'
-                    checked={enablePositionalFamiliarity}
-                    onChange={setEnablePositionalFamiliarity}
-                    className={cn(
-                      enablePositionalFamiliarity
-                        ? 'bg-primary'
-                        : 'bg-secondary',
-                      'focus:ring-primary focus:ring-offset-popover relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:ring-2 focus:ring-offset-2 focus:outline-hidden'
-                    )}
-                  >
-                    <span
-                      aria-hidden='true'
-                      className={cn(
-                        enablePositionalFamiliarity
-                          ? 'translate-x-5'
-                          : 'translate-x-0',
-                        'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out'
-                      )}
-                    />
-                  </Switch>
-                </div>
-                <div className='flex items-center justify-between gap-x-3'>
-                  <label
-                    htmlFor='training-toggle'
-                    className='text-right text-sm font-semibold text-nowrap'
-                  >
-                    Make Captain
-                  </label>
-                  <Switch
-                    id='training-toggle'
-                    checked={isCaptain}
-                    onChange={setIsCaptain}
-                    className={cn(
-                      isCaptain ? 'bg-primary' : 'bg-secondary',
-                      'focus:ring-primary focus:ring-offset-popover relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:ring-2 focus:ring-offset-2 focus:outline-hidden'
-                    )}
-                  >
-                    <span
-                      aria-hidden='true'
-                      className={cn(
-                        isCaptain ? 'translate-x-5' : 'translate-x-0',
-                        'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out'
-                      )}
-                    />
-                  </Switch>
-                </div>
-                {!isCaptain && (
-                  <div className='flex items-center justify-between gap-x-3'>
-                    <label
-                      htmlFor='captainPosition'
-                      className='text-right text-sm font-semibold text-nowrap'
-                    >
-                      Captain Pos.
-                    </label>
-                    <div className='grid grid-cols-1'>
-                      <select
-                        id='captainPosition'
-                        name='captainPosition'
-                        className='focus:outline-primary bg-card outline-border col-start-1 row-start-1 w-full appearance-none rounded-md py-1.5 pr-8 pl-3 text-base outline-1 -outline-offset-1 focus:outline-2 focus:-outline-offset-2'
-                        value={captainPosition}
-                        onChange={(e) => setCaptainPosition(e.target.value)}
+                <PopoverContent className='w-60' align='end'>
+                  <div className='grid gap-y-3.5'>
+                    <div className='flex items-center justify-between gap-x-2'>
+                      <label
+                        htmlFor='training-toggle'
+                        className='text-right text-sm font-semibold'
                       >
-                        <option value=''></option>
-                        {positionalFamiliarity.map((pos) => (
-                          <option
-                            key={pos.primaryPosition}
-                            value={pos.primaryPosition}
-                          >
-                            {pos.primaryPosition}
-                          </option>
-                        ))}
-                      </select>
-                      <ChevronDownIcon
-                        aria-hidden='true'
-                        className='pointer-events-none col-start-1 row-start-1 mr-2 size-5 self-center justify-self-end text-gray-500 sm:size-4'
+                        Training
+                      </label>
+                      <Switch
+                        id='training-toggle'
+                        checked={isTrainingMode}
+                        onCheckedChange={handleToggleSwitch}
                       />
                     </div>
+                    <div className='flex items-center justify-between gap-x-2'>
+                      <label
+                        htmlFor='pos-familiarity-toggle'
+                        className='text-sm font-semibold text-nowrap'
+                      >
+                        Pos. Familiarity
+                      </label>
+                      <Switch
+                        id='pos-familiarity-toggle'
+                        checked={enablePositionalFamiliarity}
+                        onCheckedChange={setEnablePositionalFamiliarity}
+                      />
+                    </div>
+                    <div className='flex items-center justify-between gap-x-2'>
+                      <label
+                        htmlFor='captain-toggle'
+                        className='text-right text-sm font-semibold text-nowrap'
+                      >
+                        Make Captain
+                      </label>
+                      <Switch
+                        id='captain-toggle'
+                        checked={isCaptain}
+                        onCheckedChange={setIsCaptain}
+                      />
+                    </div>
+                    {!isCaptain && (
+                      <div className='flex items-center justify-between gap-x-2'>
+                        <label className='text-right text-sm font-semibold text-nowrap'>
+                          Captain Pos.
+                        </label>
+                        <Select
+                          value={captainPosition || 'none'}
+                          onValueChange={(value) =>
+                            setCaptainPosition(value === 'none' ? '' : value)
+                          }
+                        >
+                          <SelectTrigger className='w-full max-w-22' size='sm'>
+                            <SelectValue placeholder='' />
+                          </SelectTrigger>
+                          <SelectContent
+                            className='w-[var(--radix-select-trigger-width)] min-w-22'
+                            align='end'
+                          >
+                            <SelectItem value='none'>
+                              <span className='text-muted-foreground'>
+                                None
+                              </span>
+                            </SelectItem>
+                            {positionalFamiliarity.map((pos) => (
+                              <SelectItem
+                                key={pos.primaryPosition}
+                                value={pos.primaryPosition}
+                              >
+                                {pos.primaryPosition}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            </PopoverPanel>
-          </Popover>
-        </div>
-        <div className='divide-border mt-5 grid divide-y'>
-          {enablePositionalFamiliarity ? (
-            <>
-              {playerPositionFamiliarityRatings.map(
-                ({ position, rating, difference }) => {
-                  if (
-                    position === 'GK' &&
-                    !player.metadata.positions.includes('GK')
-                  ) {
-                    return null;
-                  }
-                  return (
-                    <div key={position} className='grid grid-cols-2 py-1.5'>
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            <CollapsibleTrigger asChild>
+              <Button variant='ghost' size='sm' className='p-1'>
+                <ChevronsUpDownIcon />
+                <span className='sr-only'>Toggle</span>
+              </Button>
+            </CollapsibleTrigger>
+          </div>
+          <div className='divide-border mt-1 grid divide-y'>
+            {enablePositionalFamiliarity ? (
+              <>
+                {/* First two positions always visible */}
+                {playerPositionFamiliarityRatings
+                  .filter(
+                    ({ position }) =>
+                      !(
+                        position === 'GK' &&
+                        !player.metadata.positions.includes('GK')
+                      )
+                  )
+                  .slice(0, 3)
+                  .map(({ position, rating, difference }) => (
+                    <div
+                      key={position}
+                      className='grid grid-cols-2 py-1.5 pr-3 pl-4'
+                    >
                       <div className='flex items-center gap-3'>
-                        <span className='text-sm sm:text-base'>{position}</span>
+                        <span className='text-sm'>{position}</span>
                         <PositionalFamiliarityIndicator
                           player={player}
                           position={position}
@@ -275,45 +271,125 @@ export function PositionRatings({ player }: { player: Player }) {
                       </div>
                       <div className='flex items-center justify-end gap-3 text-center font-medium whitespace-nowrap'>
                         <DifferenceBadge difference={difference} />
-                        <StyledRatingValue rating={rating} />
+                        <StyledRatingValue rating={rating} size='sm' />
                       </div>
                     </div>
-                  );
-                }
-              )}
-            </>
-          ) : (
-            <>
-              {positionRatings.map(({ positions, rating, difference }) => {
-                if (
-                  positions.includes('GK') &&
-                  !player.metadata.positions.includes('GK')
-                )
-                  return null;
-                return (
-                  <div
-                    key={positions.join('-')}
-                    className='grid grid-cols-2 py-1.5'
-                  >
-                    <div className='flex w-full items-center gap-3 text-left font-medium whitespace-nowrap'>
-                      <span className='text-sm sm:text-base'>
-                        {positions.join(' / ')}
-                      </span>
-                      <PositionFamiliarityIndicator
-                        player={player}
-                        positions={positions}
-                      />
+                  ))}
+
+                {/* Collapsible content for remaining positions */}
+                {playerPositionFamiliarityRatings.filter(
+                  ({ position }) =>
+                    !(
+                      position === 'GK' &&
+                      !player.metadata.positions.includes('GK')
+                    )
+                ).length > 3 && (
+                  <CollapsibleContent className='divide-border grid divide-y'>
+                    {playerPositionFamiliarityRatings
+                      .filter(
+                        ({ position }) =>
+                          !(
+                            position === 'GK' &&
+                            !player.metadata.positions.includes('GK')
+                          )
+                      )
+                      .slice(2)
+                      .map(({ position, rating, difference }) => (
+                        <div
+                          key={position}
+                          className='grid grid-cols-2 py-1.5 pr-3 pl-4'
+                        >
+                          <div className='flex items-center gap-3'>
+                            <span className='text-sm'>{position}</span>
+                            <PositionalFamiliarityIndicator
+                              player={player}
+                              position={position}
+                            />
+                          </div>
+                          <div className='flex items-center justify-end gap-3 text-center font-medium whitespace-nowrap'>
+                            <DifferenceBadge difference={difference} />
+                            <StyledRatingValue rating={rating} size='sm' />
+                          </div>
+                        </div>
+                      ))}
+                  </CollapsibleContent>
+                )}
+              </>
+            ) : (
+              <>
+                {/* First two positions always visible */}
+                {positionRatings
+                  .filter(
+                    ({ positions }) =>
+                      !(
+                        positions.includes('GK') &&
+                        !player.metadata.positions.includes('GK')
+                      )
+                  )
+                  .slice(0, 3)
+                  .map(({ positions, rating, difference }) => (
+                    <div
+                      key={positions.join('-')}
+                      className='grid grid-cols-2 py-1.5 pr-3 pl-4'
+                    >
+                      <div className='flex w-full items-center gap-3 text-left font-medium whitespace-nowrap'>
+                        <span className='text-sm'>{positions.join(' / ')}</span>
+                        <PositionFamiliarityIndicator
+                          player={player}
+                          positions={positions}
+                        />
+                      </div>
+                      <div className='flex items-center justify-end gap-3 text-center font-medium whitespace-nowrap'>
+                        <DifferenceBadge difference={difference} />
+                        <StyledRatingValue rating={rating} size='sm' />
+                      </div>
                     </div>
-                    <div className='flex items-center justify-end gap-3 text-center font-medium whitespace-nowrap'>
-                      <DifferenceBadge difference={difference} />
-                      <StyledRatingValue rating={rating} />
-                    </div>
-                  </div>
-                );
-              })}
-            </>
-          )}
-        </div>
+                  ))}
+
+                {/* Collapsible content for remaining positions */}
+                {positionRatings.filter(
+                  ({ positions }) =>
+                    !(
+                      positions.includes('GK') &&
+                      !player.metadata.positions.includes('GK')
+                    )
+                ).length > 3 && (
+                  <CollapsibleContent className='divide-border grid divide-y'>
+                    {positionRatings
+                      .filter(
+                        ({ positions }) =>
+                          !(
+                            positions.includes('GK') &&
+                            !player.metadata.positions.includes('GK')
+                          )
+                      )
+                      .slice(2)
+                      .map(({ positions, rating, difference }) => (
+                        <div
+                          key={positions.join('-')}
+                          className='grid grid-cols-2 py-1.5 pr-3 pl-4'
+                        >
+                          <div className='flex w-full items-center gap-3 text-left font-medium whitespace-nowrap'>
+                            <span className='text-sm'>
+                              {positions.join(' / ')}
+                            </span>
+                            <PositionFamiliarityIndicator
+                              player={player}
+                              positions={positions}
+                            />
+                          </div>
+                          <div className='flex items-center justify-end gap-3 text-center font-medium whitespace-nowrap'>
+                            <DifferenceBadge difference={difference} />
+                            <StyledRatingValue rating={rating} size='sm' />
+                          </div>
+                        </div>
+                      ))}
+                  </CollapsibleContent>
+                )}
+              </>
+            )}
+          </div>
+        </Collapsible>
       </div>
     </>
   );

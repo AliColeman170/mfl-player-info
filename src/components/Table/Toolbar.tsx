@@ -14,7 +14,7 @@ import Image from 'next/image';
 import { FavouriteToggle } from './FavouriteToggle';
 import { Table } from '@tanstack/react-table';
 import { PlayerWithFavouriteData } from '@/types/global.types';
-import { Button } from '../UI/Button';
+import { Button } from '../UI/button';
 
 export function Toolbar({ table }: { table: Table<PlayerWithFavouriteData> }) {
   const [showFilterControls, setShowFilterControls] = useState(false);

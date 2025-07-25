@@ -1,27 +1,30 @@
-import Player from '@/components/Player';
+import { ClientPlayerPage } from '@/components/Player/ClientPlayerPage';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { openGraph, twitter } from '@/app/shared-meta';
-import { getPlayerById } from '@/data/players';
+import { createClient } from '@/lib/supabase/server';
 
 type Props = {
-  params: Promise<{ id: number }>;
+  params: Promise<{ id: string }>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
 export const experimental_ppr = true;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const id = (await params).id;
+  const id = parseInt((await params).id, 10);
 
-  // fetch data
-  const player = await getPlayerById(id);
+  // Minimal fetch for metadata - just get basic player info
+  const supabase = await createClient();
+  const { data: player } = await supabase
+    .from('players')
+    .select('first_name, last_name')
+    .eq('id', id)
+    .single();
 
   if (!player) return notFound();
 
-  const { firstName, lastName } = player.metadata;
-
-  const title = `${firstName} ${lastName} | #${id} | MFL Player Info`;
+  const title = `${player.first_name} ${player.last_name} | #${id} | MFL Player Info`;
   const url = `${process.env.NEXT_SITE_URL}/player/${id}`;
 
   return {
@@ -42,11 +45,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function PlayerPage({ params }: Props) {
-  const id = (await params).id;
+  const id = parseInt((await params).id, 10);
 
-  const player = await getPlayerById(id);
-
-  if (!player) notFound();
-
-  return <Player player={player} />;
+  return <ClientPlayerPage playerId={id} />;
 }
