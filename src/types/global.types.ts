@@ -111,6 +111,8 @@ export interface Listing {
   player?: Player;
   sellerAddress: string;
   sellerName: string;
+  buyerAddress?: string;
+  buyerName?: string;
   purchaseDateTime?: number;
   createdDateTime: number;
 }

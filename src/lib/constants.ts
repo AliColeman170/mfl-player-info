@@ -1,22 +1,23 @@
 // Position order for sorting and display
 export const POSITION_ORDER = [
   'GK',
-  'RB', 
+  'RB',
   'LB',
   'CB',
   'RWB',
-  'LWB', 
+  'LWB',
   'CDM',
   'RM',
   'LM',
   'CM',
+  'CAM',
   'RW',
   'LW',
   'CF',
-  'ST'
+  'ST',
 ] as const;
 
-export type Position = typeof POSITION_ORDER[number];
+export type Position = (typeof POSITION_ORDER)[number];
 
 // Create a mapping of position to index for sorting
 export const POSITION_INDEX_MAP: Record<string, number> = POSITION_ORDER.reduce(

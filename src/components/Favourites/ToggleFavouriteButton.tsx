@@ -52,10 +52,13 @@ export function ToggleFavouriteButton({
       disabled={
         !user?.app_metadata.address || toggleFavouriteMutation.isPending
       }
-      className={cn('group flex cursor-pointer', className)}
+      size='sm'
+      className={cn(
+        'group flex cursor-pointer items-center justify-center disabled:cursor-not-allowed',
+        className
+      )}
       onClick={toggleFavourite}
       variant={variant}
-      size='sm'
     >
       {toggleFavouriteMutation.isPending ? (
         <SpinnerIcon className='animate-spin' />

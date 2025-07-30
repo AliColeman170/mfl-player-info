@@ -20,7 +20,7 @@ export function StyledRatingValue({
   return (
     <div
       className={cn(
-        'flex items-center justify-center rounded-md border p-1 text-center font-medium',
+        'flex items-center justify-center rounded-md border p-1 text-center font-semibold',
         sizeVariants[size],
         tierClasses
       )}

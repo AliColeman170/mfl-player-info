@@ -67,7 +67,10 @@ async function FavoritePlayersContent() {
                   </span>
                   <Badge
                     variant='secondary'
-                    className={cn('text-[10px]', tierClasses)}
+                    className={cn(
+                      'px-1.5 text-[10px] font-semibold',
+                      tierClasses
+                    )}
                   >
                     {player.overall}
                   </Badge>

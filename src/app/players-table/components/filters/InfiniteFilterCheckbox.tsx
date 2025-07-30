@@ -46,7 +46,7 @@ export function InfiniteFilterCheckbox({
 
   // Flatten all pages into a single array
   const allOptions = useMemo(() => {
-    return data?.pages.flatMap((page) => page.items) ?? [];
+    return data?.pages.flatMap((page: any) => page.items) ?? [];
   }, [data]);
 
   // Add selected items that might not be in the current results

@@ -14,19 +14,48 @@ export interface MarketOverviewData {
 export async function getMarketOverview(): Promise<MarketOverviewData> {
   const supabase = await createClient();
   
+  // Get total player count
+  const { count: totalPlayers, error: countError } = await supabase
+    .from('players')
+    .select('id', { count: 'exact', head: true });
+
+  if (countError) {
+    console.error('Error fetching player count:', countError);
+    throw new Error('Failed to fetch player count');
+  }
+
+  // Get active listings count
+  const { count: activeListings, error: listingsError } = await supabase
+    .from('players')
+    .select('id', { count: 'exact', head: true })
+    .not('current_listing_id', 'is', null);
+
+  if (listingsError) {
+    console.error('Error fetching active listings count:', listingsError);
+    throw new Error('Failed to fetch active listings count');
+  }
+
+  // Get contracted players count
+  const { count: contractedPlayers, error: contractError } = await supabase
+    .from('players')
+    .select('id', { count: 'exact', head: true })
+    .not('contract_id', 'is', null);
+
+  if (contractError) {
+    console.error('Error fetching contracted players count:', contractError);
+    throw new Error('Failed to fetch contracted players count');
+  }
+
+  // Get market data for calculations (still need the actual data for calculations)
   const { data, error } = await supabase
     .from('players')
-    .select('market_value_estimate, current_listing_status, contract_status')
+    .select('market_value_estimate')
     .not('market_value_estimate', 'is', null);
 
   if (error) {
     console.error('Error fetching market overview:', error);
     throw new Error('Failed to fetch market overview data');
   }
-
-  const totalPlayers = data.length;
-  const activeListings = data.filter(p => p.current_listing_status === 'ACTIVE').length;
-  const contractedPlayers = data.filter(p => p.contract_status === 'ACTIVE').length;
   const marketValues = data.map(p => p.market_value_estimate).filter(Boolean);
   const avgMarketValue = marketValues.length > 0 
     ? marketValues.reduce((sum, val) => sum + val, 0) / marketValues.length 
@@ -34,10 +63,10 @@ export async function getMarketOverview(): Promise<MarketOverviewData> {
   const totalMarketCap = marketValues.reduce((sum, val) => sum + val, 0);
 
   return {
-    totalPlayers,
+    totalPlayers: totalPlayers || 0,
     avgMarketValue: Math.round(avgMarketValue),
-    activeListings,
-    contractedPlayers,
+    activeListings: activeListings || 0,
+    contractedPlayers: contractedPlayers || 0,
     totalMarketCap: Math.round(totalMarketCap),
   };
 }

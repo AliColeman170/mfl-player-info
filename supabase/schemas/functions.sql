@@ -647,6 +647,7 @@ BEGIN
     p.owner_wallet_address IS NOT NULL
     AND p.market_value_estimate IS NOT NULL
     AND p.overall IS NOT NULL
+    AND p.owner_wallet_address != '0xff8d2bbed8164db0'
   GROUP BY p.owner_wallet_address, p.owner_name
   ORDER BY player_count DESC
   LIMIT limit_count;

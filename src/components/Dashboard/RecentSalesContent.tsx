@@ -8,6 +8,7 @@ import { useRecentSales } from '@/hooks/useRecentSales';
 import { Clock, CrownIcon } from 'lucide-react';
 import { getTierFromOverall, getTierClasses } from '@/lib/tier-colors';
 import { cn } from '@/lib/utils';
+import { StyledRatingValue } from '../Player/StyledRatingValue';
 
 function RecentSalesSkeleton() {
   return (
@@ -93,9 +94,12 @@ export function RecentSalesContent() {
                   </span>
                   <Badge
                     variant='secondary'
-                    className={cn('border', tierClasses)}
+                    className={cn(
+                      'px-1.5 text-[10px] font-semibold',
+                      tierClasses
+                    )}
                   >
-                    #{sale.playerId}
+                    {sale.playerOverall}
                   </Badge>
                 </div>
                 <div className='flex items-center gap-1'>
@@ -118,21 +122,23 @@ export function RecentSalesContent() {
               </div>
 
               {/* Sale Info */}
-              <div className='shrink-0 text-right'>
-                <p className='flex items-center justify-end gap-1 text-sm font-semibold text-green-600'>
-                  {sale.price.toLocaleString(undefined, {
-                    style: 'currency',
-                    currency: 'USD',
-                  })}
-                </p>
-                <p className='text-muted-foreground text-xs'>
-                  {sale.purchaseDate.toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
-                </p>
+              <div className='flex shrink-0 items-center gap-4'>
+                <div className='text-right'>
+                  <p className='flex items-center justify-end gap-1 text-sm font-semibold text-green-600'>
+                    {sale.price.toLocaleString(undefined, {
+                      style: 'currency',
+                      currency: 'USD',
+                    })}
+                  </p>
+                  <p className='text-muted-foreground text-xs'>
+                    {sale.purchaseDate.toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </p>
+                </div>
               </div>
             </div>
           </Link>

@@ -148,7 +148,7 @@ export function ClientPlayer({ playerId }: ClientPlayerProps) {
           <PlayerCardSVG player={player} />
 
           {/* Action buttons below card - matching ImageCard layout */}
-          <div className='mt-4 flex items-center justify-center space-x-1.5'>
+          <div className='mt-4 flex items-center justify-center gap-x-1.5'>
             <ToggleFavouriteButton
               player={player}
               isFavourite={player.is_favourite || false}
@@ -164,7 +164,7 @@ export function ClientPlayer({ playerId }: ClientPlayerProps) {
                   },
                 }}
               >
-                <ArrowsRightLeftIcon className='h-4 w-4' />
+                <ArrowsRightLeftIcon />
               </Link>
             </Button>
             <Button asChild size='sm' variant='secondary'>

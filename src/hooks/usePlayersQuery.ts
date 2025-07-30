@@ -361,33 +361,61 @@ async function fetchPlayersFromDB({
       'metadata.preferredFoot': 'preferred_foot',
       id: 'id',
       // Add computed fields that can be sorted
+      position: 'position_index',
       bestPosition: 'best_position_index',
       bestOvr: 'best_ovr',
       bestRating: 'best_ovr',
       ovrDifference: 'ovr_difference',
       difference: 'ovr_difference',
       'marketValue.estimate': 'market_value_estimate',
+      marketValue: 'market_value_estimate',
       'currentListing.price': 'current_listing_price',
+      listingPrice: 'current_listing_price',
       priceDifference: 'price_difference',
       'ownedBy.name': 'owner_name_lower',
+      ownerName: 'owner_name',
       'club.name': 'club_name_lower',
+      club: 'club_name',
+      name: 'search_text',
+      nationality: 'nationality',
+      'metadata.nationalities[0]': 'nationality',
+      'metadata.positions[0]': 'position_index',
+      overall: 'overall',
     };
 
     // Handle array fields with PostgreSQL array indexing
     let dbColumn = sortFieldMap[filters.sortBy] || filters.sortBy;
 
+    // Define fields that should have nulls sorted last
+    const nullsLastFields = [
+      'market_value_estimate',
+      'current_listing_price', 
+      'price_difference',
+      'best_ovr',
+      'ovr_difference',
+      'best_position_index',
+      'club_name',
+      'owner_name',
+    ];
+
+    // Define rating fields that should never have nulls first when descending
+    const ratingFields = [
+      'overall', 'pace', 'shooting', 'passing', 'dribbling', 'defense', 'physical', 
+      'best_ovr', 'market_value_estimate'
+    ];
+
     // Convert array access to new field names
     if (filters.sortBy === 'metadata.nationalities[0]') {
       // Sort by nationality field
       query = query.order('nationality', { ascending });
-    } else if (filters.sortBy === 'metadata.positions[0]') {
+    } else if (filters.sortBy === 'metadata.positions[0]' || filters.sortBy === 'position') {
       // Sort by position_index field for proper position ordering
       query = query.order('position_index', { ascending });
-    } else if (
-      filters.sortBy === 'currentListing.price' ||
-      filters.sortBy === 'priceDifference'
-    ) {
-      // Sort price fields with nulls last for both ascending and descending
+    } else if (nullsLastFields.includes(dbColumn)) {
+      // Sort fields with nulls last for both ascending and descending
+      query = query.order(dbColumn, { ascending, nullsFirst: false });
+    } else if (ratingFields.includes(dbColumn) && !ascending) {
+      // For rating fields in descending order, put nulls last (want highest ratings first)
       query = query.order(dbColumn, { ascending, nullsFirst: false });
     } else {
       // Regular field sorting

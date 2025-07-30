@@ -78,10 +78,53 @@ export type Database = {
         }
         Relationships: []
       }
+      player_sync_metadata: {
+        Row: {
+          completed_at: string | null
+          current_page: number | null
+          error_message: string | null
+          id: number
+          last_player_id: number | null
+          started_at: string | null
+          status: string | null
+          sync_type: string
+          total_fetched: number | null
+          total_saved: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          current_page?: number | null
+          error_message?: string | null
+          id?: number
+          last_player_id?: number | null
+          started_at?: string | null
+          status?: string | null
+          sync_type?: string
+          total_fetched?: number | null
+          total_saved?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          current_page?: number | null
+          error_message?: string | null
+          id?: number
+          last_player_id?: number | null
+          started_at?: string | null
+          status?: string | null
+          sync_type?: string
+          total_fetched?: number | null
+          total_saved?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       players: {
         Row: {
           age: number | null
           auto_renewal: boolean | null
+          basic_data_synced_at: string | null
           best_ovr: number | null
           best_position: string | null
           best_position_difference: number | null
@@ -115,12 +158,14 @@ export type Database = {
           has_pre_contract: boolean | null
           height: number | null
           id: number
+          is_retired: boolean | null
           last_name: string | null
           last_sale_date: number | null
           last_sale_price: number | null
           last_synced_at: string | null
           listing_created_date_time: number | null
           market_value_based_on: string | null
+          market_value_calculated_at: string | null
           market_value_confidence: string | null
           market_value_estimate: number | null
           market_value_high: number | null
@@ -155,6 +200,7 @@ export type Database = {
           secondary_positions: string[] | null
           shooting: number | null
           start_season: number | null
+          sync_stage: string | null
           sync_version: number | null
           total_revenue_share_locked: number | null
           updated_at: string | null
@@ -162,6 +208,7 @@ export type Database = {
         Insert: {
           age?: number | null
           auto_renewal?: boolean | null
+          basic_data_synced_at?: string | null
           best_ovr?: number | null
           best_position?: string | null
           best_position_difference?: number | null
@@ -195,12 +242,14 @@ export type Database = {
           has_pre_contract?: boolean | null
           height?: number | null
           id: number
+          is_retired?: boolean | null
           last_name?: string | null
           last_sale_date?: number | null
           last_sale_price?: number | null
           last_synced_at?: string | null
           listing_created_date_time?: number | null
           market_value_based_on?: string | null
+          market_value_calculated_at?: string | null
           market_value_confidence?: string | null
           market_value_estimate?: number | null
           market_value_high?: number | null
@@ -235,6 +284,7 @@ export type Database = {
           secondary_positions?: string[] | null
           shooting?: number | null
           start_season?: number | null
+          sync_stage?: string | null
           sync_version?: number | null
           total_revenue_share_locked?: number | null
           updated_at?: string | null
@@ -242,6 +292,7 @@ export type Database = {
         Update: {
           age?: number | null
           auto_renewal?: boolean | null
+          basic_data_synced_at?: string | null
           best_ovr?: number | null
           best_position?: string | null
           best_position_difference?: number | null
@@ -275,12 +326,14 @@ export type Database = {
           has_pre_contract?: boolean | null
           height?: number | null
           id?: number
+          is_retired?: boolean | null
           last_name?: string | null
           last_sale_date?: number | null
           last_sale_price?: number | null
           last_synced_at?: string | null
           listing_created_date_time?: number | null
           market_value_based_on?: string | null
+          market_value_calculated_at?: string | null
           market_value_confidence?: string | null
           market_value_estimate?: number | null
           market_value_high?: number | null
@@ -315,8 +368,224 @@ export type Database = {
           secondary_positions?: string[] | null
           shooting?: number | null
           start_season?: number | null
+          sync_stage?: string | null
           sync_version?: number | null
           total_revenue_share_locked?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      sales: {
+        Row: {
+          buyer_wallet_address: string | null
+          created_date_time: number
+          imported_at: string | null
+          listing_resource_id: number
+          player_age: number | null
+          player_id: number
+          player_overall: number | null
+          player_position: string | null
+          price: number
+          purchase_date_time: number | null
+          seller_wallet_address: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          buyer_wallet_address?: string | null
+          created_date_time: number
+          imported_at?: string | null
+          listing_resource_id: number
+          player_age?: number | null
+          player_id: number
+          player_overall?: number | null
+          player_position?: string | null
+          price: number
+          purchase_date_time?: number | null
+          seller_wallet_address?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          buyer_wallet_address?: string | null
+          created_date_time?: number
+          imported_at?: string | null
+          listing_resource_id?: number
+          player_age?: number | null
+          player_id?: number
+          player_overall?: number | null
+          player_position?: string | null
+          price?: number
+          purchase_date_time?: number | null
+          seller_wallet_address?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sales_sync_metadata: {
+        Row: {
+          completed_at: string | null
+          current_page: number | null
+          error_message: string | null
+          id: number
+          last_listing_id: number | null
+          started_at: string | null
+          status: string | null
+          sync_type: string
+          total_fetched: number | null
+          total_saved: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          current_page?: number | null
+          error_message?: string | null
+          id?: number
+          last_listing_id?: number | null
+          started_at?: string | null
+          status?: string | null
+          sync_type?: string
+          total_fetched?: number | null
+          total_saved?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          current_page?: number | null
+          error_message?: string | null
+          id?: number
+          last_listing_id?: number | null
+          started_at?: string | null
+          status?: string | null
+          sync_type?: string
+          total_fetched?: number | null
+          total_saved?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      sync_config: {
+        Row: {
+          config_key: string
+          config_value: string | null
+          created_at: string | null
+          description: string | null
+          id: number
+          updated_at: string | null
+        }
+        Insert: {
+          config_key: string
+          config_value?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: number
+          updated_at?: string | null
+        }
+        Update: {
+          config_key?: string
+          config_value?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: number
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      sync_executions: {
+        Row: {
+          completed_at: string | null
+          duration_ms: number | null
+          error_message: string | null
+          execution_type: string
+          id: number
+          progress_data: Json | null
+          records_failed: number | null
+          records_processed: number | null
+          stage_name: string
+          started_at: string | null
+          status: string
+          triggered_by: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          duration_ms?: number | null
+          error_message?: string | null
+          execution_type: string
+          id?: number
+          progress_data?: Json | null
+          records_failed?: number | null
+          records_processed?: number | null
+          stage_name: string
+          started_at?: string | null
+          status?: string
+          triggered_by?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          duration_ms?: number | null
+          error_message?: string | null
+          execution_type?: string
+          id?: number
+          progress_data?: Json | null
+          records_failed?: number | null
+          records_processed?: number | null
+          stage_name?: string
+          started_at?: string | null
+          status?: string
+          triggered_by?: string | null
+        }
+        Relationships: []
+      }
+      sync_stages: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          error_message: string | null
+          id: number
+          is_one_time: boolean | null
+          last_run_at: string | null
+          last_success_at: string | null
+          progress: Json | null
+          stage_name: string
+          stage_order: number
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          error_message?: string | null
+          id?: number
+          is_one_time?: boolean | null
+          last_run_at?: string | null
+          last_success_at?: string | null
+          progress?: Json | null
+          stage_name: string
+          stage_order: number
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          error_message?: string | null
+          id?: number
+          is_one_time?: boolean | null
+          last_run_at?: string | null
+          last_success_at?: string | null
+          progress?: Json | null
+          stage_name?: string
+          stage_order?: number
+          status?: string | null
           updated_at?: string | null
         }
         Relationships: []
@@ -449,6 +718,10 @@ export type Database = {
           offset_value?: number
           search_term?: string
         }
+        Returns: Json
+      }
+      get_sync_status: {
+        Args: Record<PropertyKey, never>
         Returns: Json
       }
       get_top_owners: {

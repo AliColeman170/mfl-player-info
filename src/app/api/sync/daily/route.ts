@@ -5,10 +5,12 @@ export const maxDuration = 600 // 10 minutes for full sync
 
 export async function POST(request: NextRequest) {
   try {
-    // Check authorization
-    const authHeader = request.headers.get('authorization')
-    if (!authHeader || authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Check authorization (bypass in development)
+    if (process.env.NODE_ENV !== 'development') {
+      const authHeader = request.headers.get('authorization')
+      if (!authHeader || authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      }
     }
 
     console.log('Starting daily sync...')

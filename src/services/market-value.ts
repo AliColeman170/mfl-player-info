@@ -1,6 +1,6 @@
 import 'server-only';
 import { Player } from '@/types/global.types';
-import { getEnhancedMarketData } from '@/data/listings';
+import { getEnhancedMarketDataFromDB } from '@/data/sales';
 import { calculateEMA, type EMAResult } from './ema-pricing';
 import {
   predictValueFromStats,
@@ -67,8 +67,8 @@ export async function calculateMarketValue(
 
     console.log(`Calculating market value for player ${player.id}`);
 
-    // Get enhanced market data
-    const marketData = await getEnhancedMarketData(player, {
+    // Get enhanced market data from local database
+    const marketData = await getEnhancedMarketDataFromDB(player, {
       maxResults: 50,
       expandSearch: true,
     });
@@ -145,7 +145,7 @@ export async function calculateMarketValue(
  */
 async function calculateWithEMA(
   _player: Player,
-  marketData: ReturnType<typeof getEnhancedMarketData> extends Promise<infer T>
+  marketData: ReturnType<typeof getEnhancedMarketDataFromDB> extends Promise<infer T>
     ? T
     : never,
   testConfigs: Record<string, any> = {}
@@ -235,7 +235,7 @@ async function calculateWithEMA(
  */
 async function calculateWithStatistics(
   _player: Player,
-  marketData: ReturnType<typeof getEnhancedMarketData> extends Promise<infer T>
+  marketData: ReturnType<typeof getEnhancedMarketDataFromDB> extends Promise<infer T>
     ? T
     : never,
   _testConfigs: Record<string, any> = {}

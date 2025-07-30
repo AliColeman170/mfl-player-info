@@ -3,6 +3,16 @@ import { createClient } from '@supabase/supabase-js'
 import { calculateComputedFields, ComputedPlayerFields } from './computed-fields'
 import { updateSyncProgress } from './sync-status'
 
+/**
+ * Custom error class for rate limiting
+ */
+export class RateLimitError extends Error {
+  constructor(message: string, public statusCode: number) {
+    super(message)
+    this.name = 'RateLimitError'
+  }
+}
+
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -25,8 +35,8 @@ export interface BatchProcessOptions {
 
 const DEFAULT_OPTIONS: BatchProcessOptions = {
   batchSize: 100,
-  maxRetries: 3,
-  retryDelay: 1000,
+  maxRetries: 5,
+  retryDelay: 2000,
 }
 
 /**
@@ -163,20 +173,32 @@ export async function processBatch(
 }
 
 /**
- * Fetch players from external API in batches
+ * Fetch players from external API with cursor pagination and rate limiting
  */
 export async function fetchPlayersFromAPI(
-  offset: number = 0,
-  limit: number = 1500
+  limit: number = 1500,
+  beforePlayerId?: number
 ): Promise<Player[]> {
-  const url = `https://z519wdyajg.execute-api.us-east-1.amazonaws.com/prod/players?limit=${limit}&offset=${offset}`
+  let url = `https://z519wdyajg.execute-api.us-east-1.amazonaws.com/prod/players?limit=${limit}`
   
-  console.log(`Fetching players from API: offset=${offset}, limit=${limit}`)
+  if (beforePlayerId) {
+    url += `&beforePlayerId=${beforePlayerId}`
+  }
+  
+  console.log(`Fetching players from API: limit=${limit}${beforePlayerId ? `, beforePlayerId=${beforePlayerId}` : ''}`)
   
   const response = await fetch(url)
   
   if (!response.ok) {
-    throw new Error(`API request failed: ${response.status} ${response.statusText}`)
+    const errorMessage = `API request failed: ${url} Error: HTTP ${response.status}: ${response.statusText}`
+    
+    // Handle rate limiting specifically
+    if (response.status === 403 || response.status === 429) {
+      console.warn(`Rate limited (${response.status}), will retry with backoff`)
+      throw new RateLimitError(errorMessage, response.status)
+    }
+    
+    throw new Error(errorMessage)
   }
   
   const players = await response.json()
@@ -187,7 +209,45 @@ export async function fetchPlayersFromAPI(
 }
 
 /**
- * Fetch single player from external API
+ * Fetch all players from external API using cursor pagination
+ */
+export async function fetchAllPlayersFromAPI(): Promise<Player[]> {
+  const allPlayers: Player[] = []
+  let beforePlayerId: number | undefined = undefined
+  let hasMore = true
+  
+  console.log('Starting to fetch all players using cursor pagination...')
+  
+  while (hasMore) {
+    const players = await fetchPlayersFromAPI(1500, beforePlayerId)
+    
+    if (players.length === 0) {
+      hasMore = false
+      break
+    }
+    
+    allPlayers.push(...players)
+    
+    // Use the last player's ID as the cursor for the next page
+    beforePlayerId = players[players.length - 1].id
+    
+    console.log(`Fetched ${players.length} players. Total so far: ${allPlayers.length}. Last player ID: ${beforePlayerId}`)
+    
+    // If we got less than the limit, we've reached the end
+    if (players.length < 1500) {
+      hasMore = false
+    }
+    
+    // Longer delay between pages to avoid rate limiting
+    await sleep(2000)
+  }
+  
+  console.log(`Finished fetching all players. Total: ${allPlayers.length}`)
+  return allPlayers
+}
+
+/**
+ * Fetch single player from external API with rate limiting
  */
 export async function fetchSinglePlayerFromAPI(playerId: number): Promise<Player> {
   const url = `https://z519wdyajg.execute-api.us-east-1.amazonaws.com/prod/players/${playerId}`
@@ -197,7 +257,15 @@ export async function fetchSinglePlayerFromAPI(playerId: number): Promise<Player
   const response = await fetch(url)
   
   if (!response.ok) {
-    throw new Error(`API request failed: ${response.status} ${response.statusText}`)
+    const errorMessage = `API request failed: ${url} Error: HTTP ${response.status}: ${response.statusText}`
+    
+    // Handle rate limiting specifically
+    if (response.status === 403 || response.status === 429) {
+      console.warn(`Rate limited (${response.status}), will retry with backoff`)
+      throw new RateLimitError(errorMessage, response.status)
+    }
+    
+    throw new Error(errorMessage)
   }
   
   const data = await response.json()
@@ -226,12 +294,12 @@ function sleep(ms: number): Promise<void> {
 }
 
 /**
- * Exponential backoff retry logic
+ * Enhanced exponential backoff retry logic with special rate limit handling
  */
 export async function withRetry<T>(
   fn: () => Promise<T>,
-  maxRetries: number = 3,
-  baseDelay: number = 1000
+  maxRetries: number = 5,
+  baseDelay: number = 2000
 ): Promise<T> {
   let lastError: Error | null = null
   
@@ -245,9 +313,19 @@ export async function withRetry<T>(
         throw lastError
       }
       
-      // Exponential backoff with jitter
-      const delay = baseDelay * Math.pow(2, attempt) + Math.random() * 1000
-      console.log(`Attempt ${attempt + 1} failed, retrying in ${delay}ms...`)
+      let delay: number
+      
+      // Special handling for rate limiting (403/429 errors)
+      if (error instanceof RateLimitError) {
+        // Much longer delays for rate limiting
+        delay = baseDelay * Math.pow(3, attempt) + Math.random() * 2000
+        console.log(`Rate limit hit (${error.statusCode}), backing off for ${Math.round(delay)}ms (attempt ${attempt + 1}/${maxRetries})`)
+      } else {
+        // Regular exponential backoff for other errors
+        delay = baseDelay * Math.pow(2, attempt) + Math.random() * 1000
+        console.log(`Request failed: ${lastError.message}. Retrying in ${Math.round(delay)}ms (attempt ${attempt + 1}/${maxRetries})`)
+      }
+      
       await sleep(delay)
     }
   }

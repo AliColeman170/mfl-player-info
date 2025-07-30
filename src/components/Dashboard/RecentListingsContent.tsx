@@ -8,6 +8,7 @@ import { useRecentListings } from '@/hooks/useRecentListings';
 import { Clock, CrownIcon, ShoppingBasketIcon } from 'lucide-react';
 import { getTierFromOverall, getTierClasses } from '@/lib/tier-colors';
 import { cn } from '@/lib/utils';
+import { StyledRatingValue } from '../Player/StyledRatingValue';
 
 function RecentListingsSkeleton() {
   return (
@@ -28,9 +29,12 @@ function RecentListingsSkeleton() {
               <Skeleton className='h-4 w-12' />
             </div>
           </div>
-          <div className='flex flex-col items-end gap-1 text-right'>
-            <Skeleton className='h-5 w-16' />
-            <Skeleton className='h-3 w-20' />
+          <div className='flex shrink-0 items-center gap-12'>
+            <Skeleton className='size-8' />
+            <div className='flex flex-col items-end gap-1 text-right'>
+              <Skeleton className='h-5 w-16' />
+              <Skeleton className='h-3 w-20' />
+            </div>
           </div>
         </div>
       ))}
@@ -75,7 +79,7 @@ export function RecentListingsContent() {
             href={`/player/${listing.playerId}`}
             className='block'
           >
-            <div className='bg-muted/50 hover:bg-muted/70 group flex items-center gap-4 rounded-lg px-3 py-2 transition-colors'>
+            <div className='bg-muted/50 hover:bg-muted/70 group flex items-center justify-between gap-4 rounded-lg px-3 py-2 transition-colors'>
               {/* Player Card Image */}
               <Image
                 src={`https://d13e14gtps4iwl.cloudfront.net/players/v2/${listing.playerId}/card.png`}
@@ -93,9 +97,12 @@ export function RecentListingsContent() {
                   </span>
                   <Badge
                     variant='secondary'
-                    className={cn('border', tierClasses)}
+                    className={cn(
+                      'px-1.5 text-[10px] font-semibold',
+                      tierClasses
+                    )}
                   >
-                    #{listing.playerId}
+                    {listing.playerOverall}
                   </Badge>
                 </div>
                 <div className='flex items-center gap-1'>
@@ -118,21 +125,23 @@ export function RecentListingsContent() {
               </div>
 
               {/* Listing Info */}
-              <div className='shrink-0 text-right'>
-                <p className='flex items-center justify-end gap-1 text-sm font-semibold text-blue-600'>
-                  {listing.price.toLocaleString(undefined, {
-                    style: 'currency',
-                    currency: 'USD',
-                  })}
-                </p>
-                <p className='text-muted-foreground text-xs'>
-                  {listing.listingDate.toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
-                </p>
+              <div className='flex shrink-0 items-center gap-4'>
+                <div className='text-right'>
+                  <p className='flex items-center justify-end gap-1 text-sm font-semibold text-blue-600'>
+                    {listing.price.toLocaleString(undefined, {
+                      style: 'currency',
+                      currency: 'USD',
+                    })}
+                  </p>
+                  <p className='text-muted-foreground text-xs'>
+                    {listing.listingDate.toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </p>
+                </div>
               </div>
             </div>
           </Link>

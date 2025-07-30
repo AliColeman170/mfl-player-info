@@ -5,6 +5,7 @@ import { RecentListingsCard } from '@/components/Dashboard/RecentListingsCard';
 import { TopRatedPlayersCard } from '@/components/Dashboard/TopRatedPlayersCard';
 import { FavoritePlayersCard } from '@/components/Dashboard/FavoritePlayersCard';
 import { TopOwnersCard } from '@/components/Dashboard/TopOwnersCard';
+import { SyncStatusCard } from '@/components/Dashboard/SyncStatusCard';
 
 export const metadata: Metadata = {
   alternates: {
@@ -46,6 +47,11 @@ export default function Home() {
         {/* Recent Listings - Right column on large screens */}
         <div className='lg:col-span-6'>
           <RecentListingsCard />
+        </div>
+
+        {/* Sync Status - Full width */}
+        <div className='lg:col-span-12'>
+          <SyncStatusCard />
         </div>
       </div>
     </div>

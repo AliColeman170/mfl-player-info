@@ -1,7 +1,7 @@
 import { Player } from '@/types/global.types';
 import { getPlayerPositionFamiliarityRatings } from '@/utils/helpers';
 import { calculateMarketValue } from '@/services/market-value';
-import { getListingByPlayerId } from '@/data/players';
+// Removed getListingByPlayerId import - no longer needed for bulk sync
 import { getPositionIndex } from '@/lib/constants';
 
 export interface ComputedPlayerFields {
@@ -130,38 +130,14 @@ export async function calculateComputedFields(
     const club = contract?.club;
     const owner = player.ownedBy;
 
-    // Fetch current listing data to populate sale price in table
-    // This checks if the player is currently for sale on the MFL marketplace
-    let listingData: {
-      current_listing_id: number | null;
-      current_listing_price: number | null;
-      current_listing_status: string | null;
-      listing_created_date_time: number | null;
-    } = {
+    // Skip listing data fetch during bulk sync to avoid API rate limits
+    // This data can be populated separately or during individual player updates
+    const listingData = {
       current_listing_id: null,
       current_listing_price: null,
       current_listing_status: null,
       listing_created_date_time: null,
     };
-
-    try {
-      const listing = await getListingByPlayerId(player.id);
-      if (listing) {
-        listingData = {
-          current_listing_id: listing.listingResourceId,
-          current_listing_price: listing.price,
-          current_listing_status: listing.status,
-          listing_created_date_time: listing.createdDateTime,
-        };
-        console.log(`Found listing for player ${player.id}: $${listing.price}`);
-      }
-    } catch (error) {
-      console.error(
-        `Failed to fetch listing data for player ${player.id}:`,
-        error
-      );
-      // Keep default null values
-    }
 
     // Generate data hash for change detection
     const dataHash = generateDataHash(player);

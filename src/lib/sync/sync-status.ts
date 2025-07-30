@@ -7,7 +7,7 @@ const supabase = createClient(
 
 export interface SyncStatus {
   id: number
-  sync_type: 'full' | 'individual'
+  sync_type: 'full' | 'individual' | 'listings'
   status: 'running' | 'completed' | 'failed'
   total_players: number
   synced_players: number
