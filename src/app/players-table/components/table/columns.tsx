@@ -12,11 +12,17 @@ import { PlayerWithFavouriteData } from '../../types';
 import { Badge } from '@/components/UI/badge';
 import { Button } from '@/components/UI/button';
 import {
-  ArrowUpRightFromSquareIcon,
+  AccessibilityIcon,
+  AmbulanceIcon,
+  FlameIcon,
   Loader2Icon,
   LockIcon,
   MoreVerticalIcon,
   RefreshCwIcon,
+  ShieldXIcon,
+  SofaIcon,
+  TentIcon,
+  TentTreeIcon,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -24,6 +30,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/UI/dropdown-menu';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/UI/tooltip';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useUser } from '@/components/Wallet/UserProvider';
@@ -244,36 +256,53 @@ export const columns = [
     size: 60,
   }),
 
-  // Player name with link and external icon
+  // Player name with link and status indicators
   columnHelper.accessor(
     (row) => `${row.metadata.firstName} ${row.metadata.lastName}`,
     {
       id: 'name',
       header: 'Name',
-      cell: ({ row, getValue }) => (
-        <div className='flex min-w-0 items-center gap-1'>
-          <Link
-            href={`/player/${row.original.id}`}
-            className='truncate font-medium hover:underline'
-          >
-            {getValue()}
-          </Link>
-          <Button
-            variant='ghost'
-            size='icon'
-            className='size-6 p-0 opacity-60 hover:opacity-100'
-            asChild
-          >
+      cell: ({ row, getValue }) => {
+        const player = row.original;
+        return (
+          <div className='flex min-w-0 items-center gap-2'>
             <Link
-              href={`https://app.playmfl.com/player/${row.original.id}`}
-              target='_blank'
-              rel='noopener noreferrer'
+              href={`/player/${player.id}`}
+              className={cn(
+                'truncate font-medium hover:underline',
+                (player.is_burned || player.is_retired) &&
+                  'line-through opacity-50 hover:opacity-100'
+              )}
             >
-              <ArrowUpRightFromSquareIcon className='size-3' />
+              {getValue()}
             </Link>
-          </Button>
-        </div>
-      ),
+            <div className='flex gap-1'>
+              <TooltipProvider>
+                {player.is_retired && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <ShieldXIcon className='text-secondary/50 hover:text-secondary size-4' />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Retired</p>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+                {player.is_burned && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <FlameIcon className='fill-destructive stroke-destructive size-4' />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Burned</p>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+              </TooltipProvider>
+            </div>
+          </div>
+        );
+      },
       enableSorting: true,
       size: 200,
     }

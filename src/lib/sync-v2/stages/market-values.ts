@@ -50,6 +50,10 @@ export async function calculateMarketValues(
     const marketMultipliers = await preloadMarketMultipliers();
     console.log(`[Market Values] Pre-loaded ${Object.keys(marketMultipliers).length} market multipliers from database`);
     
+    // Calculate current baseline price from recent sales data
+    const baselinePrice = await calculateCurrentBaselinePrice();
+    console.log(`[Market Values] Calculated baseline price: $${baselinePrice.toFixed(2)}`);
+    
     // First, get total count of players to process
     let countQuery = supabase
       .from('players')
@@ -127,7 +131,7 @@ export async function calculateMarketValues(
         try {
           console.log(`[Market Values] Processing sub-batch ${Math.floor(i / opts.batchSize!) + 1} of page (${batch.length} players)`);
 
-          const batchResult = await processMarketValueBatch(batch, marketMultipliers);
+          const batchResult = await processMarketValueBatch(batch, marketMultipliers, baselinePrice);
           totalProcessed += batchResult.processed;
           totalFailed += batchResult.failed;
           errors.push(...batchResult.errors);
@@ -197,6 +201,66 @@ export async function calculateMarketValues(
       errors: [errorMsg, ...errors],
     };
   }
+}
+
+/**
+ * Calculate current baseline price from recent sales data
+ * Uses the same logic as market-multiplier-updater.ts
+ */
+async function calculateCurrentBaselinePrice(): Promise<number> {
+  console.log('[Market Values] Calculating baseline price from recent sales...');
+  
+  // Get recent sales data (last 180 days should be sufficient for baseline)
+  const cutoffDate = Date.now() - (180 * 24 * 60 * 60 * 1000);
+  
+  const { data: recentSales, error } = await supabase
+    .from('sales')
+    .select('price, player_age, player_overall, player_position')
+    .eq('status', 'BOUGHT')
+    .gte('price', 1)
+    .gte('purchase_date_time', cutoffDate)
+    .not('player_age', 'is', null)
+    .not('player_overall', 'is', null)
+    .not('player_position', 'is', null);
+
+  if (error || !recentSales || recentSales.length === 0) {
+    console.warn('Failed to get recent sales for baseline calculation, using fallback');
+    return 50; // Fallback baseline price
+  }
+
+  console.log(`[Market Values] Analyzing ${recentSales.length} recent sales for baseline`);
+
+  // Use CM, age 25, 76-78 overall as baseline (same as market-multiplier-updater.ts)
+  const baselineSales = recentSales.filter(sale => 
+    sale.player_position === 'CM' &&
+    sale.player_age === 25 &&
+    sale.player_overall >= 76 && sale.player_overall <= 78
+  );
+  
+  if (baselineSales.length >= 3) {
+    const baselinePrice = baselineSales.reduce((sum, sale) => sum + sale.price, 0) / baselineSales.length;
+    console.log(`[Market Values] Found ${baselineSales.length} exact baseline sales, avg: $${baselinePrice.toFixed(2)}`);
+    return baselinePrice;
+  }
+  
+  // Broader baseline: CM, ages 24-27, 76-78 overall
+  const broaderBaselineSales = recentSales.filter(sale => 
+    sale.player_position === 'CM' &&
+    sale.player_age >= 24 && sale.player_age <= 27 &&
+    sale.player_overall >= 76 && sale.player_overall <= 78
+  );
+  
+  if (broaderBaselineSales.length >= 5) {
+    const baselinePrice = broaderBaselineSales.reduce((sum, sale) => sum + sale.price, 0) / broaderBaselineSales.length;
+    console.log(`[Market Values] Found ${broaderBaselineSales.length} broader baseline sales, avg: $${baselinePrice.toFixed(2)}`);
+    return baselinePrice;
+  }
+  
+  // Fallback: use overall median price
+  const allPrices = recentSales.map(s => s.price).sort((a, b) => a - b);
+  const medianPrice = allPrices[Math.floor(allPrices.length / 2)];
+  console.log(`[Market Values] Using median price from ${allPrices.length} sales: $${medianPrice.toFixed(2)}`);
+  return medianPrice;
 }
 
 /**
@@ -322,7 +386,8 @@ interface PlayerForMarketValue {
 
 async function processMarketValueBatch(
   players: PlayerForMarketValue[],
-  marketMultipliers: Record<string, number>
+  marketMultipliers: Record<string, number>,
+  baselinePrice: number
 ): Promise<{ processed: number; failed: number; errors: string[] }> {
   const errors: string[] = [];
   let processed = 0;
@@ -336,7 +401,7 @@ async function processMarketValueBatch(
     
     // Calculate market values using cached multipliers (much faster)
     const calculationResults = await Promise.allSettled(
-      chunk.map(player => calculatePlayerMarketValueWithCache(player, marketMultipliers))
+      chunk.map(player => calculatePlayerMarketValueWithCache(player, marketMultipliers, baselinePrice))
     );
     
     // Prepare bulk update data
@@ -399,7 +464,8 @@ async function processMarketValueBatch(
  */
 function calculatePlayerMarketValueWithCache(
   player: PlayerForMarketValue,
-  marketMultipliers: Record<string, number>
+  marketMultipliers: Record<string, number>,
+  baselinePrice: number
 ): any {
   // Get the market multiplier for this player from the cache
   const multiplier = getMarketMultiplierFromCache(
@@ -409,12 +475,8 @@ function calculatePlayerMarketValueWithCache(
     marketMultipliers
   );
   
-  // Calculate baseline price (this should match the baseline used when generating multipliers)
-  // From market-multiplier-updater.ts: baseline is CM, age 25, 76-78 overall = 1.0
-  const BASELINE_PRICE = 50; // Estimated baseline market price in dollars
-  
-  // Calculate estimated value using the multiplier
-  const estimatedValue = Math.round(BASELINE_PRICE * multiplier);
+  // Calculate estimated value using the multiplier and actual baseline price
+  const estimatedValue = Math.round(baselinePrice * multiplier);
   
   // Calculate confidence based on whether we found the multiplier in cache vs fallback
   const key = `${player.primary_position}|${player.age}|${getOverallRange(player.overall)}`;
@@ -435,7 +497,7 @@ function calculatePlayerMarketValueWithCache(
     method: isFromDatabase ? 'database-multiplier' : 'fallback-multiplier',
     sampleSize: isFromDatabase ? 1 : 0, // Indicate if from database
     basedOn: isFromDatabase 
-      ? `Database multiplier for ${player.primary_position} ${player.age}yo ${getOverallRange(player.overall)}ovr`
+      ? `Database multiplier ${multiplier.toFixed(3)} × baseline $${baselinePrice.toFixed(0)}`
       : `Fallback calculation for ${player.primary_position} ${player.age}yo ${player.overall}ovr`
   };
 }

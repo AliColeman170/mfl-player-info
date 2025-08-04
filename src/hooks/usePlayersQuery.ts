@@ -78,6 +78,8 @@ async function fetchPlayersFromDB({
       current_listing_price,
       price_difference,
       last_synced_at,
+      is_retired,
+      is_burned,
       favourites (
         is_favourite,
         tags
@@ -145,6 +147,25 @@ async function fetchPlayersFromDB({
     };
   }
 
+  // Handle status filtering
+  if (filters.status && filters.status.length > 0) {
+    const statusConditions: string[] = [];
+    
+    if (filters.status.includes('available')) {
+      statusConditions.push('and(is_retired.eq.false,is_burned.eq.false)');
+    }
+    if (filters.status.includes('retired')) {
+      statusConditions.push('is_retired.eq.true');
+    }
+    if (filters.status.includes('burned')) {
+      statusConditions.push('is_burned.eq.true');
+    }
+    
+    if (statusConditions.length > 0) {
+      query = query.or(statusConditions.join(','));
+    }
+  }
+
   // Handle tags filtering (requires user to be logged in)
   if (filters.tags && filters.tags.length > 0 && userWalletAddress) {
     let taggedPlayerIds;
@@ -210,6 +231,11 @@ async function fetchPlayersFromDB({
 
   if (filters.positions && filters.positions.length > 0) {
     query = query.in('primary_position', filters.positions);
+  }
+  
+  // Handle primaryPositions field as well (for compatibility)
+  if (filters.primaryPositions && filters.primaryPositions.length > 0) {
+    query = query.in('primary_position', filters.primaryPositions);
   }
 
   if (filters.secondaryPositions && filters.secondaryPositions.length > 0) {
@@ -598,6 +624,9 @@ async function fetchPlayersFromDB({
     is_favourite: row.favourites?.[0]?.is_favourite ?? false,
     tags: row.favourites?.[0]?.tags || [],
     lastSyncedAt: row.last_synced_at || undefined,
+    // Status fields
+    is_retired: row.is_retired ?? false,
+    is_burned: row.is_burned ?? false,
   }));
 
   // Create simple offset-based cursor

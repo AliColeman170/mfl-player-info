@@ -56,6 +56,13 @@ CREATE TABLE IF NOT EXISTS "public"."players" (
     "owner_name_lower" "text" GENERATED ALWAYS AS (lower(trim(owner_name))) STORED,
     "owner_twitter" "text",
     "owner_last_active" bigint,
+    -- Burned status
+    "is_burned" boolean GENERATED ALWAYS AS (
+        CASE 
+            WHEN "owner_wallet_address" = '0x6fec8986261ecf49' THEN true 
+            ELSE false 
+        END
+    ) STORED,
     -- Market/listing data
     "current_listing_id" bigint,
     "current_listing_price" integer,
@@ -303,6 +310,8 @@ CREATE INDEX IF NOT EXISTS "idx_players_resistance" ON "public"."players" USING 
 CREATE INDEX IF NOT EXISTS "idx_players_data_hash" ON "public"."players" USING "btree" ("data_hash");
 
 CREATE INDEX IF NOT EXISTS "idx_players_is_retired" ON "public"."players" USING "btree" ("is_retired");
+
+CREATE INDEX IF NOT EXISTS "idx_players_is_burned" ON "public"."players" USING "btree" ("is_burned");
 
 CREATE INDEX IF NOT EXISTS "idx_sync_status_type" ON "public"."sync_status" USING "btree" ("status", "sync_type");
 

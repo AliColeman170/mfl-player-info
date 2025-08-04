@@ -7,6 +7,7 @@ import { TagsList } from '../Tags/TagsList';
 import { createColumnHelper } from '@tanstack/react-table';
 import Image from 'next/image';
 import { PlayerWithFavouriteData } from '@/types/global.types';
+import { Badge } from '@/components/UI/badge';
 
 export const columnLabels = [
   {
@@ -141,13 +142,28 @@ export const columns = [
         <SortableColumnHeader column={column} label='Name' />
       ),
       cell: ({ row, getValue }) => {
+        const player = row.original;
         return (
-          <Link
-            href={`/player/${row.original.id}`}
-            className='text-primary hover:text-primary/80 font-semibold'
-          >
-            {getValue<string>()}
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link
+              href={`/player/${player.id}`}
+              className='text-primary hover:text-primary/80 font-semibold'
+            >
+              {getValue<string>()}
+            </Link>
+            <div className="flex gap-1">
+              {player.is_retired && (
+                <Badge variant="secondary" className="text-xs px-1.5 py-0.5 h-auto">
+                  Retired
+                </Badge>
+              )}
+              {player.is_burned && (
+                <Badge variant="destructive" className="text-xs px-1.5 py-0.5 h-auto">
+                  Burned
+                </Badge>
+              )}
+            </div>
+          </div>
         );
       },
       sortingFn: (a, b) => {

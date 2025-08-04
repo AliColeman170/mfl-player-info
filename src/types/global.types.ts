@@ -226,4 +226,7 @@ export type PlayerWithFavouriteData = Player & {
   bestOvr?: number;
   ovrDifference?: number;
   priceDifference?: number | null;
+  // Status fields
+  is_retired?: boolean;
+  is_burned?: boolean;
 };

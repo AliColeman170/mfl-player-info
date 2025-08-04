@@ -236,6 +236,7 @@ export type Database = {
           has_pre_contract: boolean | null
           height: number | null
           id: number
+          is_burned: boolean | null
           is_retired: boolean | null
           last_name: string | null
           last_sale_date: number | null
@@ -320,6 +321,7 @@ export type Database = {
           has_pre_contract?: boolean | null
           height?: number | null
           id: number
+          is_burned?: boolean | null
           is_retired?: boolean | null
           last_name?: string | null
           last_sale_date?: number | null
@@ -404,6 +406,7 @@ export type Database = {
           has_pre_contract?: boolean | null
           height?: number | null
           id?: number
+          is_burned?: boolean | null
           is_retired?: boolean | null
           last_name?: string | null
           last_sale_date?: number | null

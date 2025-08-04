@@ -58,6 +58,7 @@ CREATE OR REPLACE FUNCTION get_filter_counts (
   -- Search filters
   search_text TEXT DEFAULT NULL,
   favourites_filter TEXT DEFAULT 'all',
+  status_filter TEXT[] DEFAULT '{}',
   selected_tags TEXT[] DEFAULT '{}',
   tags_match_all BOOLEAN DEFAULT FALSE,
   authenticated_wallet_address TEXT DEFAULT NULL,
@@ -139,6 +140,34 @@ BEGIN
         base_query := base_query || ' AND f.tags && ARRAY[''' || array_to_string(selected_tags, ''',''') || ''']::text[]';
       END IF;
     END IF;
+  END IF;
+  
+  -- Add status filter
+  IF array_length(status_filter, 1) > 0 THEN
+    base_query := base_query || ' AND (';
+    
+    -- Build OR conditions for selected statuses
+    IF 'available' = ANY(status_filter) THEN
+      base_query := base_query || '(p.is_retired = false AND p.is_burned = false)';
+      -- Add OR if there are more conditions
+      IF 'retired' = ANY(status_filter) OR 'burned' = ANY(status_filter) THEN
+        base_query := base_query || ' OR ';
+      END IF;
+    END IF;
+    
+    IF 'retired' = ANY(status_filter) THEN
+      base_query := base_query || 'p.is_retired = true';
+      -- Add OR if burned is also selected
+      IF 'burned' = ANY(status_filter) THEN
+        base_query := base_query || ' OR ';
+      END IF;
+    END IF;
+    
+    IF 'burned' = ANY(status_filter) THEN
+      base_query := base_query || 'p.is_burned = true';
+    END IF;
+    
+    base_query := base_query || ')';
   END IF;
   
   -- Add wallet address filter
@@ -281,7 +310,6 @@ BEGIN
           AND p.owner_name IS NOT NULL
           GROUP BY owner, p.owner_name_lower
           ORDER BY count DESC, p.owner_name_lower
-          LIMIT 100
         ) t
       ),
       ''clubs'', (
@@ -308,7 +336,6 @@ BEGIN
               WHEN p.club_name IS NULL THEN ''free agent''
               ELSE p.club_name_lower 
             END
-          LIMIT 100
         ) t
       ),
       ''bestPositions'', (
@@ -328,6 +355,26 @@ BEGIN
           ' || base_query || '
           GROUP BY foot
           ORDER BY count DESC, foot
+        ) t
+      ),
+      ''status'', (
+        SELECT json_object_agg(status, count)
+        FROM (
+          SELECT 
+            CASE 
+              WHEN p.is_burned = true THEN ''burned''
+              WHEN p.is_retired = true THEN ''retired''
+              ELSE ''available''
+            END as status,
+            COUNT(*) as count
+          ' || base_query || '
+          GROUP BY 
+            CASE 
+              WHEN p.is_burned = true THEN ''burned''
+              WHEN p.is_retired = true THEN ''retired''
+              ELSE ''available''
+            END
+          ORDER BY count DESC
         ) t
       )' || 
       CASE WHEN has_wallet THEN
@@ -648,6 +695,7 @@ BEGIN
     AND p.market_value_estimate IS NOT NULL
     AND p.overall IS NOT NULL
     AND p.owner_wallet_address != '0xff8d2bbed8164db0'
+    AND p.owner_wallet_address != '0x6fec8986261ecf49'
   GROUP BY p.owner_wallet_address, p.owner_name
   ORDER BY player_count DESC
   LIMIT limit_count;

@@ -9,10 +9,13 @@ import { Badge } from '../UI/badge';
 import Image from 'next/image';
 import { PlayerContract } from './PlayerContract';
 import {
+  BadgeXIcon,
   CrownIcon,
+  FlameIcon,
   InfoIcon,
   Loader2Icon,
   LockIcon,
+  ShieldXIcon,
   ShoppingCartIcon,
 } from 'lucide-react';
 import {
@@ -112,6 +115,8 @@ export function ClientPlayer({ playerId }: ClientPlayerProps) {
   const user = use(userPromise);
   const isAuthenticated = !!user?.app_metadata?.address;
 
+  console.log({ player });
+
   if (isLoading) {
     return (
       <div className='flex items-center justify-center p-8'>
@@ -192,6 +197,24 @@ export function ClientPlayer({ playerId }: ClientPlayerProps) {
             </Badge>
           </div>
           <div className='flex items-center gap-1.5'>
+            {player.is_burned && (
+              <Badge
+                variant='destructive'
+                className='text-[10px] [&>svg]:size-2.5'
+              >
+                <FlameIcon className='shrink-0' />
+                Burned
+              </Badge>
+            )}
+            {player.is_retired && (
+              <Badge
+                variant='secondary'
+                className='text-[10px] [&>svg]:size-2.5'
+              >
+                <ShieldXIcon className='shrink-0' />
+                Retired
+              </Badge>
+            )}
             {player.currentListing?.price && (
               <Link href={`https://app.playmfl.com/players/${player.id}`}>
                 <Tooltip>
@@ -207,7 +230,9 @@ export function ClientPlayer({ playerId }: ClientPlayerProps) {
                 </Tooltip>
               </Link>
             )}
-            <PlayerContract club={player.club} />
+            {(!player.is_retired || !player.is_burned) && (
+              <PlayerContract club={player.club} />
+            )}
             <Badge
               variant='outline'
               className='flex items-center gap-1 text-[10px] [&>svg]:size-2.5'

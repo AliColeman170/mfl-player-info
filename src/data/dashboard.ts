@@ -13,60 +13,110 @@ export interface MarketOverviewData {
 
 export async function getMarketOverview(): Promise<MarketOverviewData> {
   const supabase = await createClient();
-  
-  // Get total player count
-  const { count: totalPlayers, error: countError } = await supabase
-    .from('players')
-    .select('id', { count: 'exact', head: true });
 
-  if (countError) {
-    console.error('Error fetching player count:', countError);
-    throw new Error('Failed to fetch player count');
+  // Initialize fallback values
+  let totalPlayers = 0;
+  let activeListings = 0;
+  let contractedPlayers = 0;
+  let avgMarketValue = 0;
+  let totalMarketCap = 0;
+
+  try {
+    // Get total player count
+    const { count: totalPlayersCount, error: countError } = await supabase
+      .from('players')
+      .select('id', { count: 'exact', head: true });
+
+    if (countError) {
+      console.error('Error fetching player count:', countError);
+    } else {
+      totalPlayers = totalPlayersCount || 0;
+    }
+
+    // Get active listings count with timeout handling
+    try {
+      const { count: activeListingsCount, error: listingsError } =
+        await supabase
+          .from('players')
+          .select('id', { count: 'exact', head: true })
+          .not('current_listing_id', 'is', null);
+
+      if (listingsError) {
+        console.error('Error fetching active listings count:', listingsError);
+      } else {
+        activeListings = activeListingsCount || 0;
+      }
+    } catch (listingsTimeout) {
+      console.warn(
+        'Active listings query timed out, using fallback value:',
+        listingsTimeout
+      );
+      activeListings = 0;
+    }
+
+    // Get contracted players count
+    try {
+      const { count: contractedPlayersCount, error: contractError } =
+        await supabase
+          .from('players')
+          .select('id', { count: 'exact', head: true })
+          .not('contract_id', 'is', null);
+
+      if (contractError) {
+        console.error(
+          'Error fetching contracted players count:',
+          contractError
+        );
+      } else {
+        contractedPlayers = contractedPlayersCount || 0;
+      }
+    } catch (contractTimeout) {
+      console.warn(
+        'Contracted players query timed out, using fallback value:',
+        contractTimeout
+      );
+      contractedPlayers = 0;
+    }
+
+    // Get market data for calculations with optimized query
+    try {
+      const { data, error } = await supabase
+        .from('players')
+        .select('market_value_estimate')
+        .not('market_value_estimate', 'is', null)
+        .limit(10000); // Limit to prevent timeout on large datasets
+
+      if (error) {
+        console.error('Error fetching market overview data:', error);
+      } else if (data && data.length > 0) {
+        const marketValues = data
+          .map((p) => p.market_value_estimate)
+          .filter(Boolean) as number[];
+        avgMarketValue =
+          marketValues.length > 0
+            ? marketValues.reduce((sum, val) => sum + (val || 0), 0) /
+              marketValues.length
+            : 0;
+        totalMarketCap = marketValues.reduce((sum, val) => sum + (val || 0), 0);
+      }
+    } catch (marketTimeout) {
+      console.warn(
+        'Market values query timed out, using fallback values:',
+        marketTimeout
+      );
+      avgMarketValue = 0;
+      totalMarketCap = 0;
+    }
+  } catch (error) {
+    console.error('Error in getMarketOverview:', error);
+    // Return fallback data instead of throwing
   }
-
-  // Get active listings count
-  const { count: activeListings, error: listingsError } = await supabase
-    .from('players')
-    .select('id', { count: 'exact', head: true })
-    .not('current_listing_id', 'is', null);
-
-  if (listingsError) {
-    console.error('Error fetching active listings count:', listingsError);
-    throw new Error('Failed to fetch active listings count');
-  }
-
-  // Get contracted players count
-  const { count: contractedPlayers, error: contractError } = await supabase
-    .from('players')
-    .select('id', { count: 'exact', head: true })
-    .not('contract_id', 'is', null);
-
-  if (contractError) {
-    console.error('Error fetching contracted players count:', contractError);
-    throw new Error('Failed to fetch contracted players count');
-  }
-
-  // Get market data for calculations (still need the actual data for calculations)
-  const { data, error } = await supabase
-    .from('players')
-    .select('market_value_estimate')
-    .not('market_value_estimate', 'is', null);
-
-  if (error) {
-    console.error('Error fetching market overview:', error);
-    throw new Error('Failed to fetch market overview data');
-  }
-  const marketValues = data.map(p => p.market_value_estimate).filter(Boolean) as number[];
-  const avgMarketValue = marketValues.length > 0 
-    ? marketValues.reduce((sum, val) => sum + (val || 0), 0) / marketValues.length 
-    : 0;
-  const totalMarketCap = marketValues.reduce((sum, val) => sum + (val || 0), 0);
 
   return {
-    totalPlayers: totalPlayers || 0,
+    totalPlayers,
     avgMarketValue: Math.round(avgMarketValue),
-    activeListings: activeListings || 0,
-    contractedPlayers: contractedPlayers || 0,
+    activeListings,
+    contractedPlayers,
     totalMarketCap: Math.round(totalMarketCap),
   };
 }
@@ -76,8 +126,8 @@ export async function getRecentSales(limit: number = 10): Promise<Listing[]> {
     // Get recent sales from the last 30 days across all players
     const sales = await fetchAllPlayerSales(
       16, // min age
-      40, // max age  
-      0,  // min overall
+      40, // max age
+      0, // min overall
       99, // max overall
       'ALL', // all positions
       { maxPages: 1 } // limit to first page for performance
@@ -85,7 +135,7 @@ export async function getRecentSales(limit: number = 10): Promise<Listing[]> {
 
     // Filter to only sales that have purchase dates and sort by most recent
     const recentSales = sales
-      .filter(sale => sale.purchaseDateTime)
+      .filter((sale) => sale.purchaseDateTime)
       .sort((a, b) => (b.purchaseDateTime || 0) - (a.purchaseDateTime || 0))
       .slice(0, limit);
 
@@ -107,12 +157,16 @@ export interface TopPlayer {
   club_name: string | null;
 }
 
-export async function getTopPlayersByValue(limit: number = 10): Promise<TopPlayer[]> {
+export async function getTopPlayersByValue(
+  limit: number = 10
+): Promise<TopPlayer[]> {
   const supabase = await createClient();
-  
+
   const { data, error } = await supabase
     .from('players')
-    .select('id, first_name, last_name, overall, primary_position, market_value_estimate, age, club_name')
+    .select(
+      'id, first_name, last_name, overall, primary_position, market_value_estimate, age, club_name'
+    )
     .not('market_value_estimate', 'is', null)
     .order('market_value_estimate', { ascending: false })
     .limit(limit);
@@ -125,12 +179,16 @@ export async function getTopPlayersByValue(limit: number = 10): Promise<TopPlaye
   return data || [];
 }
 
-export async function getBestValuePlayers(limit: number = 10): Promise<TopPlayer[]> {
+export async function getBestValuePlayers(
+  limit: number = 10
+): Promise<TopPlayer[]> {
   const supabase = await createClient();
-  
+
   const { data, error } = await supabase
     .from('players')
-    .select('id, first_name, last_name, overall, primary_position, market_value_estimate, age, club_name')
+    .select(
+      'id, first_name, last_name, overall, primary_position, market_value_estimate, age, club_name'
+    )
     .not('market_value_estimate', 'is', null)
     .not('overall', 'is', null)
     .gte('market_value_estimate', 1) // avoid division by zero
@@ -144,9 +202,9 @@ export async function getBestValuePlayers(limit: number = 10): Promise<TopPlayer
 
   // Calculate value per overall rating point and sort
   const playersWithValueRatio = (data || [])
-    .map(player => ({
+    .map((player) => ({
       ...player,
-      valueRatio: (player.overall || 0) / (player.market_value_estimate || 1)
+      valueRatio: (player.overall || 0) / (player.market_value_estimate || 1),
     }))
     .sort((a, b) => b.valueRatio - a.valueRatio)
     .slice(0, limit);
@@ -156,10 +214,12 @@ export async function getBestValuePlayers(limit: number = 10): Promise<TopPlayer
 
 export async function getRisingStars(limit: number = 10): Promise<TopPlayer[]> {
   const supabase = await createClient();
-  
+
   const { data, error } = await supabase
     .from('players')
-    .select('id, first_name, last_name, overall, primary_position, market_value_estimate, age, club_name')
+    .select(
+      'id, first_name, last_name, overall, primary_position, market_value_estimate, age, club_name'
+    )
     .not('market_value_estimate', 'is', null)
     .lt('age', 21)
     .order('market_value_estimate', { ascending: false })
@@ -173,12 +233,16 @@ export async function getRisingStars(limit: number = 10): Promise<TopPlayer[]> {
   return data || [];
 }
 
-export async function getTopRatedPlayers(limit: number = 5): Promise<TopPlayer[]> {
+export async function getTopRatedPlayers(
+  limit: number = 5
+): Promise<TopPlayer[]> {
   const supabase = await createClient();
-  
+
   const { data, error } = await supabase
     .from('players')
-    .select('id, first_name, last_name, overall, primary_position, market_value_estimate, age, club_name')
+    .select(
+      'id, first_name, last_name, overall, primary_position, market_value_estimate, age, club_name'
+    )
     .not('overall', 'is', null)
     .order('overall', { ascending: false })
     .limit(limit);
@@ -201,28 +265,38 @@ export interface TopOwner {
 
 export async function getTopOwners(limit: number = 5): Promise<TopOwner[]> {
   const supabase = await createClient();
-  
-  const { data, error } = await supabase.rpc('get_top_owners', {
-    limit_count: limit
-  });
 
-  if (error) {
-    console.error('Error fetching top owners:', error);
+  try {
+    const { data, error } = await supabase.rpc('get_top_owners', {
+      limit_count: limit,
+    });
+
+    if (error) {
+      console.error('Error fetching top owners:', error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error(
+      'Error fetching top owners, canceling statement due to statement timeout:',
+      error
+    );
     return [];
   }
-
-  return data || [];
 }
 
 export interface FavoritePlayer extends TopPlayer {
   favorite_count: number;
 }
 
-export async function getFavoritePlayers(limit: number = 5): Promise<FavoritePlayer[]> {
+export async function getFavoritePlayers(
+  limit: number = 5
+): Promise<FavoritePlayer[]> {
   const supabase = await createClient();
-  
+
   const { data, error } = await supabase.rpc('get_favorite_players', {
-    limit_count: limit
+    limit_count: limit,
   });
 
   if (error) {

@@ -93,6 +93,8 @@ async function fetchPlayerFromDB(
       updated_at,
       sync_version,
       data_hash,
+      is_retired,
+      is_burned,
       favourites (
         is_favourite,
         tags
@@ -155,7 +157,11 @@ async function fetchPlayerFromDB(
           nbSeasons: player.nb_seasons || 0,
           autoRenewal: player.auto_renewal || false,
           createdDateTime: player.contract_created_date_time || 0,
-          clauses: Array.isArray(player.clauses) ? player.clauses.filter((clause): clause is string => typeof clause === 'string') : [],
+          clauses: Array.isArray(player.clauses)
+            ? player.clauses.filter(
+                (clause): clause is string => typeof clause === 'string'
+              )
+            : [],
           club: player.club_id
             ? {
                 id: player.club_id,
@@ -169,7 +175,7 @@ async function fetchPlayerFromDB(
                 type: player.club_type || '',
                 squads: [],
               }
-            : {} as Club,
+            : ({} as Club),
         }
       : undefined,
     club: player.club_id
@@ -205,17 +211,23 @@ async function fetchPlayerFromDB(
     offerMinDivision: player.offer_min_division || undefined,
     offerMinRevenueShare: player.offer_min_revenue_share || undefined,
     offerAutoAccept: player.offer_auto_accept || undefined,
-    marketValue: player.market_value_estimate ? {
-      estimate: player.market_value_estimate,
-      low: player.market_value_low || 0,
-      high: player.market_value_high || 0,
-      confidence: (player.market_value_confidence as 'high' | 'medium' | 'low') || 'low',
-      method: player.market_value_method || 'unknown',
-      basedOn: player.market_value_based_on || 'unknown',
-      sampleSize: player.market_value_sample_size || 0,
-    } : undefined,
+    marketValue: player.market_value_estimate
+      ? {
+          estimate: player.market_value_estimate,
+          low: player.market_value_low || 0,
+          high: player.market_value_high || 0,
+          confidence:
+            (player.market_value_confidence as 'high' | 'medium' | 'low') ||
+            'low',
+          method: player.market_value_method || 'unknown',
+          basedOn: player.market_value_based_on || 'unknown',
+          sampleSize: player.market_value_sample_size || 0,
+        }
+      : undefined,
     // Additional PlayerWithFavouriteData fields
-    position_ratings: Array.isArray(player.position_ratings) ? (player.position_ratings as unknown as PositionRating[]) : [],
+    position_ratings: Array.isArray(player.position_ratings)
+      ? (player.position_ratings as unknown as PositionRating[])
+      : [],
     is_favourite: player.favourites?.[0]?.is_favourite || false,
     tags: player.favourites?.[0]?.tags || [],
     lastSyncedAt: player.last_synced_at || undefined,
@@ -225,6 +237,8 @@ async function fetchPlayerFromDB(
     bestOvr: player.best_ovr || undefined,
     ovrDifference: player.ovr_difference || undefined,
     priceDifference: player.price_difference || null,
+    is_burned: player.is_burned || false,
+    is_retired: player.is_retired || false,
   };
 
   return transformedPlayer;

@@ -65,7 +65,7 @@ export function FilterSlider({
   const maxDisplayValue = infinityMax && value[1] === max ? '3000+' : value[1];
 
   return (
-    <div className='space-y-3'>
+    <div className='space-y-3 overflow-visible'>
       <div className='flex flex-col gap-3'>
         <div className='flex items-center justify-between gap-2'>
           <div className='flex flex-col gap-1'>

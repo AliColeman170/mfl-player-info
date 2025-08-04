@@ -37,6 +37,7 @@ export interface PlayersApiFilters {
   beforePlayerId?: string
   limit?: number
   favourites?: 'all' | 'favourites' | 'non-favourites'
+  status?: ('available' | 'retired' | 'burned')[]
   tags?: string[]
   tagsMatchAll?: boolean
   nationalities?: string[]

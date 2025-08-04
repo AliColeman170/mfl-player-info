@@ -13,6 +13,7 @@ const POSITIONS = [
 
 const PREFERRED_FOOT = ['LEFT', 'RIGHT', 'BOTH'] as const
 const FAVOURITE_FILTER = ['all', 'favourites', 'non-favourites'] as const
+const STATUS_FILTER = ['all', 'available', 'retired', 'burned'] as const
 
 
 // Filter parsers for URL state
@@ -22,6 +23,9 @@ export const filterParsers = {
   
   // Favourites filter
   favourites: parseAsStringEnum([...FAVOURITE_FILTER]).withDefault('all'),
+  
+  // Status filter - now supports multiple selections
+  status: parseAsArrayOf(parseAsStringEnum([...STATUS_FILTER])).withDefault([]),
   
   // Multi-select arrays
   tags: parseAsArrayOf(parseAsString).withDefault([]),
@@ -82,6 +86,7 @@ export const filterParsers = {
 export type FilterState = {
   search: string
   favourites: FavouriteFilter
+  status: StatusFilter[]
   tags: string[]
   tagsMatchAll: boolean
   nationalities: string[]
@@ -122,6 +127,7 @@ export type FilterState = {
 export type Position = typeof POSITIONS[number]
 export type PreferredFoot = typeof PREFERRED_FOOT[number]
 export type FavouriteFilter = typeof FAVOURITE_FILTER[number]
+export type StatusFilter = typeof STATUS_FILTER[number]
 
 // Helper type for number ranges
 export type NumberRange = {
@@ -131,7 +137,7 @@ export type NumberRange = {
 
 // Filter groups for better organization
 export const FILTER_GROUPS = {
-  SEARCH: ['search', 'favourites', 'tags', 'walletAddress'],
+  SEARCH: ['search', 'favourites', 'status', 'tags', 'walletAddress'],
   DEMOGRAPHICS: ['nationalities', 'ageMin', 'ageMax', 'heightMin', 'heightMax', 'preferredFoot'],
   POSITIONS: ['primaryPositions', 'secondaryPositions'],
   RATINGS: [

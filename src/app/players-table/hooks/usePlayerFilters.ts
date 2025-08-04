@@ -18,6 +18,7 @@ export function usePlayerFilters() {
     // Direct mappings
     if (filters.search) result.search = filters.search
     if (filters.favourites !== 'all') result.favourites = filters.favourites
+    if (filters.status.length > 0) result.status = filters.status
     if (filters.tags.length > 0) result.tags = filters.tags
     if (filters.tags.length > 0) result.tagsMatchAll = filters.tagsMatchAll
     if (filters.nationalities.length > 0) result.nationalities = filters.nationalities
@@ -76,6 +77,7 @@ export function usePlayerFilters() {
     setFilters({
       search: '',
       favourites: 'all',
+      status: [],
       tags: [],
       tagsMatchAll: false,
       nationalities: [],
@@ -149,6 +151,7 @@ export function usePlayerFilters() {
     return (
       filters.search !== '' ||
       filters.favourites !== 'all' ||
+      filters.status.length > 0 ||
       filters.tags.length > 0 ||
       filters.nationalities.length > 0 ||
       filters.primaryPositions.length > 0 ||
@@ -190,6 +193,7 @@ export function usePlayerFilters() {
     let count = 0
     if (filters.search) count++
     if (filters.favourites !== 'all') count++
+    if (filters.status.length > 0) count++
     if (filters.tags.length > 0) count++
     if (filters.nationalities.length > 0) count++
     if (filters.primaryPositions.length > 0) count++

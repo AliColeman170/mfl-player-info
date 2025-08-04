@@ -9,6 +9,7 @@ import {
   ListIcon,
   FileText,
   DollarSign,
+  AlertTriangle,
 } from 'lucide-react';
 import { Card, CardContent } from '../UI/card';
 
@@ -53,33 +54,54 @@ function MarketOverviewSkeleton() {
   );
 }
 
-async function MarketOverviewContent() {
-  const data = await getMarketOverview();
-
+function MarketOverviewError() {
   return (
-    <div className='grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4'>
-      <MetricItem
-        icon={<Users className='size-5' />}
-        label='Total Players'
-        value={data.totalPlayers}
-      />
-      <MetricItem
-        icon={<DollarSign className='size-5' />}
-        label='Avg Market Value'
-        value={`$${data.avgMarketValue}`}
-      />
-      <MetricItem
-        icon={<ListIcon className='size-5' />}
-        label='Active Listings'
-        value={data.activeListings}
-      />
-      <MetricItem
-        icon={<FileText className='size-5' />}
-        label='Contracted Players'
-        value={data.contractedPlayers}
-      />
-    </div>
+    <Card className='col-span-full'>
+      <CardContent className='flex flex-col items-center gap-3 py-6'>
+        <AlertTriangle className='size-8 text-destructive' />
+        <div className='text-center'>
+          <p className='font-medium'>Unable to load market overview</p>
+          <p className='text-muted-foreground text-sm'>
+            Please try refreshing the page. Some data may be temporarily unavailable.
+          </p>
+        </div>
+      </CardContent>
+    </Card>
   );
+}
+
+async function MarketOverviewContent() {
+  try {
+    const data = await getMarketOverview();
+
+    return (
+      <div className='grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4'>
+        <MetricItem
+          icon={<Users className='size-5' />}
+          label='Total Players'
+          value={data.totalPlayers}
+        />
+        <MetricItem
+          icon={<DollarSign className='size-5' />}
+          label='Avg Market Value'
+          value={`$${data.avgMarketValue}`}
+        />
+        <MetricItem
+          icon={<ListIcon className='size-5' />}
+          label='Active Listings'
+          value={data.activeListings}
+        />
+        <MetricItem
+          icon={<FileText className='size-5' />}
+          label='Contracted Players'
+          value={data.contractedPlayers}
+        />
+      </div>
+    );
+  } catch (error) {
+    console.error('Error in MarketOverviewContent:', error);
+    return <MarketOverviewError />;
+  }
 }
 
 export function MarketOverviewCard() {

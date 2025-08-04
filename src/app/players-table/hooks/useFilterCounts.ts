@@ -12,6 +12,7 @@ export interface FilterCounts {
   clubs?: Record<string, number>;
   bestPositions?: Record<string, number>;
   preferredFoot?: Record<string, number>;
+  status?: Record<string, number>;
   favourites?: Record<string, number>;
   tags?: Record<string, number>;
 }
@@ -30,6 +31,7 @@ async function fetchFilterCounts(
     // Search filters
     search_text: filters.search || undefined,
     favourites_filter: filters.favourites || 'all',
+    status_filter: filters.status || [],
     selected_tags: filters.tags || [],
     tags_match_all: filters.tagsMatchAll || false,
     authenticated_wallet_address: userWalletAddress || undefined,

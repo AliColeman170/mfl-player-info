@@ -8,13 +8,14 @@ import Link from 'next/link';
 
 function TopOwnersSkeleton() {
   return (
-    <div className='space-y-2'>
+    <div className='flex flex-col gap-2'>
       {Array.from({ length: 5 }).map((_, i) => (
         <div
           key={i}
-          className='bg-muted/30 flex items-center gap-3 rounded-lg p-2'
+          className='bg-muted/30 flex items-center gap-3 rounded-lg px-3 py-4'
         >
-          <div className='flex-1 space-y-1'>
+          <Skeleton className='h-4 w-6' />
+          <div className='flex flex-1 flex-col gap-1'>
             <Skeleton className='h-3 w-24' />
             <Skeleton className='h-2 w-16' />
           </div>

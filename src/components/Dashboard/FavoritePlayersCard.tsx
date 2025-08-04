@@ -15,7 +15,7 @@ function FavoritePlayersSkeleton() {
       {Array.from({ length: 5 }).map((_, i) => (
         <div
           key={i}
-          className='bg-muted/30 flex items-center gap-3 rounded-lg p-2'
+          className='bg-muted/30 flex items-center gap-3 rounded-lg px-2 py-3'
         >
           <Skeleton className='h-8 w-6 shrink-0' />
           <div className='flex-1 space-y-1'>

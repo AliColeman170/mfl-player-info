@@ -21,7 +21,7 @@ export function WalletAddressFilter({
   return (
     <div className={cn('flex flex-col gap-2', className)}>
       <div className='grid grid-cols-[auto_1fr_auto] items-center gap-2 overflow-visible'>
-        <div className='bg-input text-accent-foreground col-start-1 row-start-1 flex h-8 items-center justify-center rounded-l-md px-2.5'>
+        <div className='bg-input/50 text-accent-foreground col-start-1 row-start-1 flex h-8 items-center justify-center rounded-l-md px-2.5'>
           <WalletIcon className='size-3' />
         </div>
         <Input
