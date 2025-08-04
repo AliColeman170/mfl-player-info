@@ -5,6 +5,7 @@ import {
   completeSyncExecution,
   updateSyncProgress,
   sleep,
+  withRetry,
   type SyncResult,
 } from '../core';
 import { getEnhancedMarketDataFromDB } from '@/data/sales';
@@ -21,10 +22,11 @@ const STAGE_NAME = 'market_values';
 export interface MarketValuesOptions {
   batchSize?: number;
   onProgress?: (processed: number, total: number) => void;
+  fixZeroValuesOnly?: boolean; // New option to process only players with 0 values
 }
 
 const DEFAULT_OPTIONS: MarketValuesOptions = {
-  batchSize: 100,
+  batchSize: 500, // Increased from 100 since we're using local DB
 };
 
 /**
@@ -44,24 +46,33 @@ export async function calculateMarketValues(
   const errors: string[] = [];
 
   try {
-    // Get all players that need market value calculation
-    const { data: players, error: playersError } = await supabase
+    // Pre-load market multipliers from database once for all calculations
+    const marketMultipliers = await preloadMarketMultipliers();
+    console.log(`[Market Values] Pre-loaded ${Object.keys(marketMultipliers).length} market multipliers from database`);
+    
+    // First, get total count of players to process
+    let countQuery = supabase
       .from('players')
-      .select(`
-        id, overall, age, pace, shooting, passing, dribbling, defense, physical, 
-        goalkeeping, primary_position, nationality, first_name, last_name
-      `)
-      .not('basic_data_synced_at', 'is', null)
-      .order('id');
+      .select('*', { count: 'exact', head: true })
+      .not('basic_data_synced_at', 'is', null);
+    
+    // If fixing zero values only, filter for players with 0 market values
+    if (opts.fixZeroValuesOnly) {
+      countQuery = countQuery
+        .eq('market_value_estimate', 0)
+        .not('market_value_updated_at', 'is', null); // Only previously processed players
+      console.log('[Market Values] Targeting only players with 0 market values...');
+    }
+    
+    const { count: totalPlayers, error: countError } = await countQuery;
 
-    if (playersError) {
-      throw new Error(`Failed to fetch players: ${playersError.message}`);
+    if (countError) {
+      throw new Error(`Failed to count players: ${countError.message}`);
     }
 
-    const totalPlayers = players?.length || 0;
-    console.log(`[Market Values] Found ${totalPlayers} players to process`);
+    console.log(`[Market Values] Found ${totalPlayers || 0} players to process`);
 
-    if (totalPlayers === 0) {
+    if (!totalPlayers || totalPlayers === 0) {
       await completeSyncExecution(executionId, 'completed');
       return {
         success: true,
@@ -73,39 +84,79 @@ export async function calculateMarketValues(
       };
     }
 
-    // Process players in batches
-    for (let i = 0; i < totalPlayers; i += opts.batchSize!) {
-      const batch = players!.slice(i, i + opts.batchSize!);
+    // Process players in paginated batches
+    const pageSize = 1000; // Increased page size for better performance
+    let processedTotal = 0;
+    let currentOffset = 0;
+
+    while (currentOffset < totalPlayers) {
+      // Fetch next batch of players
+      let playersQuery = supabase
+        .from('players')
+        .select(`
+          id, overall, age, pace, shooting, passing, dribbling, defense, physical, 
+          goalkeeping, primary_position, nationality, first_name, last_name
+        `)
+        .not('basic_data_synced_at', 'is', null);
       
-      try {
-        console.log(`[Market Values] Processing batch ${Math.floor(i / opts.batchSize!) + 1}/${Math.ceil(totalPlayers / opts.batchSize!)} (${batch.length} players)`);
-
-        const batchResult = await processMarketValueBatch(batch);
-        totalProcessed += batchResult.processed;
-        totalFailed += batchResult.failed;
-        errors.push(...batchResult.errors);
-
-        // Update progress
-        await updateSyncProgress(executionId, totalProcessed, totalFailed, {
-          batchNumber: Math.floor(i / opts.batchSize!) + 1,
-          totalBatches: Math.ceil(totalPlayers / opts.batchSize!),
-          currentBatchSize: batch.length,
-        });
-
-        // Progress callback
-        if (opts.onProgress) {
-          opts.onProgress(totalProcessed, totalPlayers);
-        }
-
-        // Small delay between batches
-        await sleep(500);
-
-      } catch (error) {
-        console.error(`[Market Values] Error processing batch ${Math.floor(i / opts.batchSize!) + 1}:`, error);
-        const errorMsg = error instanceof Error ? error.message : 'Unknown error';
-        errors.push(`Batch ${Math.floor(i / opts.batchSize!) + 1} failed: ${errorMsg}`);
-        totalFailed += batch.length;
+      // Apply same filter as count query
+      if (opts.fixZeroValuesOnly) {
+        playersQuery = playersQuery
+          .eq('market_value_estimate', 0)
+          .not('market_value_updated_at', 'is', null);
       }
+      
+      const { data: players, error: playersError } = await playersQuery
+        .order('id')
+        .range(currentOffset, currentOffset + pageSize - 1);
+
+      if (playersError) {
+        throw new Error(`Failed to fetch players batch: ${playersError.message}`);
+      }
+
+      if (!players || players.length === 0) {
+        break; // No more players to process
+      }
+
+      console.log(`[Market Values] Processing batch ${Math.floor(currentOffset / pageSize) + 1}: ${players.length} players (${currentOffset + 1}-${currentOffset + players.length} of ${totalPlayers})`);
+
+      // Process this batch in smaller sub-batches
+      for (let i = 0; i < players.length; i += opts.batchSize!) {
+        const batch = players.slice(i, i + opts.batchSize!);
+      
+        try {
+          console.log(`[Market Values] Processing sub-batch ${Math.floor(i / opts.batchSize!) + 1} of page (${batch.length} players)`);
+
+          const batchResult = await processMarketValueBatch(batch, marketMultipliers);
+          totalProcessed += batchResult.processed;
+          totalFailed += batchResult.failed;
+          errors.push(...batchResult.errors);
+
+          // Update progress
+          await updateSyncProgress(executionId, totalProcessed, totalFailed, {
+            currentPage: Math.floor(currentOffset / pageSize) + 1,
+            totalProcessed,
+            totalPlayers,
+            currentBatchSize: batch.length,
+          });
+
+          // Progress callback
+          if (opts.onProgress) {
+            opts.onProgress(totalProcessed, totalPlayers);
+          }
+
+          // No delay needed since we're using preloaded data
+
+        } catch (error) {
+          console.error(`[Market Values] Error processing sub-batch:`, error);
+          const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+          errors.push(`Sub-batch failed: ${errorMsg}`);
+          totalFailed += batch.length;
+        }
+      }
+
+      // Move to next page
+      currentOffset += players.length;
     }
 
     // Complete execution
@@ -149,8 +200,109 @@ export async function calculateMarketValues(
 }
 
 /**
- * Process a batch of players for market value calculation
+ * Pre-load all market multipliers from database for batch processing
  */
+async function preloadMarketMultipliers(): Promise<Record<string, number>> {
+  console.log('[Market Values] Pre-loading market multipliers from database...');
+  
+  const { data: multipliers, error } = await supabase
+    .from('market_multipliers')
+    .select('position, age_range, overall_range, multiplier');
+
+  if (error) {
+    console.error('Failed to preload market multipliers:', error);
+    return {};
+  }
+
+  // Create lookup map: "position|age|overall" -> multiplier
+  const multiplierMap: Record<string, number> = {};
+  for (const mult of multipliers || []) {
+    const key = `${mult.position}|${mult.age_range}|${mult.overall_range}`;
+    multiplierMap[key] = mult.multiplier;
+  }
+  
+  return multiplierMap;
+}
+
+/**
+ * Get market multiplier from preloaded data with fallback
+ */
+function getMarketMultiplierFromCache(
+  position: string, 
+  age: number, 
+  overall: number, 
+  multiplierCache: Record<string, number>
+): number {
+  // Convert age and overall to the same ranges used in the database
+  const ageRange = age.toString(); // Individual ages 16-40
+  const overallRange = getOverallRange(overall);
+  
+  const key = `${position}|${ageRange}|${overallRange}`;
+  const multiplier = multiplierCache[key];
+  
+  if (multiplier !== undefined) {
+    return multiplier;
+  }
+  
+  // Fallback to basic calculation if not in cache
+  return getFallbackMultiplier(position, age, overall);
+}
+
+/**
+ * Helper functions from market-multiplier-updater.ts
+ */
+function getOverallRange(overall: number): string {
+  if (overall >= 97) return '97-99';
+  if (overall >= 94) return '94-96';
+  if (overall >= 91) return '91-93';
+  if (overall >= 88) return '88-90';
+  if (overall >= 85) return '85-87';
+  if (overall >= 82) return '82-84';
+  if (overall >= 79) return '79-81';
+  if (overall >= 76) return '76-78';
+  if (overall >= 73) return '73-75';
+  if (overall >= 70) return '70-72';
+  if (overall >= 67) return '67-69';
+  if (overall >= 64) return '64-66';
+  if (overall >= 61) return '61-63';
+  if (overall >= 58) return '58-60';
+  if (overall >= 55) return '55-57';
+  if (overall >= 52) return '52-54';
+  if (overall >= 49) return '49-51';
+  if (overall >= 46) return '46-48';
+  if (overall >= 43) return '43-45';
+  if (overall >= 40) return '40-42';
+  return '40-42';
+}
+
+function getFallbackMultiplier(position: string, age: number, overall: number): number {
+  // Basic fallback based on overall rating (adjusted baseline to 76-78)
+  const baseMultiplier = Math.pow(overall / 77, 2);
+  
+  // Individual age adjustment
+  let ageMultiplier: number;
+  if (age <= 20) ageMultiplier = 1.50;
+  else if (age <= 22) ageMultiplier = 1.30;
+  else if (age <= 24) ageMultiplier = 1.10;
+  else if (age <= 27) ageMultiplier = 1.00; // BASELINE
+  else if (age <= 29) ageMultiplier = 0.85;
+  else if (age <= 32) ageMultiplier = 0.65;
+  else if (age <= 35) ageMultiplier = 0.45;
+  else ageMultiplier = 0.30;
+  
+  // Position adjustment
+  const positionMultipliers: Record<string, number> = {
+    'ST': 1.25, 'CF': 1.20, 'CAM': 1.15,
+    'CM': 1.00, 'LW': 1.10, 'RW': 1.10, 'LM': 0.95,
+    'RM': 0.95, 'CDM': 0.90, 'RB': 0.85, 'LB': 0.85,
+    'RWB': 0.80, 'LWB': 0.80, 'CB': 0.75, 'GK': 0.70
+  };
+  
+  const positionMultiplier = positionMultipliers[position] || 1.0;
+  
+  return Math.max(0.001, baseMultiplier * ageMultiplier * positionMultiplier);
+}
+
 interface PlayerForMarketValue {
   id: number;
   overall: number;
@@ -169,52 +321,39 @@ interface PlayerForMarketValue {
 }
 
 async function processMarketValueBatch(
-  players: PlayerForMarketValue[]
+  players: PlayerForMarketValue[],
+  marketMultipliers: Record<string, number>
 ): Promise<{ processed: number; failed: number; errors: string[] }> {
   const errors: string[] = [];
   let processed = 0;
   let failed = 0;
 
-  // Process each player's market value
-  for (const player of players) {
-    try {
-      // Create a Player object compatible with market value calculation
-      const playerObj: Player = {
-        id: player.id,
-        hasPreContract: false,
-        energy: 100,
-        offerStatus: 0,
-        metadata: {
+  // Process players in parallel chunks using preloaded multipliers
+  const PARALLEL_CHUNK_SIZE = 50; // Higher since we're using cached multipliers
+  
+  for (let i = 0; i < players.length; i += PARALLEL_CHUNK_SIZE) {
+    const chunk = players.slice(i, i + PARALLEL_CHUNK_SIZE);
+    
+    // Calculate market values using cached multipliers (much faster)
+    const calculationResults = await Promise.allSettled(
+      chunk.map(player => calculatePlayerMarketValueWithCache(player, marketMultipliers))
+    );
+    
+    // Prepare bulk update data
+    const updateData: any[] = [];
+    
+    for (let j = 0; j < calculationResults.length; j++) {
+      const result = calculationResults[j];
+      const player = chunk[j];
+      
+      if (result.status === 'fulfilled') {
+        const marketValueResult = result.value;
+        
+        updateData.push({
           id: player.id,
-          firstName: player.first_name || '',
-          lastName: player.last_name || '',
-          overall: player.overall || 0,
-          age: player.age || 0,
-          pace: player.pace || 0,
-          shooting: player.shooting || 0,
-          passing: player.passing || 0,
-          dribbling: player.dribbling || 0,
-          defense: player.defense || 0,
-          physical: player.physical || 0,
-          goalkeeping: player.goalkeeping || 0,
-          positions: player.primary_position ? [player.primary_position] : [],
-          nationalities: player.nationality ? [player.nationality] : [],
-          preferredFoot: '',
-          height: 0,
-          resistance: 0,
-        }
-      };
-
-      // Calculate market value using imported sales data
-      const marketValueResult = await calculateMarketValue(playerObj);
-
-      // Update player with market value data
-      const { error: updateError } = await supabase
-        .from('players')
-        .update({
-          market_value_estimate: marketValueResult.estimatedValue,
-          market_value_low: marketValueResult.priceRange.low,
-          market_value_high: marketValueResult.priceRange.high,
+          market_value_estimate: Math.round(marketValueResult.estimatedValue),
+          market_value_low: Math.round(marketValueResult.priceRange.low),
+          market_value_high: Math.round(marketValueResult.priceRange.high),
           market_value_confidence: marketValueResult.confidence,
           market_value_method: marketValueResult.method,
           market_value_sample_size: marketValueResult.sampleSize,
@@ -222,27 +361,85 @@ async function processMarketValueBatch(
           market_value_updated_at: new Date().toISOString(),
           market_value_calculated_at: new Date().toISOString(),
           sync_stage: 'market_calculated',
-        })
-        .eq('id', player.id);
-
-      if (updateError) {
-        console.error(`[Market Values] Error updating player ${player.id}:`, updateError);
-        errors.push(`Player ${player.id}: ${updateError.message}`);
-        failed++;
+        });
       } else {
-        processed++;
+        failed++;
+        errors.push(`Player ${player.id}: ${result.reason}`);
       }
-
-    } catch (error) {
-      console.error(`[Market Values] Error calculating market value for player ${player.id}:`, error);
-      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
-      errors.push(`Player ${player.id}: ${errorMsg}`);
-      failed++;
     }
+    
+    // Bulk update database
+    if (updateData.length > 0) {
+      try {
+        const { error: bulkUpdateError } = await supabase
+          .from('players')
+          .upsert(updateData, { onConflict: 'id' });
+          
+        if (bulkUpdateError) {
+          failed += updateData.length;
+          errors.push(`Bulk update error: ${bulkUpdateError.message}`);
+        } else {
+          processed += updateData.length;
+        }
+      } catch (error) {
+        failed += updateData.length;
+        const errorMsg = error instanceof Error ? error.message : 'Unknown bulk update error';
+        errors.push(`Bulk update failed: ${errorMsg}`);
+      }
+    }
+    
+    // No delay needed since we're using preloaded data
   }
 
   return { processed, failed, errors };
 }
+
+/**
+ * Calculate market value for a single player using cached database multipliers
+ */
+function calculatePlayerMarketValueWithCache(
+  player: PlayerForMarketValue,
+  marketMultipliers: Record<string, number>
+): any {
+  // Get the market multiplier for this player from the cache
+  const multiplier = getMarketMultiplierFromCache(
+    player.primary_position,
+    player.age,
+    player.overall,
+    marketMultipliers
+  );
+  
+  // Calculate baseline price (this should match the baseline used when generating multipliers)
+  // From market-multiplier-updater.ts: baseline is CM, age 25, 76-78 overall = 1.0
+  const BASELINE_PRICE = 50; // Estimated baseline market price in dollars
+  
+  // Calculate estimated value using the multiplier
+  const estimatedValue = Math.round(BASELINE_PRICE * multiplier);
+  
+  // Calculate confidence based on whether we found the multiplier in cache vs fallback
+  const key = `${player.primary_position}|${player.age}|${getOverallRange(player.overall)}`;
+  const isFromDatabase = marketMultipliers[key] !== undefined;
+  const confidence = isFromDatabase ? 'medium' : 'low';
+  
+  // Calculate price range (±20% for database multipliers, ±30% for fallback)
+  const rangePercent = isFromDatabase ? 0.2 : 0.3;
+  const priceRange = {
+    low: Math.round(estimatedValue * (1 - rangePercent)),
+    high: Math.round(estimatedValue * (1 + rangePercent))
+  };
+  
+  return {
+    estimatedValue: Math.max(1, estimatedValue),
+    priceRange,
+    confidence,
+    method: isFromDatabase ? 'database-multiplier' : 'fallback-multiplier',
+    sampleSize: isFromDatabase ? 1 : 0, // Indicate if from database
+    basedOn: isFromDatabase 
+      ? `Database multiplier for ${player.primary_position} ${player.age}yo ${getOverallRange(player.overall)}ovr`
+      : `Fallback calculation for ${player.primary_position} ${player.age}yo ${player.overall}ovr`
+  };
+}
+
 
 /**
  * Get market values calculation statistics

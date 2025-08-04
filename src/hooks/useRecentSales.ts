@@ -52,15 +52,15 @@ interface RecentSale {
 
 async function fetchRecentSales(): Promise<RecentSale[]> {
   const response = await fetch(
-    'https://z519wdyajg.execute-api.us-east-1.amazonaws.com/prod/listings?limit=5&status=BOUGHT&type=PLAYER'
+    'https://z519wdyajg.execute-api.us-east-1.amazonaws.com/prod/listings?limit=5&status=BOUGHT&type=PLAYER&sorts=listing.purchaseDateTime&sortsOrders=DESC&marketplace=all'
   );
-  
+
   if (!response.ok) {
     throw new Error('Failed to fetch recent sales');
   }
-  
+
   const data: RecentSaleAPIResponse[] = await response.json();
-  
+
   return data.map((sale) => ({
     listingResourceId: sale.listingResourceId,
     price: sale.price,

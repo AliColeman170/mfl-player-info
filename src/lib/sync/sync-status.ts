@@ -31,7 +31,7 @@ export interface SyncProgress {
  * Create a new sync status record
  */
 export async function createSyncStatus(
-  type: 'full' | 'individual',
+  type: 'full' | 'individual' | 'listings',
   totalPlayers: number
 ): Promise<number> {
   const { data, error } = await supabase

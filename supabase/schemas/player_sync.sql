@@ -417,6 +417,48 @@ ADD CONSTRAINT "favourites_player_id_fkey" FOREIGN KEY ("player_id") REFERENCES 
 ALTER TABLE ONLY "public"."sales"
 ADD CONSTRAINT "sales_player_id_fkey" FOREIGN KEY ("player_id") REFERENCES "public"."players" ("id");
 
+-- Market multipliers table for dynamic market analysis
+CREATE TABLE IF NOT EXISTS "public"."market_multipliers" (
+    "id" SERIAL PRIMARY KEY,
+    "position" VARCHAR(10) NOT NULL,
+    "age_range" VARCHAR(10) NOT NULL, -- '16-22', '23-27', '28-32', '33-40'
+    "overall_range" VARCHAR(10) NOT NULL, -- '85-89', '80-84', etc.
+    "multiplier" DECIMAL(8,4) NOT NULL,
+    "sample_size" INTEGER NOT NULL,
+    "avg_price" DECIMAL(10,2) NOT NULL,
+    "confidence_score" DECIMAL(3,2) NOT NULL, -- 0.0 to 1.0
+    "last_updated" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    "created_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    
+    -- Composite unique constraint
+    UNIQUE("position", "age_range", "overall_range")
+);
+
+ALTER TABLE "public"."market_multipliers" OWNER TO "postgres";
+
+-- Market multiplier update log
+CREATE TABLE IF NOT EXISTS "public"."market_multiplier_updates" (
+    "id" SERIAL PRIMARY KEY,
+    "update_run_id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "total_combinations_analyzed" INTEGER NOT NULL,
+    "combinations_updated" INTEGER NOT NULL,
+    "combinations_added" INTEGER NOT NULL,
+    "sales_data_window_days" INTEGER NOT NULL,
+    "total_sales_analyzed" INTEGER NOT NULL,
+    "started_at" TIMESTAMP WITH TIME ZONE NOT NULL,
+    "completed_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    "status" VARCHAR(20) DEFAULT 'completed' -- 'running', 'completed', 'failed'
+);
+
+ALTER TABLE "public"."market_multiplier_updates" OWNER TO "postgres";
+
+-- Indexes for market multipliers
+CREATE INDEX IF NOT EXISTS "idx_market_multipliers_lookup" 
+ON "public"."market_multipliers"("position", "age_range", "overall_range");
+
+CREATE INDEX IF NOT EXISTS "idx_market_multipliers_updated" 
+ON "public"."market_multipliers"("last_updated");
+
 -- Enable RLS
 ALTER TABLE "public"."players" ENABLE ROW LEVEL SECURITY;
 
@@ -427,3 +469,7 @@ ALTER TABLE "public"."sales_sync_metadata" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "public"."player_sync_metadata" ENABLE ROW LEVEL SECURITY;
 
 ALTER TABLE "public"."sync_status" ENABLE ROW LEVEL SECURITY;
+
+ALTER TABLE "public"."market_multipliers" ENABLE ROW LEVEL SECURITY;
+
+ALTER TABLE "public"."market_multiplier_updates" ENABLE ROW LEVEL SECURITY;

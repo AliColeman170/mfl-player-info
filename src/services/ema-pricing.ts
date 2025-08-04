@@ -6,7 +6,7 @@ import { Listing } from '@/types/global.types';
  */
 const EMA_CONFIG = {
   alpha: 0.3, // Smoothing factor (0.1 = slow, 0.5 = fast)
-  maxDaysOld: 60, // Exclude sales older than 60 days
+  maxDaysOld: 180, // Exclude sales older than 180 days (increased from 60 for more data)
   minSampleSize: 2, // Minimum sales needed for EMA
 } as const;
 
@@ -45,9 +45,9 @@ function calculateTimeWeight(daysOld: number): number {
 /**
  * Convert sales to weighted sales with time calculations
  */
-function prepareWeightedSales(sales: Listing[]): WeightedSale[] {
+function prepareWeightedSales(sales: Listing[], maxDaysOld: number = EMA_CONFIG.maxDaysOld): WeightedSale[] {
   const now = Date.now();
-  const maxAge = EMA_CONFIG.maxDaysOld * 24 * 60 * 60 * 1000; // Convert to milliseconds
+  const maxAge = maxDaysOld * 24 * 60 * 60 * 1000; // Convert to milliseconds
 
   return sales
     .filter(sale => sale.purchaseDateTime && sale.price > 0)
@@ -63,7 +63,7 @@ function prepareWeightedSales(sales: Listing[]): WeightedSale[] {
         timeWeight: calculateTimeWeight(daysOld),
       };
     })
-    .filter(sale => sale.daysOld <= EMA_CONFIG.maxDaysOld) // Remove sales older than max age
+    .filter(sale => sale.daysOld <= maxDaysOld) // Remove sales older than max age
     .sort((a, b) => a.timestamp - b.timestamp); // Sort oldest to newest for EMA calculation
 }
 
@@ -84,7 +84,7 @@ export function calculateEMA(
     minSampleSize = EMA_CONFIG.minSampleSize,
   } = options;
 
-  const weightedSales = prepareWeightedSales(sales);
+  const weightedSales = prepareWeightedSales(sales, maxDaysOld);
 
   if (weightedSales.length === 0) {
     return {

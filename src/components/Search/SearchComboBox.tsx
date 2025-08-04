@@ -32,11 +32,12 @@ export function SearchComboBox({
   let [isSearching, setIsSearching] = useState<boolean>(false);
   
   // Update query when id prop changes
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (id && query !== id.toString()) {
       setQuery(id.toString());
     }
-  }, [id]); // Only depend on id, not query to avoid infinite loops
+  }, [id, query]); // Only depend on id, not query to avoid infinite loops
 
   useEffect(() => {
     async function fetchSearchResults() {
@@ -72,7 +73,7 @@ export function SearchComboBox({
     }
     
     fetchSearchResults();
-  }, [debouncedQuery, handlePlayerChange]);
+  }, [debouncedQuery, handlePlayerChange, id]);
 
   return (
     <Combobox

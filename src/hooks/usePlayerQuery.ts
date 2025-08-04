@@ -205,15 +205,15 @@ async function fetchPlayerFromDB(
     offerMinDivision: player.offer_min_division || undefined,
     offerMinRevenueShare: player.offer_min_revenue_share || undefined,
     offerAutoAccept: player.offer_auto_accept || undefined,
-    marketValue: {
-      estimate: player.market_value_estimate || 0,
+    marketValue: player.market_value_estimate ? {
+      estimate: player.market_value_estimate,
       low: player.market_value_low || 0,
       high: player.market_value_high || 0,
       confidence: (player.market_value_confidence as 'high' | 'medium' | 'low') || 'low',
       method: player.market_value_method || 'unknown',
       basedOn: player.market_value_based_on || 'unknown',
       sampleSize: player.market_value_sample_size || 0,
-    },
+    } : undefined,
     // Additional PlayerWithFavouriteData fields
     position_ratings: Array.isArray(player.position_ratings) ? (player.position_ratings as unknown as PositionRating[]) : [],
     is_favourite: player.favourites?.[0]?.is_favourite || false,

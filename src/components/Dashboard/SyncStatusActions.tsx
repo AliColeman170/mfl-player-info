@@ -14,6 +14,7 @@ import {
   Activity,
   List,
   Square,
+  Calculator,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -78,6 +79,7 @@ export function SyncStatusActions({
   const [fullSyncLoading, setFullSyncLoading] = useState(false);
   const [syncExecutionId, setSyncExecutionId] = useState<number | null>(null);
   const [stopping, setStopping] = useState(false);
+  const [multiplierUpdateLoading, setMultiplierUpdateLoading] = useState(false);
 
   
   // Show full sync loading if we have a running full_sync or if local state indicates loading
@@ -228,9 +230,46 @@ export function SyncStatusActions({
     }
   };
 
+  const updateMarketMultipliers = async () => {
+    setMultiplierUpdateLoading(true);
+
+    try {
+      const response = await fetch('/api/admin/update-multipliers', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          windowDays: 540, // 18 months
+          minSampleSize: 5,
+          forceUpdate: false
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        toast.success('Market multipliers updated successfully', {
+          description: `Updated ${result.metrics.combinations_updated} multipliers, added ${result.metrics.combinations_added} new ones`,
+        });
+      } else {
+        toast.error('Failed to update market multipliers', {
+          description: result.error || 'Unknown error occurred',
+        });
+      }
+    } catch (error) {
+      console.error('Error updating market multipliers:', error);
+      toast.error('Failed to update market multipliers', {
+        description: 'Network error occurred',
+      });
+    } finally {
+      setMultiplierUpdateLoading(false);
+    }
+  };
+
 
   const isAnyStageLoading = loadingStages.size > 0;
-  const isDisabled = isRunning || isAnyStageLoading || fullSyncLoading;
+  const isDisabled = isRunning || isAnyStageLoading || fullSyncLoading || multiplierUpdateLoading;
 
   return (
     <div className='space-y-4'>
@@ -323,6 +362,32 @@ export function SyncStatusActions({
               </Button>
             );
           })}
+        </div>
+      </div>
+
+      {/* Market Multiplier Updates */}
+      <div className='flex flex-col gap-2'>
+        <div className='text-muted-foreground text-sm font-medium'>
+          Market Analysis
+        </div>
+        <div className='flex gap-2'>
+          <Button
+            onClick={updateMarketMultipliers}
+            disabled={isDisabled}
+            size='sm'
+            variant='outline'
+            title='Update market multipliers from recent sales data'
+          >
+            {multiplierUpdateLoading ? (
+              <Loader2 className='animate-spin' />
+            ) : (
+              <Calculator />
+            )}
+            Update Market Multipliers
+          </Button>
+        </div>
+        <div className='text-muted-foreground text-xs'>
+          Recalculates Age × Position × Overall multipliers from 18 months of sales data
         </div>
       </div>
 

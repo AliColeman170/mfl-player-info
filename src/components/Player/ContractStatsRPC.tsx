@@ -56,7 +56,7 @@ function formatPercentage(value: number) {
 }
 
 export async function ContractStatsRPC({ player }: { player: Player }) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   try {
     const { data: contractStats, error } = await supabase.rpc(

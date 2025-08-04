@@ -606,16 +606,57 @@ export const columns = [
   columnHelper.accessor((row) => row.marketValue?.estimate, {
     id: 'marketValue',
     header: 'Market Value',
-    cell: ({ getValue }) => {
+    cell: ({ getValue, row }) => {
       const value = getValue();
-      if (!value)
+      const confidence = row.original.marketValue?.confidence;
+
+      if (value === null || value === undefined)
         return <div className='text-muted-foreground text-center'>-</div>;
+
+      // Map confidence to badge color and text
+      const getConfidenceBadge = (conf: string) => {
+        switch (conf) {
+          case 'high':
+            return (
+              <Badge
+                variant='default'
+                className='ml-1 h-4 bg-green-500 px-1 py-0 text-[9px] text-white'
+              >
+                H
+              </Badge>
+            );
+          case 'medium':
+            return (
+              <Badge
+                variant='default'
+                className='ml-1 h-4 bg-yellow-500 px-1 py-0 text-[9px] text-white'
+              >
+                M
+              </Badge>
+            );
+          case 'low':
+            return (
+              <Badge
+                variant='default'
+                className='ml-1 h-4 bg-red-500 px-1 py-0 text-[9px] text-white'
+              >
+                L
+              </Badge>
+            );
+          default:
+            return null;
+        }
+      };
+
       return (
-        <div className='text-center font-medium'>${value.toLocaleString()}</div>
+        <div className='flex items-center justify-center gap-1 font-medium'>
+          <span>${value.toLocaleString()}</span>
+          {confidence && getConfidenceBadge(confidence)}
+        </div>
       );
     },
     enableSorting: true,
-    size: 100,
+    size: 130,
   }),
 
   // Current Listing Price
@@ -625,7 +666,7 @@ export const columns = [
     cell: ({ getValue }) => {
       const value = getValue();
 
-      if (!value)
+      if (value === null || value === undefined)
         return <div className='text-muted-foreground text-center'>-</div>;
 
       return (
@@ -648,7 +689,7 @@ export const columns = [
         return <div className='text-muted-foreground text-center'>-</div>;
 
       const marketValue = row.original.marketValue?.estimate;
-      if (!marketValue)
+      if (marketValue === null || marketValue === undefined)
         return <div className='text-muted-foreground text-center'>-</div>;
 
       const percentage = (value / marketValue) * 100;

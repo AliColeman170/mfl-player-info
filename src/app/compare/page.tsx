@@ -74,6 +74,8 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   };
 }
 
+import { Suspense } from 'react';
+
 export default function ComparePage() {
-  return <ClientComparePage />;
+  return <Suspense><ClientComparePage /></Suspense>;
 }

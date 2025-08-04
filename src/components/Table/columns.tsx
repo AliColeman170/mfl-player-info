@@ -432,7 +432,6 @@ export const columns = [
         <TagsList
           playerId={row.original.id}
           tags={row.original.tags}
-          isFavourite={row.original.is_favourite}
         />
       );
     },

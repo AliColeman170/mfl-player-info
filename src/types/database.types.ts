@@ -17,10 +17,10 @@ export type Database = {
     Functions: {
       graphql: {
         Args: {
+          extensions?: Json
           operationName?: string
           query?: string
           variables?: Json
-          extensions?: Json
         }
         Returns: Json
       }
@@ -62,6 +62,84 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      market_multiplier_updates: {
+        Row: {
+          combinations_added: number
+          combinations_updated: number
+          completed_at: string | null
+          id: number
+          sales_data_window_days: number
+          started_at: string
+          status: string | null
+          total_combinations_analyzed: number
+          total_sales_analyzed: number
+          update_run_id: string
+        }
+        Insert: {
+          combinations_added: number
+          combinations_updated: number
+          completed_at?: string | null
+          id?: number
+          sales_data_window_days: number
+          started_at: string
+          status?: string | null
+          total_combinations_analyzed: number
+          total_sales_analyzed: number
+          update_run_id?: string
+        }
+        Update: {
+          combinations_added?: number
+          combinations_updated?: number
+          completed_at?: string | null
+          id?: number
+          sales_data_window_days?: number
+          started_at?: string
+          status?: string | null
+          total_combinations_analyzed?: number
+          total_sales_analyzed?: number
+          update_run_id?: string
+        }
+        Relationships: []
+      }
+      market_multipliers: {
+        Row: {
+          age_range: string
+          avg_price: number
+          confidence_score: number
+          created_at: string | null
+          id: number
+          last_updated: string | null
+          multiplier: number
+          overall_range: string
+          position: string
+          sample_size: number
+        }
+        Insert: {
+          age_range: string
+          avg_price: number
+          confidence_score: number
+          created_at?: string | null
+          id?: number
+          last_updated?: string | null
+          multiplier: number
+          overall_range: string
+          position: string
+          sample_size: number
+        }
+        Update: {
+          age_range?: string
+          avg_price?: number
+          confidence_score?: number
+          created_at?: string | null
+          id?: number
+          last_updated?: string | null
+          multiplier?: number
+          overall_range?: string
+          position?: string
+          sample_size?: number
+        }
+        Relationships: []
       }
       nonces: {
         Row: {
@@ -636,11 +714,11 @@ export type Database = {
     Functions: {
       get_contract_stats_for_player: {
         Args: {
-          player_id: number
-          age_min?: number
           age_max?: number
-          overall_min?: number
+          age_min?: number
           overall_max?: number
+          overall_min?: number
+          player_id: number
           position_filter?: string
         }
         Returns: {
@@ -667,43 +745,43 @@ export type Database = {
       }
       get_filter_counts: {
         Args: {
-          search_text?: string
-          favourites_filter?: string
-          selected_tags?: string[]
-          tags_match_all?: boolean
-          authenticated_wallet_address?: string
-          wallet_address_filter?: string
-          applied_nationalities?: string[]
-          applied_positions?: string[]
-          applied_secondary_positions?: string[]
-          applied_owners?: string[]
-          applied_clubs?: string[]
-          applied_best_positions?: string[]
-          applied_preferred_foot?: string
-          age_min_filter?: number
           age_max_filter?: number
-          height_min_filter?: number
-          height_max_filter?: number
-          overall_min_filter?: number
-          overall_max_filter?: number
-          pace_min_filter?: number
-          pace_max_filter?: number
-          shooting_min_filter?: number
-          shooting_max_filter?: number
-          passing_min_filter?: number
-          passing_max_filter?: number
-          dribbling_min_filter?: number
-          dribbling_max_filter?: number
-          defense_min_filter?: number
-          defense_max_filter?: number
-          physical_min_filter?: number
-          physical_max_filter?: number
-          best_overall_min_filter?: number
+          age_min_filter?: number
+          applied_best_positions?: string[]
+          applied_clubs?: string[]
+          applied_nationalities?: string[]
+          applied_owners?: string[]
+          applied_positions?: string[]
+          applied_preferred_foot?: string
+          applied_secondary_positions?: string[]
+          authenticated_wallet_address?: string
           best_overall_max_filter?: number
-          market_value_min_filter?: number
+          best_overall_min_filter?: number
+          defense_max_filter?: number
+          defense_min_filter?: number
+          dribbling_max_filter?: number
+          dribbling_min_filter?: number
+          favourites_filter?: string
+          height_max_filter?: number
+          height_min_filter?: number
           market_value_max_filter?: number
-          price_diff_min_filter?: number
+          market_value_min_filter?: number
+          overall_max_filter?: number
+          overall_min_filter?: number
+          pace_max_filter?: number
+          pace_min_filter?: number
+          passing_max_filter?: number
+          passing_min_filter?: number
+          physical_max_filter?: number
+          physical_min_filter?: number
           price_diff_max_filter?: number
+          price_diff_min_filter?: number
+          search_text?: string
+          selected_tags?: string[]
+          shooting_max_filter?: number
+          shooting_min_filter?: number
+          tags_match_all?: boolean
+          wallet_address_filter?: string
         }
         Returns: Json
       }
@@ -713,9 +791,9 @@ export type Database = {
       }
       get_filter_options_paginated: {
         Args: {
+          offset_value?: number
           option_type: string
           page_size?: number
-          offset_value?: number
           search_term?: string
         }
         Returns: Json

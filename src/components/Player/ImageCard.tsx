@@ -33,7 +33,7 @@ export function ImageCard({ player }: { player: Player }) {
         priority
       />
       <div className='mt-3 flex flex-col items-center justify-center gap-1'>
-        <PlayerContract player={player} />
+        <PlayerContract club={player.activeContract?.club} />
         <Suspense>
           <ForSale player={player} />
         </Suspense>

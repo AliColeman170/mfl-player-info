@@ -31,9 +31,9 @@ export function useSyncStatus() {
       }
       return response.json();
     },
-    refetchInterval: (data) => {
+    refetchInterval: (query) => {
       // Refetch more frequently if a sync is running
-      return data?.isRunning ? 2000 : 10000; // 2s if running, 10s if idle
+      return query.state.data?.isRunning ? 2000 : 10000; // 2s if running, 10s if idle
     },
     refetchIntervalInBackground: true,
     staleTime: 1000, // Consider data stale after 1 second

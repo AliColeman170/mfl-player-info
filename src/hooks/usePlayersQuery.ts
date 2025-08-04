@@ -95,9 +95,9 @@ async function fetchPlayersFromDB({
         .select('player_id')
         .eq('wallet_address', userWalletAddress)
         .eq('is_favourite', true);
-      
-      const includeIds = favouriteIds?.map(f => f.player_id) || [];
-      
+
+      const includeIds = favouriteIds?.map((f) => f.player_id) || [];
+
       if (includeIds.length === 0) {
         // No favourites found, return empty result
         return {
@@ -106,10 +106,10 @@ async function fetchPlayersFromDB({
           hasNextPage: false,
         };
       }
-      
+
       // Filter to only include favourite players
       query = query.in('id', includeIds);
-      
+
       // Join with favourites table for UI display
       query = query.eq('favourites.wallet_address', userWalletAddress);
     } else if (filters.favourites === 'non-favourites') {
@@ -119,21 +119,24 @@ async function fetchPlayersFromDB({
         .select('player_id')
         .eq('wallet_address', userWalletAddress)
         .eq('is_favourite', true);
-      
-      const excludeIds = favouriteIds?.map(f => f.player_id) || [];
-      
+
+      const excludeIds = favouriteIds?.map((f) => f.player_id) || [];
+
       if (excludeIds.length > 0) {
         // Exclude favourite players
         query = query.not('id', 'in', `(${excludeIds.join(',')})`);
       }
-      
+
       // Join with favourites table for UI display (will show false/null for non-favourites)
       query = query.eq('favourites.wallet_address', userWalletAddress);
     } else {
       // Show all players - just join with wallet address to get favourite status
       query = query.eq('favourites.wallet_address', userWalletAddress);
     }
-  } else if (filters.favourites === 'favourites' || filters.favourites === 'non-favourites') {
+  } else if (
+    filters.favourites === 'favourites' ||
+    filters.favourites === 'non-favourites'
+  ) {
     // User not logged in but trying to filter favourites - return empty results
     return {
       players: [],
@@ -145,7 +148,7 @@ async function fetchPlayersFromDB({
   // Handle tags filtering (requires user to be logged in)
   if (filters.tags && filters.tags.length > 0 && userWalletAddress) {
     let taggedPlayerIds;
-    
+
     if (filters.tagsMatchAll) {
       // Match ALL selected tags - player must have every selected tag
       const { data } = await supabase
@@ -165,7 +168,7 @@ async function fetchPlayersFromDB({
     }
 
     if (taggedPlayerIds && taggedPlayerIds.length > 0) {
-      const playerIds = taggedPlayerIds.map(row => row.player_id);
+      const playerIds = taggedPlayerIds.map((row) => row.player_id);
       query = query.in('id', playerIds);
     } else {
       // No players found with selected tags - return empty results
@@ -184,9 +187,14 @@ async function fetchPlayersFromDB({
     };
   }
 
-  // Apply cursor pagination
+  // Apply offset-based pagination with .range()
   if (pageParam) {
-    query = query.lt('id', parseInt(pageParam));
+    const offset = parseInt(pageParam);
+    const endRange = offset + pageSize - 1;
+    query = query.range(offset, endRange);
+  } else {
+    // First page
+    query = query.range(0, pageSize - 1);
   }
 
   // Apply filters
@@ -389,7 +397,7 @@ async function fetchPlayersFromDB({
     // Define fields that should have nulls sorted last
     const nullsLastFields = [
       'market_value_estimate',
-      'current_listing_price', 
+      'current_listing_price',
       'price_difference',
       'best_ovr',
       'ovr_difference',
@@ -400,26 +408,44 @@ async function fetchPlayersFromDB({
 
     // Define rating fields that should never have nulls first when descending
     const ratingFields = [
-      'overall', 'pace', 'shooting', 'passing', 'dribbling', 'defense', 'physical', 
-      'best_ovr', 'market_value_estimate'
+      'overall',
+      'pace',
+      'shooting',
+      'passing',
+      'dribbling',
+      'defense',
+      'physical',
     ];
 
     // Convert array access to new field names
     if (filters.sortBy === 'metadata.nationalities[0]') {
-      // Sort by nationality field
-      query = query.order('nationality', { ascending });
-    } else if (filters.sortBy === 'metadata.positions[0]' || filters.sortBy === 'position') {
-      // Sort by position_index field for proper position ordering
-      query = query.order('position_index', { ascending });
+      // Sort by nationality field with ID as tiebreaker
+      query = query
+        .order('nationality', { ascending })
+        .order('id', { ascending: true });
+    } else if (
+      filters.sortBy === 'metadata.positions[0]' ||
+      filters.sortBy === 'position'
+    ) {
+      // Sort by position_index field with ID as tiebreaker
+      query = query
+        .order('position_index', { ascending })
+        .order('id', { ascending: true });
     } else if (nullsLastFields.includes(dbColumn)) {
-      // Sort fields with nulls last for both ascending and descending
-      query = query.order(dbColumn, { ascending, nullsFirst: false });
+      // Sort fields with nulls last + ID tiebreaker for stable pagination
+      query = query
+        .order(dbColumn, { ascending, nullsFirst: false })
+        .order('id', { ascending: true });
     } else if (ratingFields.includes(dbColumn) && !ascending) {
-      // For rating fields in descending order, put nulls last (want highest ratings first)
-      query = query.order(dbColumn, { ascending, nullsFirst: false });
+      // For rating fields in descending order, put nulls last + ID tiebreaker
+      query = query
+        .order(dbColumn, { ascending, nullsFirst: false })
+        .order('id', { ascending: true });
     } else {
-      // Regular field sorting
-      query = query.order(dbColumn, { ascending });
+      // Regular field sorting + ID tiebreaker for stable pagination
+      query = query
+        .order(dbColumn, { ascending })
+        .order('id', { ascending: true });
     }
   } else {
     // Default sort by ID descending for consistent pagination
@@ -428,7 +454,14 @@ async function fetchPlayersFromDB({
 
   const { data, error } = await query;
 
-  console.log({ data });
+  console.log('Fetched players page:', {
+    pageParam: pageParam || 'first',
+    offset: pageParam ? parseInt(pageParam) : 0,
+    count: data?.length || 0,
+    hasMore: (data?.length || 0) === pageSize,
+    firstId: data?.[0]?.id,
+    lastId: data?.[data.length - 1]?.id,
+  });
 
   if (error) {
     console.error('Database query error:', error);
@@ -471,13 +504,18 @@ async function fetchPlayersFromDB({
     bestPosition: row.best_position || undefined,
     bestOvr: row.best_ovr || undefined,
     ovrDifference: row.ovr_difference || undefined,
+    // Include sorting fields for cursor pagination
+    position_index: row.position_index || 999,
+    best_position_index: row.best_position_index || 999,
     marketValue: row.market_value_estimate
       ? {
           estimate: row.market_value_estimate,
           low: row.market_value_low || 0,
           high: row.market_value_high || 0,
-          confidence: row.market_value_confidence || '',
+          confidence: (row.market_value_confidence as 'high' | 'medium' | 'low') || 'low',
           method: row.market_value_method || '',
+          basedOn: '',
+          sampleSize: 0,
         }
       : undefined,
     // Contract and owner info
@@ -562,12 +600,16 @@ async function fetchPlayersFromDB({
     lastSyncedAt: row.last_synced_at || undefined,
   }));
 
+  // Create simple offset-based cursor
+  const currentOffset = pageParam ? parseInt(pageParam) : 0;
+  const nextCursor =
+    players.length === pageSize
+      ? (currentOffset + pageSize).toString()
+      : undefined;
+
   return {
     players,
-    nextCursor:
-      players.length === pageSize
-        ? players[players.length - 1].id.toString()
-        : undefined,
+    nextCursor,
     hasNextPage: players.length === pageSize,
   };
 }
@@ -575,13 +617,22 @@ async function fetchPlayersFromDB({
 export function usePlayersInfiniteQuery(params: PlayersQueryParams = {}) {
   const { pageSize = 50, filters = {} } = params;
 
+  const queryKey = ['players-db-infinite', pageSize, JSON.stringify(filters)];
+
   return useInfiniteQuery({
-    queryKey: ['players-db-infinite', pageSize, JSON.stringify(filters)],
-    queryFn: ({ pageParam }) =>
-      fetchPlayersFromDB({ pageParam: pageParam as string, pageSize, filters }),
+    queryKey,
+    queryFn: ({ pageParam }) => {
+      return fetchPlayersFromDB({
+        pageParam: pageParam as string,
+        pageSize,
+        filters,
+      });
+    },
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => {
-      return lastPage.hasNextPage ? lastPage.nextCursor : undefined;
+      const nextParam = lastPage.hasNextPage ? lastPage.nextCursor : undefined;
+      console.log('Next page cursor:', nextParam || 'none (end of data)');
+      return nextParam;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes,

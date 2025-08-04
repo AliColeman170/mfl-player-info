@@ -19,20 +19,21 @@ async function fetchFilterOptionsPage(
     option_type: optionType,
     page_size: 50,
     offset_value: pageParam,
-    search_term: searchTerm || null,
+    search_term: searchTerm || undefined,
   });
 
   if (error) {
     throw new Error(`Failed to fetch ${optionType}: ${error.message}`);
   }
 
-  return data as FilterOptionsPage;
+  return data as unknown as FilterOptionsPage;
 }
 
 export function useInfiniteFilterOptions(optionType: string, searchTerm?: string) {
   return useInfiniteQuery({
     queryKey: ['infinite-filter-options', optionType, searchTerm],
-    queryFn: ({ pageParam = 0 }) => fetchFilterOptionsPage(optionType, pageParam, searchTerm),
+    queryFn: ({ pageParam }) => fetchFilterOptionsPage(optionType, pageParam as number, searchTerm),
+    initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) => {
       if (!lastPage.hasMore) return undefined;
       return allPages.length * 50; // 50 items per page

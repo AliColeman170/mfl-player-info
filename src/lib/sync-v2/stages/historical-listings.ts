@@ -11,6 +11,8 @@ import {
   getSyncConfig,
   setSyncConfig,
   getStageInfo,
+  importMissingPlayer,
+  LISTINGS_API_RATE_LIMIT_DELAY,
   type SyncResult,
 } from '../core';
 
@@ -40,9 +42,11 @@ export async function importHistoricalListings(
 ): Promise<SyncResult> {
   const startTime = Date.now();
   const opts = { ...DEFAULT_OPTIONS, ...options };
-  
-  console.log('[Historical Listings] Starting one-time historical listings import...');
-  
+
+  console.log(
+    '[Historical Listings] Starting one-time historical listings import...'
+  );
+
   // Check if this stage has already been completed
   const stageInfo = await getStageInfo(STAGE_NAME);
   if (stageInfo?.status === 'completed' && stageInfo.is_one_time) {
@@ -56,7 +60,7 @@ export async function importHistoricalListings(
       metadata: { skipped: true, reason: 'Already completed' },
     };
   }
-  
+
   const executionId = await startSyncExecution(STAGE_NAME, 'api');
   let totalFetched = 0;
   let totalUpdatedPlayers = 0;
@@ -78,15 +82,24 @@ export async function importHistoricalListings(
       .not('current_listing_id', 'is', null);
 
     if (clearError) {
-      console.error('[Historical Listings] Error clearing listing data:', clearError);
-      errors.push(`Failed to clear existing listing data: ${clearError.message}`);
+      console.error(
+        '[Historical Listings] Error clearing listing data:',
+        clearError
+      );
+      errors.push(
+        `Failed to clear existing listing data: ${clearError.message}`
+      );
     }
 
     // Check for resumable progress
     const lastListingIdStr = await getSyncConfig('last_historical_listing_id');
-    let beforeListingId: number | undefined = lastListingIdStr ? parseInt(lastListingIdStr) : undefined;
-    
-    console.log(`[Historical Listings] ${beforeListingId ? `Resuming from listing ID ${beforeListingId}` : 'Starting fresh historical import'}`);
+    let beforeListingId: number | undefined = lastListingIdStr
+      ? parseInt(lastListingIdStr)
+      : undefined;
+
+    console.log(
+      `[Historical Listings] ${beforeListingId ? `Resuming from listing ID ${beforeListingId}` : 'Starting fresh historical import'}`
+    );
 
     let hasMore = true;
     let currentPage = 1;
@@ -94,7 +107,9 @@ export async function importHistoricalListings(
 
     while (hasMore && currentPage <= maxPages) {
       try {
-        console.log(`[Historical Listings] Fetching page ${currentPage}${beforeListingId ? `, beforeListingId: ${beforeListingId}` : ''}`);
+        console.log(
+          `[Historical Listings] Fetching page ${currentPage}${beforeListingId ? `, beforeListingId: ${beforeListingId}` : ''}`
+        );
 
         // Fetch listings page with retry
         const listingsPage = await withRetry(
@@ -119,22 +134,35 @@ export async function importHistoricalListings(
         }
 
         // Process listings batch
-        const processingResult = await processListingsBatch(listingsPage, executionId);
+        const processingResult = await processListingsBatch(
+          listingsPage,
+          executionId
+        );
         totalUpdatedPlayers += processingResult.updatedPlayers;
         totalFailed += processingResult.failed;
         errors.push(...processingResult.errors);
 
         // Update progress
-        await updateSyncProgress(executionId, totalUpdatedPlayers, totalFailed, {
-          currentPage,
-          totalFetched,
-          lastListingId: listingsPage[listingsPage.length - 1]?.listingResourceId,
-        });
+        await updateSyncProgress(
+          executionId,
+          totalUpdatedPlayers,
+          totalFailed,
+          {
+            currentPage,
+            totalFetched,
+            lastListingId:
+              listingsPage[listingsPage.length - 1]?.listingResourceId,
+          }
+        );
 
         // Save progress for resumability
-        const lastListingId = listingsPage[listingsPage.length - 1]?.listingResourceId;
+        const lastListingId =
+          listingsPage[listingsPage.length - 1]?.listingResourceId;
         if (lastListingId) {
-          await setSyncConfig('last_historical_listing_id', lastListingId.toString());
+          await setSyncConfig(
+            'last_historical_listing_id',
+            lastListingId.toString()
+          );
         }
 
         // Progress callback
@@ -144,26 +172,35 @@ export async function importHistoricalListings(
 
         // Check if last page (less than 50 results)
         if (listingsPage.length < 50) {
-          console.log(`[Historical Listings] Received ${listingsPage.length} results (less than 50). Last page reached.`);
+          console.log(
+            `[Historical Listings] Received ${listingsPage.length} results (less than 50). Last page reached.`
+          );
           hasMore = false;
         } else {
           beforeListingId = lastListingId;
           currentPage++;
         }
 
-        console.log(`[Historical Listings] Page ${currentPage - 1} complete: updated ${processingResult.updatedPlayers} players, total updated: ${totalUpdatedPlayers}`);
+        console.log(
+          `[Historical Listings] Page ${currentPage - 1} complete: updated ${processingResult.updatedPlayers} players, total updated: ${totalUpdatedPlayers}`
+        );
 
-        // Rate limiting delay
-        await sleep(3000);
-
+        // Rate limiting delay for /listings endpoint
+        await sleep(LISTINGS_API_RATE_LIMIT_DELAY);
       } catch (error) {
-        console.error(`[Historical Listings] Error processing page ${currentPage}:`, error);
-        const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+        console.error(
+          `[Historical Listings] Error processing page ${currentPage}:`,
+          error
+        );
+        const errorMsg =
+          error instanceof Error ? error.message : 'Unknown error';
         errors.push(`Page ${currentPage} failed: ${errorMsg}`);
 
         // Continue to next page on error, but limit consecutive failures
         if (errors.length > 10) {
-          console.error('[Historical Listings] Too many errors, stopping import');
+          console.error(
+            '[Historical Listings] Too many errors, stopping import'
+          );
           break;
         }
         currentPage++;
@@ -176,11 +213,14 @@ export async function importHistoricalListings(
 
     if (success) {
       // Clear resumable progress since we completed successfully
-      await setSyncConfig('last_historical_listing_id', '');
-      
+      // await setSyncConfig('last_historical_listing_id', '');
+
       // Set the last synced ID for future live syncs
       if (firstListingId) {
-        await setSyncConfig('last_listing_id_synced', firstListingId.toString());
+        await setSyncConfig(
+          'last_listing_id_synced',
+          firstListingId.toString()
+        );
       }
     }
 
@@ -190,7 +230,9 @@ export async function importHistoricalListings(
       errors.length > 0 ? errors.slice(0, 5).join('; ') : undefined
     );
 
-    console.log(`[Historical Listings] Completed: fetched ${totalFetched}, updated ${totalUpdatedPlayers} players, failed ${totalFailed}`);
+    console.log(
+      `[Historical Listings] Completed: fetched ${totalFetched}, updated ${totalUpdatedPlayers} players, failed ${totalFailed}`
+    );
 
     return {
       success,
@@ -204,13 +246,12 @@ export async function importHistoricalListings(
         firstListingId,
       },
     };
-
   } catch (error) {
     console.error('[Historical Listings] Fatal error:', error);
     const errorMsg = error instanceof Error ? error.message : 'Unknown error';
-    
+
     await completeSyncExecution(executionId, 'failed', errorMsg);
-    
+
     return {
       success: false,
       duration: Date.now() - startTime,
@@ -224,7 +265,9 @@ export async function importHistoricalListings(
 /**
  * Fetch historical listings from API
  */
-async function fetchHistoricalListingsPage(beforeListingId?: number): Promise<Listing[]> {
+async function fetchHistoricalListingsPage(
+  beforeListingId?: number
+): Promise<Listing[]> {
   const params: Record<string, string | number> = {
     limit: 50,
     type: 'PLAYER',
@@ -246,18 +289,18 @@ async function fetchHistoricalListingsPage(beforeListingId?: number): Promise<Li
   const fullUrl = `${baseUrl}/listings?${queryString}`;
 
   const response = await fetch(fullUrl);
-  
+
   if (!response.ok) {
     const errorMessage = `API request failed: ${fullUrl} Error: HTTP ${response.status}: ${response.statusText}`;
-    
+
     // Handle rate limiting specifically
     if (response.status === 403 || response.status === 429) {
       throw new RateLimitError(errorMessage, response.status);
     }
-    
+
     throw new Error(errorMessage);
   }
-  
+
   const listings = await response.json();
   return listings;
 }
@@ -276,27 +319,29 @@ async function processListingsBatch(
   try {
     // Group listings by player ID
     const playerListings = new Map<number, Listing>();
-    
-    listings.forEach(listing => {
+
+    listings.forEach((listing) => {
       if (listing.player?.id) {
         playerListings.set(listing.player.id, listing);
       }
     });
 
-    console.log(`[Historical Listings] Processing ${playerListings.size} unique player listings`);
+    console.log(
+      `[Historical Listings] Processing ${playerListings.size} unique player listings`
+    );
 
     // Update players in batches
     const batchSize = 100;
     const playerIds = Array.from(playerListings.keys());
-    
+
     for (let i = 0; i < playerIds.length; i += batchSize) {
       const batch = playerIds.slice(i, i + batchSize);
-      
+
       try {
         // Update players with listing data
         for (const playerId of batch) {
           const listing = playerListings.get(playerId)!;
-          
+
           const { error } = await supabase
             .from('players')
             .update({
@@ -308,30 +353,85 @@ async function processListingsBatch(
             .eq('id', playerId);
 
           if (error) {
-            console.error(`[Historical Listings] Error updating player ${playerId}:`, error);
-            errors.push(`Failed to update player ${playerId}: ${error.message}`);
-            failed++;
+            // Check if it's a foreign key constraint error for missing player
+            if (
+              error.message.includes('is not present in table "players"') ||
+              error.message.includes(`Key (player_id)=(${playerId})`)
+            ) {
+              console.log(
+                `[Historical Listings] Player ${playerId} missing - attempting to import`
+              );
+
+              // Import the missing player
+              const imported = await importMissingPlayer(playerId);
+
+              if (imported) {
+                // Retry the update operation
+                const { error: retryError } = await supabase
+                  .from('players')
+                  .update({
+                    current_listing_id: listing.listingResourceId,
+                    current_listing_price: listing.price,
+                    current_listing_status: listing.status,
+                    listing_created_date_time: listing.createdDateTime,
+                  })
+                  .eq('id', playerId);
+
+                if (retryError) {
+                  console.error(
+                    `[Historical Listings] Error updating player ${playerId} after import:`,
+                    retryError
+                  );
+                  errors.push(
+                    `Failed to update player ${playerId} after import: ${retryError.message}`
+                  );
+                  failed++;
+                } else {
+                  updatedPlayers++;
+                  console.log(
+                    `[Historical Listings] Successfully updated player ${playerId} after importing missing player`
+                  );
+                }
+              } else {
+                console.error(
+                  `[Historical Listings] Failed to import missing player ${playerId}`
+                );
+                errors.push(`Failed to import missing player ${playerId}`);
+                failed++;
+              }
+            } else {
+              console.error(
+                `[Historical Listings] Error updating player ${playerId}:`,
+                error
+              );
+              errors.push(
+                `Failed to update player ${playerId}: ${error.message}`
+              );
+              failed++;
+            }
           } else {
             updatedPlayers++;
           }
         }
 
-        console.log(`[Historical Listings] Successfully processed batch ${Math.floor(i / batchSize) + 1} (${batch.length} players)`);
-        
+        console.log(
+          `[Historical Listings] Successfully processed batch ${Math.floor(i / batchSize) + 1} (${batch.length} players)`
+        );
+
         // Small delay between batches
         await sleep(100);
-
       } catch (error) {
         console.error(`[Historical Listings] Error processing batch:`, error);
-        const errorMsg = error instanceof Error ? error.message : 'Unknown batch error';
+        const errorMsg =
+          error instanceof Error ? error.message : 'Unknown batch error';
         errors.push(`Batch error: ${errorMsg}`);
         failed += batch.length;
       }
     }
-
   } catch (error) {
     console.error('[Historical Listings] Batch processing error:', error);
-    const errorMsg = error instanceof Error ? error.message : 'Unknown batch error';
+    const errorMsg =
+      error instanceof Error ? error.message : 'Unknown batch error';
     errors.push(`Processing error: ${errorMsg}`);
     failed = listings.length;
   }

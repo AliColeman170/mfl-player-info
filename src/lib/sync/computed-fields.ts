@@ -13,13 +13,13 @@ export interface ComputedPlayerFields {
   best_position_index: number;
 
   // Market value data
-  market_value_estimate: number;
-  market_value_low: number;
-  market_value_high: number;
-  market_value_confidence: string;
-  market_value_method: string;
+  market_value_estimate: number | null;
+  market_value_low: number | null;
+  market_value_high: number | null;
+  market_value_confidence: string | null;
+  market_value_method: string | null;
   market_value_sample_size: number;
-  market_value_based_on: string;
+  market_value_based_on: string | null;
   market_value_updated_at: string;
 
   // Position ratings
@@ -152,15 +152,21 @@ export async function calculateComputedFields(
         bestPositionData.position || 'Unknown'
       ),
 
-      // Market value data
-      market_value_estimate: marketValue.estimatedValue,
-      market_value_low: marketValue.priceRange.low,
-      market_value_high: marketValue.priceRange.high,
-      market_value_confidence: marketValue.confidence,
-      market_value_method: marketValue.method,
-      market_value_sample_size: marketValue.sampleSize,
-      market_value_based_on: marketValue.basedOn || 'unknown',
-      market_value_updated_at: new Date().toISOString(),
+      // Market value data - with comprehensive fallback, all values are usable
+      ...(() => {
+        const isUnreliable = false; // No longer reject any calculations
+        
+        return {
+          market_value_estimate: isUnreliable ? null : marketValue.estimatedValue,
+          market_value_low: isUnreliable ? null : marketValue.priceRange.low,
+          market_value_high: isUnreliable ? null : marketValue.priceRange.high,
+          market_value_confidence: isUnreliable ? null : marketValue.confidence,
+          market_value_method: isUnreliable ? null : marketValue.method,
+          market_value_sample_size: marketValue.sampleSize,
+          market_value_based_on: isUnreliable ? null : (marketValue.basedOn || 'unknown'),
+          market_value_updated_at: new Date().toISOString(),
+        };
+      })(),
 
       // Position ratings
       position_ratings: positionRatings,

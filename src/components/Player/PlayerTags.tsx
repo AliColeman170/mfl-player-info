@@ -18,7 +18,6 @@ export async function PlayerTags({ player }: { player: Player }) {
         <TagsList
           playerId={player.id}
           tags={favourite.tags}
-          isFavourite={favourite.is_favourite}
           wrap={true}
         />
       </dd>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useCallback, useState } from 'react';
+import { useMemo, useCallback } from 'react';
 import { usePlayersQuery } from '@/hooks/usePlayersQuery';
 import { usePlayerFilters } from '../hooks/usePlayerFilters';
 import { useColumnVisibility } from '../hooks/useColumnVisibility';
@@ -53,8 +53,39 @@ export function PlayersTableContainer({
   // Flatten all pages into a single array
   const allPlayers = useMemo(() => {
     if (!data) return [];
-    return data.pages.flatMap((page) => page.players);
-  }, [data]);
+    
+    const flattened = data.pages.flatMap((page) => page.players);
+    
+    // Debug: Check for duplicates to verify stable sorting fix
+    const ids = flattened.map(p => p.id);
+    const uniqueIds = new Set(ids);
+    if (ids.length !== uniqueIds.size) {
+      console.error('DUPLICATE PLAYERS DETECTED (stable sorting failed):', {
+        totalPlayers: ids.length,
+        uniquePlayers: uniqueIds.size,
+        duplicateCount: ids.length - uniqueIds.size,
+        currentSort: `${apiFilters.sortBy || 'default'} ${apiFilters.sortOrder || 'desc'}`,
+        pages: data.pages.map((page, index) => ({
+          pageIndex: index,
+          playerCount: page.players.length,
+          firstId: page.players[0]?.id,
+          lastId: page.players[page.players.length - 1]?.id,
+          nextCursor: page.nextCursor,
+          // Show boundary data to debug overlaps
+          lastFewIds: page.players.slice(-3).map(p => p.id),
+          firstFewIds: page.players.slice(0, 3).map(p => p.id)
+        }))
+      });
+      
+      // Find the duplicate IDs
+      const duplicateIds = ids.filter((id, index) => ids.indexOf(id) !== index);
+      console.error('Duplicate player IDs:', [...new Set(duplicateIds)]);
+    } else {
+      console.log('✅ No duplicates detected - stable sorting working!');
+    }
+    
+    return flattened;
+  }, [data, apiFilters.sortBy, apiFilters.sortOrder]);
 
   // Handle loading more data
   const handleLoadMore = useCallback(() => {

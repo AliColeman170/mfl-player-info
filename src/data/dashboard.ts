@@ -56,11 +56,11 @@ export async function getMarketOverview(): Promise<MarketOverviewData> {
     console.error('Error fetching market overview:', error);
     throw new Error('Failed to fetch market overview data');
   }
-  const marketValues = data.map(p => p.market_value_estimate).filter(Boolean);
+  const marketValues = data.map(p => p.market_value_estimate).filter(Boolean) as number[];
   const avgMarketValue = marketValues.length > 0 
-    ? marketValues.reduce((sum, val) => sum + val, 0) / marketValues.length 
+    ? marketValues.reduce((sum, val) => sum + (val || 0), 0) / marketValues.length 
     : 0;
-  const totalMarketCap = marketValues.reduce((sum, val) => sum + val, 0);
+  const totalMarketCap = marketValues.reduce((sum, val) => sum + (val || 0), 0);
 
   return {
     totalPlayers: totalPlayers || 0,

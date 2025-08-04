@@ -10,6 +10,8 @@ import {
   RateLimitError,
   getSyncConfig,
   setSyncConfig,
+  importMissingPlayer,
+  LISTINGS_API_RATE_LIMIT_DELAY,
   type SyncResult,
 } from '../core';
 
@@ -130,8 +132,8 @@ export async function syncLiveSales(
 
         console.log(`[Live Sales] Page complete: processed ${newSales.length} new sales, total processed: ${totalProcessed}`);
 
-        // Rate limiting delay
-        await sleep(3000);
+        // Rate limiting delay for /listings endpoint
+        await sleep(LISTINGS_API_RATE_LIMIT_DELAY);
 
       } catch (error) {
         console.error(`[Live Sales] Error processing page:`, error);
@@ -278,9 +280,72 @@ async function processSalesBatch(
       });
 
     if (error) {
-      console.error('[Live Sales] Database upsert error:', error);
-      errors.push(`Database error: ${error.message}`);
-      failed = sales.length;
+      // Check if it's a foreign key constraint error for missing player
+      if (error.code === '23503') {
+        console.log('[Live Sales] Foreign key constraint error - attempting to import missing players');
+        
+        // Find all missing players by checking which ones exist in the database
+        const missingPlayerIds = new Set<number>();
+        const uniquePlayerIds = [...new Set(dbRecords.map(record => record.player_id).filter(id => id > 0))];
+        
+        console.log(`[Live Sales] Checking existence of ${uniquePlayerIds.length} unique players in batch`);
+        
+        // Check which players exist in the database
+        const { data: existingPlayers } = await supabase
+          .from('players')
+          .select('id')
+          .in('id', uniquePlayerIds);
+        
+        const existingPlayerIds = new Set(existingPlayers?.map(p => p.id) || []);
+        
+        // Find missing players
+        uniquePlayerIds.forEach(playerId => {
+          if (!existingPlayerIds.has(playerId)) {
+            missingPlayerIds.add(playerId);
+          }
+        });
+        
+        console.log(`[Live Sales] Found ${missingPlayerIds.size} missing players: [${Array.from(missingPlayerIds).join(', ')}]`);
+        
+        // Import missing players
+        let importedCount = 0;
+        for (const playerId of missingPlayerIds) {
+          console.log(`[Live Sales] Attempting to import missing player ${playerId}`);
+          const imported = await importMissingPlayer(playerId);
+          if (imported) {
+            importedCount++;
+          }
+        }
+        
+        if (importedCount > 0) {
+          console.log(`[Live Sales] Imported ${importedCount} missing players, retrying batch`);
+          
+          // Retry the upsert operation
+          const { error: retryError, count: retryCount } = await supabase
+            .from('sales')
+            .upsert(dbRecords, { 
+              onConflict: 'listing_resource_id',
+              count: 'exact'
+            });
+          
+          if (retryError) {
+            console.error('[Live Sales] Database upsert error on retry:', retryError);
+            errors.push(`Database error (after player import): ${retryError.message}`);
+            failed = sales.length;
+          } else {
+            processed = retryCount || dbRecords.length;
+            console.log(`[Live Sales] Successfully processed ${processed} sales in batch after importing missing players`);
+          }
+        } else {
+          console.error('[Live Sales] Failed to import missing players');
+          errors.push(`Database error (missing players): ${error.message}`);
+          failed = sales.length;
+        }
+      } else {
+        console.error('[Live Sales] Database upsert error:', error);
+        errors.push(`Database error: ${error.message}`);
+        failed = sales.length;
+      }
     } else {
       processed = count || dbRecords.length;
       console.log(`[Live Sales] Successfully processed ${processed} sales in batch`);

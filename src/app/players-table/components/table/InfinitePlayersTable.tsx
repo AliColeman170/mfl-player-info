@@ -47,6 +47,7 @@ interface InfinitePlayersTableProps {
     showAllColumns: () => void;
     hideAllColumns: () => void;
     resetColumns: () => void;
+    getCurrentVisibility: () => VisibilityState;
   }) => void;
 }
 
@@ -64,6 +65,23 @@ export function InfinitePlayersTable({
   const { filters, updateSorting } = usePlayerFilters();
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const scrollPositionRef = useRef<number>(0);
+  
+  // Track when filters change to reset scroll position (but don't force re-mount)
+  const filtersRef = useRef(filters);
+  const filtersChanged = JSON.stringify(filters) !== JSON.stringify(filtersRef.current);
+  
+  useEffect(() => {
+    if (filtersChanged) {
+      console.log('Filters changed, resetting scroll position');
+      filtersRef.current = filters;
+      
+      if (tableContainerRef.current) {
+        tableContainerRef.current.scrollTop = 0;
+        tableContainerRef.current.scrollLeft = 0;
+        scrollPositionRef.current = 0;
+      }
+    }
+  }, [filters, filtersChanged]);
 
   // Convert URL sorting state to table sorting state
   const sorting: SortingState = useMemo(
@@ -226,7 +244,7 @@ export function InfinitePlayersTable({
 
   const { rows } = table.getRowModel();
 
-  // Virtualization setup
+  // Virtualization setup - reset when data source changes
   const rowVirtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: useCallback(() => tableContainerRef.current, []),
@@ -248,7 +266,7 @@ export function InfinitePlayersTable({
       tableContainerRef.current.scrollLeft = scrollPositionRef.current;
       scrollPositionRef.current = 0; // Reset after restoring
     }
-  }, [isLoading]);
+  }, [isLoading, players.length]);
 
   // Preserve scroll position during loading to reduce flash
   useEffect(() => {
@@ -261,26 +279,42 @@ export function InfinitePlayersTable({
     }
   }, [isLoading]);
 
-  // Infinite scroll logic with debouncing
-  const lastVirtualIndexRef = useRef<number>(-1);
+  // Infinite scroll logic with scroll event detection
+  const lastLoadTriggerRef = useRef<number>(-1);
+  
+  // Reset infinite scroll trigger when filters change
+  useEffect(() => {
+    if (filtersChanged) {
+      console.log('Resetting infinite scroll trigger due to filter change');
+      lastLoadTriggerRef.current = -1;
+    }
+  }, [filtersChanged]);
 
   useEffect(() => {
-    if (
-      hasNextPage &&
-      !isFetchingNextPage &&
-      onLoadMore &&
-      virtualRows.length > 0
-    ) {
-      const lastItem = virtualRows[virtualRows.length - 1];
-      if (lastItem && lastItem.index >= rows.length - 3) {
-        // Only trigger if we've moved significantly down the list
-        if (lastItem.index > lastVirtualIndexRef.current) {
-          lastVirtualIndexRef.current = lastItem.index;
-          onLoadMore();
-        }
-      }
+    const container = tableContainerRef.current;
+    if (!container || !onLoadMore || !hasNextPage || isFetchingNextPage) {
+      return;
     }
-  }, [rows.length, hasNextPage, isFetchingNextPage, onLoadMore]);
+
+    const handleScroll = () => {
+      const scrollTop = container.scrollTop;
+      const scrollHeight = container.scrollHeight;
+      const clientHeight = container.clientHeight;
+      
+      // Trigger load more when scrolled to within 200px of bottom
+      const scrollPercentage = (scrollTop + clientHeight) / scrollHeight;
+      const isNearBottom = scrollPercentage > 0.9;
+      
+      if (isNearBottom && scrollTop > lastLoadTriggerRef.current + 100) {
+        console.log('Infinite scroll: triggering load more at', scrollTop);
+        lastLoadTriggerRef.current = scrollTop;
+        onLoadMore();
+      }
+    };
+
+    container.addEventListener('scroll', handleScroll, { passive: true });
+    return () => container.removeEventListener('scroll', handleScroll);
+  }, [hasNextPage, isFetchingNextPage, onLoadMore]);
 
   // Loading states
   if (isLoading && players.length === 0) {

@@ -10,6 +10,8 @@ import {
   RateLimitError,
   getSyncConfig,
   setSyncConfig,
+  importMissingPlayer,
+  LISTINGS_API_RATE_LIMIT_DELAY,
   type SyncResult,
 } from '../core';
 
@@ -147,8 +149,8 @@ export async function syncLiveListings(
 
         console.log(`[Live Listings] Page complete: updated ${newListings.length} players, total updated: ${totalUpdatedPlayers}`);
 
-        // Rate limiting delay
-        await sleep(3000);
+        // Rate limiting delay for /listings endpoint
+        await sleep(LISTINGS_API_RATE_LIMIT_DELAY);
 
       } catch (error) {
         console.error(`[Live Listings] Error processing page:`, error);
@@ -299,9 +301,43 @@ async function processListingsBatch(
             .eq('id', playerId);
 
           if (error) {
-            console.error(`[Live Listings] Error updating player ${playerId}:`, error);
-            errors.push(`Failed to update player ${playerId}: ${error.message}`);
-            failed++;
+            // Check if it's a foreign key constraint error for missing player
+            if (error.message.includes('is not present in table "players"') || error.message.includes(`Key (player_id)=(${playerId})`)) {
+              console.log(`[Live Listings] Player ${playerId} missing - attempting to import`);
+              
+              // Import the missing player
+              const imported = await importMissingPlayer(playerId);
+              
+              if (imported) {
+                // Retry the update operation
+                const { error: retryError } = await supabase
+                  .from('players')
+                  .update({
+                    current_listing_id: listing.listingResourceId,
+                    current_listing_price: listing.price,
+                    current_listing_status: listing.status,
+                    listing_created_date_time: listing.createdDateTime,
+                  })
+                  .eq('id', playerId);
+                
+                if (retryError) {
+                  console.error(`[Live Listings] Error updating player ${playerId} after import:`, retryError);
+                  errors.push(`Failed to update player ${playerId} after import: ${retryError.message}`);
+                  failed++;
+                } else {
+                  updatedPlayers++;
+                  console.log(`[Live Listings] Successfully updated player ${playerId} after importing missing player`);
+                }
+              } else {
+                console.error(`[Live Listings] Failed to import missing player ${playerId}`);
+                errors.push(`Failed to import missing player ${playerId}`);
+                failed++;
+              }
+            } else {
+              console.error(`[Live Listings] Error updating player ${playerId}:`, error);
+              errors.push(`Failed to update player ${playerId}: ${error.message}`);
+              failed++;
+            }
           } else {
             updatedPlayers++;
           }
