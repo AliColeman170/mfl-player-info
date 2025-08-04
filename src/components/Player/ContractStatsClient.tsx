@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { createClient } from '@/lib/supabase/client';
 import { Player } from '@/types/global.types';
 import { InfoIcon, ChevronsUpDownIcon } from 'lucide-react';
-import { Button } from '../UI/button';
+import { Button } from '../UI/button-alt';
 import {
   Collapsible,
   CollapsibleContent,

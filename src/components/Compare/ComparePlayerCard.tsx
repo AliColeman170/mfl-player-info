@@ -10,7 +10,7 @@ import {
   LockIcon,
 } from 'lucide-react';
 import { Badge } from '@/components/UI/badge';
-import { Button } from '@/components/UI/button';
+import { Button } from '@/components/UI/button-alt';
 import { getTierFromOverall, getTierClasses } from '@/lib/tier-colors';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';

@@ -1,7 +1,7 @@
 import type { Player, PlayerStats, StatKey } from '@/types/global.types';
 import { cn } from '@/utils/helpers';
 import { StyledRatingValue } from './StyledRatingValue';
-import { Button } from '../UI/button';
+import { Button } from '../UI/button-alt';
 import { MinusIcon, PlusIcon } from '@heroicons/react/20/solid';
 
 export function PlayerStatsTable({

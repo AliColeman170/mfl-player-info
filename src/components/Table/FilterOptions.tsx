@@ -1,6 +1,6 @@
 import { cn } from '@/utils/helpers';
 import { FunnelIcon } from '@heroicons/react/24/solid';
-import { Button } from '../UI/button';
+import { Button } from '../UI/button-alt';
 
 export function FilterOptions({
   count,

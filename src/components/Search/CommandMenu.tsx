@@ -15,7 +15,7 @@ import {
   CommandShortcut,
 } from '@/components/UI/command';
 import { Badge } from '@/components/UI/badge';
-import { Button } from '@/components/UI/button';
+import { Button } from '@/components/UI/button-alt';
 import {
   SearchIcon,
   Loader2Icon,

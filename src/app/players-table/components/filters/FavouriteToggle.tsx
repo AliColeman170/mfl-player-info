@@ -1,5 +1,5 @@
 import { Heart, HeartOff, Users } from 'lucide-react';
-import { Button } from '@/components/UI/button';
+import { Button } from '@/components/UI/button-alt';
 import { cn } from '@/utils/helpers';
 
 type FavouriteFilter = 'all' | 'favourites' | 'non-favourites';

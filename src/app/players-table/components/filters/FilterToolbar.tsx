@@ -2,7 +2,7 @@
 
 import { useCallback, useState, useEffect } from 'react';
 import { XIcon } from 'lucide-react';
-import { Button } from '@/components/UI/button';
+import { Button } from '@/components/UI/button-alt';
 import { cn } from '@/utils/helpers';
 import { usePlayerFilters } from '../../hooks/usePlayerFilters';
 import { useColumnVisibility } from '../../hooks/useColumnVisibility';

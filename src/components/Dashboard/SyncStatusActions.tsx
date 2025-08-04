@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Button } from '@/components/UI/button';
+import { Button } from '@/components/UI/button-alt';
 import {
   Play,
   Loader2,
@@ -69,10 +69,10 @@ const STAGE_CONFIGS = [
   },
 ];
 
-export function SyncStatusActions({ 
-  isRunning, 
-  currentExecutionId, 
-  runningStages = [] 
+export function SyncStatusActions({
+  isRunning,
+  currentExecutionId,
+  runningStages = [],
 }: SyncStatusActionsProps) {
   const queryClient = useQueryClient();
   const [loadingStages, setLoadingStages] = useState<Set<string>>(new Set());
@@ -81,10 +81,10 @@ export function SyncStatusActions({
   const [stopping, setStopping] = useState(false);
   const [multiplierUpdateLoading, setMultiplierUpdateLoading] = useState(false);
 
-  
   // Show full sync loading if we have a running full_sync or if local state indicates loading
-  const isFullSyncRunning = runningStages.includes('full_sync') || fullSyncLoading;
-  
+  const isFullSyncRunning =
+    runningStages.includes('full_sync') || fullSyncLoading;
+
   // Update local execution ID when API provides one
   React.useEffect(() => {
     if (currentExecutionId && !syncExecutionId) {
@@ -193,24 +193,24 @@ export function SyncStatusActions({
 
   const stopSync = async () => {
     setStopping(true);
-    
+
     try {
       const response = await fetch('/api/sync-v2/stop', {
         method: 'POST',
       });
-      
+
       const result = await response.json();
-      
+
       if (result.success) {
         toast.success('Sync stopped successfully', {
           description: result.message,
         });
-        
+
         // Clear execution ID and all local loading states
         setSyncExecutionId(null);
         setLoadingStages(new Set());
         setFullSyncLoading(false);
-        
+
         // Force immediate refetch of sync status
         await queryClient.invalidateQueries({ queryKey: ['sync-status'] });
         await queryClient.refetchQueries({ queryKey: ['sync-status'] });
@@ -219,7 +219,6 @@ export function SyncStatusActions({
           description: result.error || 'Unknown error occurred',
         });
       }
-      
     } catch (error) {
       console.error('Error stopping sync:', error);
       toast.error('Failed to stop sync', {
@@ -242,7 +241,7 @@ export function SyncStatusActions({
         body: JSON.stringify({
           windowDays: 540, // 18 months
           minSampleSize: 5,
-          forceUpdate: false
+          forceUpdate: false,
         }),
       });
 
@@ -267,9 +266,12 @@ export function SyncStatusActions({
     }
   };
 
-
   const isAnyStageLoading = loadingStages.size > 0;
-  const isDisabled = isRunning || isAnyStageLoading || fullSyncLoading || multiplierUpdateLoading;
+  const isDisabled =
+    isRunning ||
+    isAnyStageLoading ||
+    fullSyncLoading ||
+    multiplierUpdateLoading;
 
   return (
     <div className='space-y-4'>
@@ -357,7 +359,11 @@ export function SyncStatusActions({
                 variant='outline'
                 title={stage.description}
               >
-                {isStageLoading ? <Loader2 className='animate-spin' /> : <Icon />}
+                {isStageLoading ? (
+                  <Loader2 className='animate-spin' />
+                ) : (
+                  <Icon />
+                )}
                 <span className='truncate'>{stage.displayName}</span>
               </Button>
             );
@@ -387,7 +393,8 @@ export function SyncStatusActions({
           </Button>
         </div>
         <div className='text-muted-foreground text-xs'>
-          Recalculates Age × Position × Overall multipliers from 18 months of sales data
+          Recalculates Age × Position × Overall multipliers from 18 months of
+          sales data
         </div>
       </div>
 

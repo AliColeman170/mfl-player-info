@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { MFLIcon } from '../MFLIcon';
 import { Wallet } from '../Wallet';
 import { Suspense } from 'react';
-import { Button } from '../UI/button';
+import { Button } from '../UI/button-alt';
 import { CommandMenu } from '../Search/CommandMenu';
 import { Loader2Icon } from 'lucide-react';
 

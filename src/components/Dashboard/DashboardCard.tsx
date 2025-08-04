@@ -6,7 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/UI/card';
-import { Button } from '@/components/UI/button';
+import { Button } from '@/components/UI/button-alt';
 import { ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';

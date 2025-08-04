@@ -7,7 +7,7 @@ import { SpinnerIcon } from '../SpinnerIcon';
 import { usePathname } from 'next/navigation';
 import { login } from '@/actions/auth';
 import { toast } from 'sonner';
-import { Button } from '../UI/button';
+import { Button } from '../UI/button-alt';
 
 export function ConnectButton({ showText = false }) {
   let [isPending, startTransition] = useTransition();

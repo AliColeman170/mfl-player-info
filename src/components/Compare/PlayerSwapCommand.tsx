@@ -11,7 +11,7 @@ import {
   CommandList,
 } from '@/components/UI/command';
 import { Badge } from '@/components/UI/badge';
-import { Button } from '@/components/UI/button';
+import { Button } from '@/components/UI/button-alt';
 import { Loader2Icon, CrownIcon, ShoppingBasketIcon } from 'lucide-react';
 import { ArrowsRightLeftIcon } from '@heroicons/react/20/solid';
 import { cn } from '@/lib/utils';

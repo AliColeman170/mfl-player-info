@@ -4,7 +4,7 @@ import { useState, use } from 'react';
 import { Player } from '@/types/global.types';
 import { useUser } from '../Wallet/UserProvider';
 import { Badge } from '../UI/badge';
-import { Button } from '../UI/button';
+import { Button } from '../UI/button-alt';
 import { Input } from '../UI/input';
 import { X, Plus, Tag } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '../UI/popover';
