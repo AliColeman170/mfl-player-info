@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useRef, useCallback } from 'react';
-import { Button } from '@/components/UI/button-alt';
+import { Button } from '@/components/UI/button';
 import { Input } from '@/components/UI/input';
 import { cn } from '@/lib/utils';
 import { Search, Loader2 } from 'lucide-react';

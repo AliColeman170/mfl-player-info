@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { EyeIcon, EyeOffIcon, Settings2Icon } from 'lucide-react';
-import { Button } from '@/components/UI/button-alt';
+import { Button } from '@/components/UI/button';
 import {
   Popover,
   PopoverContent,

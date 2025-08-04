@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Label } from '@/components/UI/label';
 import { Input } from '@/components/UI/input';
-import { Button } from '@/components/UI/button-alt';
+import { Button } from '@/components/UI/button';
 import { X } from 'lucide-react';
 import { cn } from '@/utils/helpers';
 

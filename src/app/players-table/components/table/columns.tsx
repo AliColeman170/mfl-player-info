@@ -10,7 +10,7 @@ import { ToggleFavouriteButton } from '@/components/Favourites/ToggleFavouriteBu
 import { TagsList } from '@/components/Tags/TagsList';
 import { PlayerWithFavouriteData } from '../../types';
 import { Badge } from '@/components/UI/badge';
-import { Button } from '@/components/UI/button-alt';
+import { Button } from '@/components/UI/button';
 import {
   ArrowUpRightFromSquareIcon,
   Loader2Icon,

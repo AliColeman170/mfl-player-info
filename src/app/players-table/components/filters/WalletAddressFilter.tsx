@@ -1,6 +1,6 @@
 import { SearchIcon, WalletIcon, XIcon } from 'lucide-react';
 import { Input } from '@/components/UI/input';
-import { Button } from '@/components/UI/button-alt';
+import { Button } from '@/components/UI/button';
 import { cn } from '@/utils/helpers';
 
 interface WalletAddressFilterProps {

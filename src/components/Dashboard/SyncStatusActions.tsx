@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Button } from '@/components/UI/button-alt';
+import { Button } from '@/components/UI/button';
 import {
   Play,
   Loader2,

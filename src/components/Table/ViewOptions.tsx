@@ -10,7 +10,7 @@ import { columnLabels } from './columns';
 
 import { Table } from '@tanstack/react-table';
 import { PlayerWithFavouriteData } from '@/types/global.types';
-import { Button } from '../UI/button-alt';
+import { Button } from '../UI/button';
 
 export function ViewOptions({
   table,

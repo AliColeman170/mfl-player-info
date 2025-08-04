@@ -5,7 +5,7 @@ import { use } from 'react';
 import { cn } from '@/utils/helpers';
 import { Player } from '@/types/global.types';
 import { useUser } from '../Wallet/UserProvider';
-import { Button } from '../UI/button-alt';
+import { Button } from '../UI/button';
 import { HeartIcon } from 'lucide-react';
 import { useToggleFavourite } from '@/hooks/useFavouriteMutations';
 

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Filter, X } from 'lucide-react';
-import { Button } from '@/components/UI/button-alt';
+import { Button } from '@/components/UI/button';
 import { Badge } from '@/components/UI/badge';
 import { Switch } from '@/components/UI/switch';
 import { Label } from '@/components/UI/label';

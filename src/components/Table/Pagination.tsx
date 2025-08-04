@@ -14,7 +14,7 @@ import {
 } from '@heroicons/react/24/solid';
 import { Table } from '@tanstack/react-table';
 import { PlayerWithFavouriteData } from '@/types/global.types';
-import { Button } from '../UI/button-alt';
+import { Button } from '../UI/button';
 
 export function Pagination({
   table,

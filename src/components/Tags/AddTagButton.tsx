@@ -6,7 +6,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/UI/popover';
-import { Button } from '../UI/button-alt';
+import { Button } from '../UI/button';
 import { Input } from '../UI/input';
 import { Loader2Icon, PlusIcon, SaveIcon } from 'lucide-react';
 import { useUpdateTags } from '@/hooks/useTagMutations';

@@ -25,7 +25,7 @@ import { getTierClasses, getTierFromOverall } from '@/lib/tier-colors';
 import { cn } from '@/utils/helpers';
 import { MarketValue } from '@/types/global.types';
 import { ToggleFavouriteButton } from '../Favourites/ToggleFavouriteButton';
-import { Button } from '../UI/button-alt';
+import { Button } from '../UI/button';
 import { TagsList } from '../Tags/TagsList';
 import { useUser } from '../Wallet/UserProvider';
 import { use } from 'react';

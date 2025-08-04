@@ -31,7 +31,7 @@ import {
 import { StyledRatingValue } from './StyledRatingValue';
 import { positionalFamiliarity } from '@/config';
 import type { Player, PlayerStats, StatKey } from '@/types/global.types';
-import { Button } from '../UI/button-alt';
+import { Button } from '../UI/button';
 import {
   SettingsIcon,
   ChevronDownIcon,
