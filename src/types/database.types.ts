@@ -761,6 +761,18 @@ export type Database = {
         }
         Relationships: []
       }
+      total_volume: {
+        Row: {
+          coalesce: number | null
+        }
+        Insert: {
+          coalesce?: number | null
+        }
+        Update: {
+          coalesce?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -933,6 +945,10 @@ export type Database = {
           total_value: number
           avg_overall: number
         }[]
+      }
+      get_total_sales_volume: {
+        Args: Record<PropertyKey, never>
+        Returns: number
       }
       test_market_value_updates: {
         Args: { test_count?: number }
