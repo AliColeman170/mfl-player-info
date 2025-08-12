@@ -6,7 +6,7 @@ export async function POST(request: NextRequest) {
     // Parse request body for options
     const body = await request.json().catch(() => ({}));
     const { 
-      windowDays = 180, 
+      windowDays = 90, // Default to 3 months (with 6-month fallback built-in)
       minSampleSize = 5, 
       forceUpdate = false 
     } = body;

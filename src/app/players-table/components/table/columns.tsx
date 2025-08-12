@@ -75,11 +75,12 @@ const PlayerActionsCell = React.memo(function PlayerActionsCell({
 
   const refreshPlayerMutation = useMutation({
     mutationFn: async (playerId: number) => {
-      const response = await fetch(`/api/sync/player/${playerId}`, {
+      const response = await fetch('/api/sync-v2/single-player', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        body: JSON.stringify({ playerId }),
       });
 
       if (!response.ok) {
@@ -688,67 +689,6 @@ export const columns = [
     size: 130,
   }),
 
-  // Current Listing Price
-  columnHelper.accessor((row) => row.currentListing?.price, {
-    id: 'listingPrice',
-    header: 'Sale Price',
-    cell: ({ getValue }) => {
-      const value = getValue();
-
-      if (value === null || value === undefined)
-        return <div className='text-muted-foreground text-center'>-</div>;
-
-      return (
-        <div className={cn('text-center font-medium')}>
-          ${value.toLocaleString()}
-        </div>
-      );
-    },
-    enableSorting: true,
-    size: 100,
-  }),
-
-  // Price Difference (Listing - Market Value) - from database
-  columnHelper.accessor((row) => row.priceDifference, {
-    id: 'priceDifference',
-    header: 'Price Diff',
-    cell: ({ getValue, row }) => {
-      const value = getValue();
-      if (value === null || value === undefined)
-        return <div className='text-muted-foreground text-center'>-</div>;
-
-      const marketValue = row.original.marketValue?.estimate;
-      if (marketValue === null || marketValue === undefined)
-        return <div className='text-muted-foreground text-center'>-</div>;
-
-      const percentage = (value / marketValue) * 100;
-      const isPositive = value > 0;
-
-      return (
-        <div className='flex flex-col items-center justify-center text-xs'>
-          <span
-            className={cn('font-medium', {
-              'text-red-600': isPositive,
-              'text-green-600': !isPositive,
-            })}
-          >
-            {isPositive ? '+' : ''}${value.toLocaleString()}
-          </span>
-          <span
-            className={cn('text-[10px]', {
-              'text-red-600': isPositive,
-              'text-green-600': !isPositive,
-            })}
-          >
-            {isPositive ? '+' : ''}
-            {percentage.toFixed(1)}%
-          </span>
-        </div>
-      );
-    },
-    enableSorting: true,
-    size: 80,
-  }),
 
   // Tags
   columnHelper.accessor((row) => row.tags, {
@@ -806,7 +746,6 @@ export const columnConfig = {
     'bestPosition',
     'bestRating',
     'marketValue',
-    'listingPrice',
     'lastSynced',
     'actions',
   ],
@@ -822,7 +761,6 @@ export const columnConfig = {
     'defense',
     'physical',
     'difference',
-    'priceDifference',
     'tags',
   ],
   ratings: [

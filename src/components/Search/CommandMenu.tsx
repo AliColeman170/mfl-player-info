@@ -6,7 +6,6 @@ import { useInfiniteQuery } from '@tanstack/react-query';
 import { createClient } from '@/lib/supabase/client';
 import {
   Command,
-  CommandDialog,
   CommandEmpty,
   CommandGroup,
   CommandInput,
@@ -19,14 +18,11 @@ import { Button } from '@/components/UI/button';
 import {
   SearchIcon,
   Loader2Icon,
-  UserIcon,
   CrownIcon,
-  ShoppingCartIcon,
   ShoppingBasketIcon,
 } from 'lucide-react';
 import { cn } from '@/utils/helpers';
 import { getTierClasses, getTierFromOverall } from '@/lib/tier-colors';
-import { PlayerCardSVG } from '../Player/PlayerCardSVG';
 import { StyledRatingValue } from '../Player/StyledRatingValue';
 import { PlayerContract } from '../Player/PlayerContract';
 import {
@@ -112,6 +108,7 @@ async function searchPlayers({
     `
     )
     .ilike('search_text', `%${searchTerm}%`)
+    .order('id', { ascending: true })
     .order('overall', { ascending: false })
     .range(offset, offset + limit - 1);
 
@@ -166,8 +163,6 @@ function PlayerItem({
     router.push(`/player/${player.id}`);
     onSelect(); // Close the dialog
   }, [player.id, router, onSelect]);
-
-  const transformedPlayer = transformPlayerForCard(player);
 
   return (
     <CommandItem
@@ -366,24 +361,18 @@ export function CommandMenu() {
               )}
 
             {players.length > 0 && (
-              <CommandGroup>
-                {players.map((player) => (
-                  <PlayerItem
-                    key={player.id}
-                    player={player}
-                    onSelect={() => setOpen(false)}
-                  />
-                ))}
+              <>
+                <CommandGroup>
+                  {players.map((player) => (
+                    <PlayerItem
+                      key={player.id}
+                      player={player}
+                      onSelect={() => setOpen(false)}
+                    />
+                  ))}
 
-                {hasNextPage && (
-                  <div className='px-4 py-2'>
-                    <Button
-                      variant='ghost'
-                      size='sm'
-                      className='w-full'
-                      onClick={handleLoadMore}
-                      disabled={isFetchingNextPage}
-                    >
+                  {hasNextPage && (
+                    <CommandItem onClick={handleLoadMore}>
                       {isFetchingNextPage ? (
                         <>
                           <Loader2Icon className='mr-2 size-4 animate-spin' />
@@ -392,10 +381,10 @@ export function CommandMenu() {
                       ) : (
                         'Load more players'
                       )}
-                    </Button>
-                  </div>
-                )}
-              </CommandGroup>
+                    </CommandItem>
+                  )}
+                </CommandGroup>
+              </>
             )}
 
             {!search && (

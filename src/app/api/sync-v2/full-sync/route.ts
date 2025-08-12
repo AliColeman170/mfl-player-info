@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
 export async function GET() {
   return NextResponse.json({
     endpoint: 'full-sync',
-    description: 'Run the complete 6-stage sync orchestrator',
+    description: 'Run the complete 3-stage sync orchestrator',
     method: 'POST',
     maxDuration: '10 minutes',
     parameters: {
@@ -74,11 +74,8 @@ export async function GET() {
     },
     stages: [
       { name: 'players_import', isOneTime: false, required: true },
-      { name: 'sales_historical', isOneTime: true, required: false },
-      { name: 'listings_historical', isOneTime: true, required: false },
+      { name: 'sales', isOneTime: false, required: true },
       { name: 'market_values', isOneTime: false, required: true },
-      { name: 'sales_live', isOneTime: false, required: true },
-      { name: 'listings_live', isOneTime: false, required: true },
     ],
   });
 }

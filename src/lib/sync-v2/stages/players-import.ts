@@ -31,9 +31,9 @@ export interface PlayersImportOptions {
 }
 
 const DEFAULT_OPTIONS: PlayersImportOptions = {
-  batchSize: 1500, // API page size
+  batchSize: 1500, // API hard limit is 1500
   maxRetries: 5,
-  retryDelay: 2000,
+  retryDelay: 1000, // Reduced retry delay
 };
 
 /**
@@ -57,10 +57,30 @@ export async function importPlayersBasicData(
     // Import both active and retired players
     const mergedOpts = { ...DEFAULT_OPTIONS, ...opts };
     const importResults = await Promise.all([
-      importPlayersByType(false, false, executionId, mergedOpts as Required<PlayersImportOptions>), // Active available players
-      importPlayersByType(true, false, executionId, mergedOpts as Required<PlayersImportOptions>), // Active burnt players
-      importPlayersByType(false, true, executionId, mergedOpts as Required<PlayersImportOptions>), // Retired available players
-      importPlayersByType(true, true, executionId, mergedOpts as Required<PlayersImportOptions>), // Retired burnt players
+      importPlayersByType(
+        false,
+        false,
+        executionId,
+        mergedOpts as Required<PlayersImportOptions>
+      ), // Active available players
+      importPlayersByType(
+        true,
+        false,
+        executionId,
+        mergedOpts as Required<PlayersImportOptions>
+      ), // Active burnt players
+      importPlayersByType(
+        false,
+        true,
+        executionId,
+        mergedOpts as Required<PlayersImportOptions>
+      ), // Retired available players
+      importPlayersByType(
+        true,
+        true,
+        executionId,
+        mergedOpts as Required<PlayersImportOptions>
+      ), // Retired burnt players
     ]);
 
     // Combine results
@@ -76,9 +96,15 @@ export async function importPlayersBasicData(
     const duration = Date.now() - startTime;
 
     if (success) {
-      // Clear resumable progress since we completed successfully
-      await setSyncConfig('last_player_id_imported', '');
-      await setSyncConfig('last_retired_player_id_imported', '');
+      // Reset config keys to '0' after successful full import so next run starts fresh
+      await Promise.all([
+        setSyncConfig('last_player_id_imported', '0'),
+        setSyncConfig('last_retired_player_id_imported', '0'),
+        setSyncConfig('last_burned_player_id_imported', '0'),
+      ]);
+      console.log(
+        '[Players Import] Sync completed successfully - config keys reset to 0 for fresh start'
+      );
     }
 
     await completeSyncExecution(
@@ -143,16 +169,17 @@ async function importPlayersByType(
   const errors: string[] = [];
 
   try {
-    // Check for resumable progress
+    // Check for resumable progress to enable proper resumability
     const configKey = isRetired
       ? 'last_retired_player_id_imported'
       : isBurned
         ? 'last_burned_player_id_imported'
         : 'last_player_id_imported';
     const lastPlayerIdStr = await getSyncConfig(configKey);
-    let beforePlayerId: number | undefined = lastPlayerIdStr
-      ? parseInt(lastPlayerIdStr)
-      : undefined;
+    let beforePlayerId: number | undefined =
+      lastPlayerIdStr && lastPlayerIdStr !== '0'
+        ? parseInt(lastPlayerIdStr)
+        : undefined;
 
     console.log(
       `[Players Import] ${beforePlayerId ? `Resuming ${playerType} ${playerBurn} from player ID ${beforePlayerId}` : `Starting fresh ${playerType} ${playerBurn} import`}`
@@ -162,13 +189,17 @@ async function importPlayersByType(
     let currentPage = 1;
     const maxPages = 1000; // Safety limit
 
+    let previousProcessingPromise: Promise<any> | null = null;
+    
     while (hasMore && currentPage <= maxPages) {
+      const pageStartTime = Date.now();
       try {
         console.log(
           `[Players Import] Fetching ${playerType} ${playerBurn} page ${currentPage}${beforePlayerId ? `, beforePlayerId: ${beforePlayerId}` : ''}`
         );
 
-        // Fetch players page with retry
+        // Fetch players page with retry - ADD TIMING
+        const apiStartTime = Date.now();
         const playersPage = await withRetry(
           () =>
             fetchPlayersPage(
@@ -181,6 +212,8 @@ async function importPlayersByType(
           opts.retryDelay,
           STAGE_NAME
         );
+        const apiDuration = Date.now() - apiStartTime;
+        console.log(`[Performance] API fetch took ${apiDuration}ms for ${playersPage?.length || 0} players`);
 
         if (!playersPage || playersPage.length === 0) {
           console.log(
@@ -192,33 +225,26 @@ async function importPlayersByType(
 
         totalFetched += playersPage.length;
 
-        // Process players in smaller batches for database operations
-        const processingResult = await processPlayersBasic(
-          playersPage,
-          executionId,
-          isRetired
-        );
-        totalProcessed += processingResult.processed;
-        totalFailed += processingResult.failed;
-        errors.push(...processingResult.errors);
+        // Wait for previous page processing to complete before starting new one
+        if (previousProcessingPromise) {
+          const prevResult = await previousProcessingPromise;
+          totalProcessed += prevResult.processed;
+          totalFailed += prevResult.failed;
+          errors.push(...prevResult.errors);
+        }
 
-        // Update progress (this will throw SyncCancelledException if cancelled)
-        await updateSyncProgress(executionId, totalProcessed, totalFailed, {
-          currentPage: `${playerType}-${currentPage}`,
-          totalFetched,
-          lastPlayerId: playersPage[playersPage.length - 1]?.id,
-          playerType,
+        // Start processing current page (don't await yet - pipeline with next API fetch)
+        const processingStartTime = Date.now();
+        previousProcessingPromise = processPlayersBasic(playersPage, isRetired).then(result => {
+          const processingDuration = Date.now() - processingStartTime;
+          console.log(`[Performance] Database processing took ${processingDuration}ms for ${playersPage.length} players (${Math.round(processingDuration/playersPage.length)}ms per player)`);
+          return result;
         });
 
-        // Save progress for resumability
+        // Save progress for resumability and update pagination cursor
         const lastPlayerId = playersPage[playersPage.length - 1]?.id;
         if (lastPlayerId) {
           await setSyncConfig(configKey, lastPlayerId.toString());
-        }
-
-        // Progress callback
-        if (opts.onProgress) {
-          opts.onProgress(totalProcessed, totalFetched);
         }
 
         // Check if last page (less than requested amount)
@@ -233,11 +259,11 @@ async function importPlayersByType(
         }
 
         console.log(
-          `[Players Import] ${playerType} page ${currentPage - 1} complete: processed ${processingResult.processed}, total processed: ${totalProcessed}`
+          `[Players Import] ${playerType} page ${currentPage} fetch complete, processing in background`
         );
 
-        // Rate limiting delay
-        await sleep(3000);
+        // Reduced rate limiting delay - API can handle faster requests  
+        await sleep(100);
       } catch (error) {
         // Handle sync cancellation specially
         if (error instanceof SyncCancelledException) {
@@ -265,6 +291,14 @@ async function importPlayersByType(
         }
         currentPage++;
       }
+    }
+
+    // Process final batch if exists
+    if (previousProcessingPromise) {
+      const finalResult = await previousProcessingPromise;
+      totalProcessed += finalResult.processed;
+      totalFailed += finalResult.failed;
+      errors.push(...finalResult.errors);
     }
 
     console.log(
@@ -309,6 +343,7 @@ async function fetchPlayersPage(
     sortsOrders: 'ASC',
   };
 
+  // Use beforePlayerId for pagination with ascending sort
   if (beforePlayerId) {
     params.beforePlayerId = beforePlayerId;
   }
@@ -317,7 +352,8 @@ async function fetchPlayersPage(
     params.isRetired = isRetired;
   }
 
-  if (isBurned !== undefined) {
+  // For burned players, use the specific burned wallet address
+  if (isBurned) {
     params.ownerWalletAddress = '0x6fec8986261ecf49';
   }
 
@@ -345,128 +381,123 @@ async function fetchPlayersPage(
 }
 
 /**
- * Process players with basic data only (no market value calculations)
+ * Process players with basic data only (no market value calculations) - FAST & RELIABLE
  */
 async function processPlayersBasic(
   players: Player[],
-  executionId: number,
   isRetired: boolean = false
 ): Promise<{ processed: number; failed: number; errors: string[] }> {
   const errors: string[] = [];
   let processed = 0;
   let failed = 0;
 
-  // Process in smaller batches for database operations
-  const batchSize = 100;
+  // Use smaller batches that won't timeout, no delays for maximum speed
+  const batchSize = 50; // Small enough to never timeout
 
-  for (let i = 0; i < players.length; i += batchSize) {
-    const batch = players.slice(i, i + batchSize);
+  // Pre-transform all players to avoid doing this work in the loop - ADD TIMING
+  const transformStartTime = Date.now();
+  const allDbRecords = players.map((player) => {
+    const computedFields = calculateEssentialFields(player);
+
+    return {
+      // Basic player info
+      id: player.id,
+      first_name: player.metadata.firstName || null,
+      last_name: player.metadata.lastName || null,
+      age: player.metadata.age || null,
+      height: player.metadata.height || null,
+      nationality: player.metadata.nationalities?.[0] || null,
+      primary_position: player.metadata.positions?.[0] || null,
+      secondary_positions: player.metadata.positions?.slice(1) || [],
+      preferred_foot: player.metadata.preferredFoot || null,
+      is_retired: isRetired,
+
+      // Player stats
+      overall: player.metadata.overall || null,
+      pace: player.metadata.pace || null,
+      shooting: player.metadata.shooting || null,
+      passing: player.metadata.passing || null,
+      dribbling: player.metadata.dribbling || null,
+      defense: player.metadata.defense || null,
+      physical: player.metadata.physical || null,
+      goalkeeping: player.metadata.goalkeeping || null,
+      resistance: player.metadata.resistance || null,
+
+      // Active contract data
+      contract_id: player.activeContract?.id || null,
+      contract_status: player.activeContract?.status || null,
+      contract_kind: player.activeContract?.kind || null,
+      revenue_share: player.activeContract?.revenueShare || null,
+      total_revenue_share_locked:
+        player.activeContract?.totalRevenueShareLocked || null,
+
+      // Club information
+      club_id: player.activeContract?.club?.id || null,
+      club_name: player.activeContract?.club?.name || null,
+      club_main_color: player.activeContract?.club?.mainColor || null,
+      club_secondary_color: player.activeContract?.club?.secondaryColor || null,
+      club_city: player.activeContract?.club?.city || null,
+      club_division: player.activeContract?.club?.division || null,
+      club_logo_version: player.activeContract?.club?.logoVersion || null,
+      club_country: player.activeContract?.club?.country || null,
+      club_type: player.activeContract?.club?.type || null,
+
+      // Owner information
+      owner_wallet_address: player.ownedBy?.walletAddress || null,
+      owner_name: player.ownedBy?.name || null,
+      owner_twitter: player.ownedBy?.twitter || null,
+      owner_last_active: player.ownedBy?.lastActive || null,
+
+      // Computed fields for sorting and display
+      best_position: computedFields.best_position,
+      best_ovr: computedFields.best_ovr,
+      ovr_difference: computedFields.ovr_difference,
+      position_index: computedFields.position_index,
+      best_position_index: computedFields.best_position_index,
+      position_ratings: computedFields.position_ratings,
+
+      // Sync metadata
+      basic_data_synced_at: new Date().toISOString(),
+      sync_stage: 'basic_imported',
+      last_synced_at: new Date().toISOString(),
+      sync_version: 2, // v2 sync system
+
+      // Data hash for change detection
+      data_hash: generateDataHash(player),
+    };
+  });
+  const transformDuration = Date.now() - transformStartTime;
+  console.log(`[Performance] Data transformation took ${transformDuration}ms for ${players.length} players (${Math.round(transformDuration/players.length)}ms per player)`);
+
+  // Process in small, fast batches with no delays
+  for (let i = 0; i < allDbRecords.length; i += batchSize) {
+    const batch = allDbRecords.slice(i, i + batchSize);
 
     try {
-      // Transform to database format with computed fields
-      const dbRecords = batch.map((player) => {
-        // Calculate essential computed fields
-        const computedFields = calculateEssentialFields(player);
-
-        return {
-          // Basic player info
-          id: player.id,
-          first_name: player.metadata.firstName || null,
-          last_name: player.metadata.lastName || null,
-          age: player.metadata.age || null,
-          height: player.metadata.height || null,
-          nationality: player.metadata.nationalities?.[0] || null,
-          primary_position: player.metadata.positions?.[0] || null,
-          secondary_positions: player.metadata.positions?.slice(1) || [],
-          preferred_foot: player.metadata.preferredFoot || null,
-          is_retired: isRetired,
-
-          // Player stats
-          overall: player.metadata.overall || null,
-          pace: player.metadata.pace || null,
-          shooting: player.metadata.shooting || null,
-          passing: player.metadata.passing || null,
-          dribbling: player.metadata.dribbling || null,
-          defense: player.metadata.defense || null,
-          physical: player.metadata.physical || null,
-          goalkeeping: player.metadata.goalkeeping || null,
-          resistance: player.metadata.resistance || null,
-
-          // Contract information
-          has_pre_contract: player.hasPreContract || false,
-          energy: player.energy || null,
-          offer_status: player.offerStatus || null,
-          offer_min_division: player.offerMinDivision || null,
-          offer_min_revenue_share: player.offerMinRevenueShare || null,
-          offer_auto_accept: player.offerAutoAccept || false,
-
-          // Active contract data
-          contract_id: player.activeContract?.id || null,
-          contract_status: player.activeContract?.status || null,
-          contract_kind: player.activeContract?.kind || null,
-          revenue_share: player.activeContract?.revenueShare || null,
-          total_revenue_share_locked:
-            player.activeContract?.totalRevenueShareLocked || null,
-          start_season: player.activeContract?.startSeason || null,
-          nb_seasons: player.activeContract?.nbSeasons || null,
-          auto_renewal: player.activeContract?.autoRenewal || false,
-          contract_created_date_time:
-            player.activeContract?.createdDateTime || null,
-          clauses: player.activeContract?.clauses
-            ? JSON.stringify(player.activeContract.clauses)
-            : null,
-
-          // Club information
-          club_id: player.activeContract?.club?.id || null,
-          club_name: player.activeContract?.club?.name || null,
-          club_main_color: player.activeContract?.club?.mainColor || null,
-          club_secondary_color:
-            player.activeContract?.club?.secondaryColor || null,
-          club_city: player.activeContract?.club?.city || null,
-          club_division: player.activeContract?.club?.division || null,
-          club_logo_version: player.activeContract?.club?.logoVersion || null,
-          club_country: player.activeContract?.club?.country || null,
-          club_type: player.activeContract?.club?.type || null,
-
-          // Owner information
-          owner_wallet_address: player.ownedBy?.walletAddress || null,
-          owner_name: player.ownedBy?.name || null,
-          owner_twitter: player.ownedBy?.twitter || null,
-          owner_last_active: player.ownedBy?.lastActive || null,
-
-          // Computed fields for sorting and display
-          best_position: computedFields.best_position,
-          best_ovr: computedFields.best_ovr,
-          ovr_difference: computedFields.ovr_difference,
-          position_index: computedFields.position_index,
-          best_position_index: computedFields.best_position_index,
-          position_ratings: computedFields.position_ratings,
-
-          // Sync metadata
-          basic_data_synced_at: new Date().toISOString(),
-          sync_stage: 'basic_imported',
-          last_synced_at: new Date().toISOString(),
-          sync_version: 2, // v2 sync system
-
-          // Data hash for change detection
-          data_hash: generateDataHash(player),
-        };
-      });
-
-      // Upsert to database
+      // Fast upsert with small batch - ADD TIMING
+      const batchStartTime = Date.now();
       const { error } = await supabase
         .from('players')
-        .upsert(dbRecords, { onConflict: 'id' });
+        .upsert(batch, { onConflict: 'id' });
+      const batchDuration = Date.now() - batchStartTime;
 
       if (error) {
-        console.error(`[Players Import] Database error for batch:`, error);
+        console.error(
+          `[Players Import] Database error for batch ${Math.floor(i / batchSize) + 1}:`,
+          error
+        );
+        console.log(`[Performance] Failed batch took ${batchDuration}ms for ${batch.length} records`);
         errors.push(`Database error: ${error.message}`);
         failed += batch.length;
       } else {
         processed += batch.length;
-        console.log(
-          `[Players Import] Successfully processed ${batch.length} players (batch ${Math.floor(i / batchSize) + 1})`
-        );
+        console.log(`[Performance] DB batch ${Math.floor(i / batchSize) + 1} took ${batchDuration}ms for ${batch.length} records (${Math.round(batchDuration/batch.length)}ms per record)`);
+        // Less verbose logging for speed
+        if ((Math.floor(i / batchSize) + 1) % 10 === 0) {
+          console.log(
+            `[Players Import] Processed ${processed}/${allDbRecords.length} players`
+          );
+        }
       }
     } catch (error) {
       console.error(`[Players Import] Error processing batch:`, error);
@@ -476,10 +507,12 @@ async function processPlayersBasic(
       failed += batch.length;
     }
 
-    // Small delay between database batches
-    await sleep(100);
+    // NO DELAYS - maximum speed
   }
 
+  console.log(
+    `[Players Import] Completed: ${processed} processed, ${failed} failed`
+  );
   return { processed, failed, errors };
 }
 
@@ -487,7 +520,14 @@ async function processPlayersBasic(
  * Calculate essential computed fields for bulk import (lightweight version)
  */
 function calculateEssentialFields(player: Player) {
+  const ratingsStartTime = Date.now();
   const positionRatings = getPlayerPositionFamiliarityRatings(player, true);
+  const ratingsDuration = Date.now() - ratingsStartTime;
+  
+  // Log slow calculations (> 5ms per player is concerning)
+  if (ratingsDuration > 5) {
+    console.log(`[Performance] Position ratings took ${ratingsDuration}ms for player ${player.id}`);
+  }
   const bestPositionData = positionRatings?.[0] || {
     position: player.metadata.positions?.[0] || 'Unknown',
     rating: player.metadata.overall || 0,

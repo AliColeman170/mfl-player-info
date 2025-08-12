@@ -1,4 +1,3 @@
-import { getPlayerPositionRatings } from '@/utils/helpers';
 import { Metadata } from 'next';
 import {
   ArrowTopRightOnSquareIcon,
@@ -7,13 +6,9 @@ import {
 import { MFLIcon } from '@/components/MFLIcon';
 import Link from 'next/link';
 import Image from 'next/image';
-import { getFavourites } from '@/data/favourites';
-import { PlayerWithFavouriteData } from '@/types/global.types';
-import { getAllPlayersByOwner } from '@/data/players';
-import { TableWrapper } from '@/components/Table/TableWrapper';
 import { getUserProfile } from '@/data/user';
-import { createClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
+import { UserPlayersTable } from './UserPlayersTable';
 
 type Props = {
   params: Promise<{ address: string }>;
@@ -34,34 +29,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-async function fetchPlayersWithFavouriteData(address: string) {
-  const supabase = await createClient();
-  const favourites = await getFavourites(supabase);
-
-  const players = await getAllPlayersByOwner(address);
-
-  const playersWithAdditionalData: PlayerWithFavouriteData[] = players.map(
-    (player) => {
-      const faveData = favourites?.find((fave) => fave.player_id === player.id);
-      return {
-        ...player,
-        position_ratings: getPlayerPositionRatings(player, true),
-        is_favourite: faveData?.is_favourite ?? false,
-        tags: faveData?.tags ?? [],
-      };
-    }
-  );
-
-  return playersWithAdditionalData;
-}
-
 export default async function UserPage({ params }: Props) {
   const address = (await params).address;
   const user = await getUserProfile(address);
 
   if (!user) notFound();
-
-  const players = await fetchPlayersWithFavouriteData(address);
 
   return (
     <div className='mt-4'>
@@ -109,7 +81,7 @@ export default async function UserPage({ params }: Props) {
       ) : (
         <h1 className='text-4xl font-bold'>{address}</h1>
       )}
-      <TableWrapper players={players} />
+      <UserPlayersTable walletAddress={address} />
     </div>
   );
 }

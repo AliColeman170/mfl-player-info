@@ -6,7 +6,8 @@ import { Listing } from '@/types/global.types';
  */
 const EMA_CONFIG = {
   alpha: 0.3, // Smoothing factor (0.1 = slow, 0.5 = fast)
-  maxDaysOld: 180, // Exclude sales older than 180 days (increased from 60 for more data)
+  maxDaysOld: 90, // Primary window: 3 months (accounts for player aging)
+  fallbackMaxDaysOld: 180, // Fallback window: 6 months when insufficient data
   minSampleSize: 2, // Minimum sales needed for EMA
 } as const;
 
@@ -84,7 +85,13 @@ export function calculateEMA(
     minSampleSize = EMA_CONFIG.minSampleSize,
   } = options;
 
-  const weightedSales = prepareWeightedSales(sales, maxDaysOld);
+  // Try with primary 3-month window first
+  let weightedSales = prepareWeightedSales(sales, maxDaysOld);
+  
+  // If insufficient data, fallback to 6-month window
+  if (weightedSales.length < minSampleSize) {
+    weightedSales = prepareWeightedSales(sales, EMA_CONFIG.fallbackMaxDaysOld);
+  }
 
   if (weightedSales.length === 0) {
     return {

@@ -19,23 +19,10 @@ import { getTierClasses, getTierFromOverall } from '@/lib/tier-colors';
 import { StyledRatingValue } from '../Player/StyledRatingValue';
 import { PlayerContract } from '../Player/PlayerContract';
 import Image from 'next/image';
+import { SearchPlayerResult } from '@/types/global.types';
 
-interface SearchPlayer {
-  id: number;
-  first_name: string | null;
-  last_name: string | null;
-  overall: number | null;
-  primary_position: string | null;
-  secondary_positions: string[] | null;
-  nationality: string | null;
-  club_id: number | null;
-  club_name?: string | null;
-  club_type: string | null;
-  owner_wallet_address: string | null;
-  owner_name?: string | null;
-  age: number | null;
-  current_listing_price: number | null;
-}
+// Using centralized SearchPlayerResult type from global.types.ts
+type SearchPlayer = SearchPlayerResult;
 
 async function searchPlayers({
   query,

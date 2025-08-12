@@ -1,16 +1,14 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase/client';
+import { PlayerMutationResponse } from '@/types/global.types';
 
 interface UpdateFavouriteParams {
   player_id: number;
   is_favourite: boolean;
 }
 
-interface UpdateFavouriteResponse {
-  success: boolean;
-  message: string;
-  player_id: number;
+interface UpdateFavouriteResponse extends PlayerMutationResponse {
   is_favourite: boolean;
 }
 

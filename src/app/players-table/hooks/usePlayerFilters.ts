@@ -18,7 +18,7 @@ export function usePlayerFilters() {
     // Direct mappings
     if (filters.search) result.search = filters.search
     if (filters.favourites !== 'all') result.favourites = filters.favourites
-    if (filters.status.length > 0) result.status = filters.status
+    if (filters.status.length > 0) result.status = filters.status.filter(s => s !== 'all')
     if (filters.tags.length > 0) result.tags = filters.tags
     if (filters.tags.length > 0) result.tagsMatchAll = filters.tagsMatchAll
     if (filters.nationalities.length > 0) result.nationalities = filters.nationalities

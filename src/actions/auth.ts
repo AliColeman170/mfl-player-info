@@ -15,13 +15,9 @@ export async function login(credentials: CurrentUser, redirectTo?: string) {
 
   const supabase = await createClient();
 
-  console.log('Has credentials.services');
-
   const accountProofService = (credentials.services as any).find(
     (service: Service) => service.type === 'account-proof'
   );
-
-  console.log('Account Proof Service Found', accountProofService);
 
   if (!accountProofService || !accountProofService.data)
     return { success: false, message: 'Login failed.' };
@@ -31,9 +27,6 @@ export async function login(credentials: CurrentUser, redirectTo?: string) {
     return { success: false, message: 'Failed to verify nonce.' };
   }
 
-  console.log('Delete nonce.');
-
-  console.log('Verifying account proof.');
   const verified = await fcl.AppUtils.verifyAccountProof(
     appIdentifier,
     accountProofService.data
@@ -43,8 +36,6 @@ export async function login(credentials: CurrentUser, redirectTo?: string) {
     console.log('Account proof not verified.');
     return { success: false, message: 'Account proof not verified.' };
   }
-
-  console.log('Account proof verified successfully.');
 
   const { error, data } = await supabase.auth.signInAnonymously({
     options: {
@@ -75,8 +66,6 @@ export async function login(credentials: CurrentUser, redirectTo?: string) {
     console.log('Error updating user app_metadata.');
     return { success: false, message: updateError.message };
   }
-
-  console.log('Signed in anonymously.');
 
   await supabase.auth.refreshSession();
 

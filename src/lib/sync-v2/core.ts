@@ -1,7 +1,6 @@
 import 'server-only';
 import { createClient } from '@supabase/supabase-js';
 import { Player } from '@/types/global.types';
-import { calculateComputedFields } from '@/lib/sync/computed-fields';
 import { getPlayerPositionFamiliarityRatings } from '@/utils/helpers';
 import { getPositionIndex } from '@/lib/constants';
 

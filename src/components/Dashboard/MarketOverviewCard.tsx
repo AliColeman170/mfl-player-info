@@ -83,8 +83,8 @@ async function MarketOverviewContent() {
         />
         <MetricItem
           icon={<DollarSign className='size-5' />}
-          label='Avg Market Value'
-          value={`$${data.avgMarketValue}`}
+          label='Total Sales Volume'
+          value={`$${data.totalSalesVolume.toLocaleString()}`}
         />
         <MetricItem
           icon={<ListIcon className='size-5' />}

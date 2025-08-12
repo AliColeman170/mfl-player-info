@@ -202,6 +202,7 @@ export type Database = {
         Row: {
           age: number | null
           auto_renewal: boolean | null
+          base_value_estimate: number | null
           basic_data_synced_at: string | null
           best_ovr: number | null
           best_position: string | null
@@ -287,6 +288,7 @@ export type Database = {
         Insert: {
           age?: number | null
           auto_renewal?: boolean | null
+          base_value_estimate?: number | null
           basic_data_synced_at?: string | null
           best_ovr?: number | null
           best_position?: string | null
@@ -372,6 +374,7 @@ export type Database = {
         Update: {
           age?: number | null
           auto_renewal?: boolean | null
+          base_value_estimate?: number | null
           basic_data_synced_at?: string | null
           best_ovr?: number | null
           best_position?: string | null
@@ -511,6 +514,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      sales_summary: {
+        Row: {
+          age_center: number
+          age_range: number
+          avg_price: number | null
+          created_at: string | null
+          id: number
+          last_updated: string | null
+          median_price: number | null
+          overall_center: number
+          overall_range: number
+          position: string
+          price_trend: number | null
+          recent_sales_data: Json | null
+          sample_count: number
+        }
+        Insert: {
+          age_center: number
+          age_range?: number
+          avg_price?: number | null
+          created_at?: string | null
+          id?: number
+          last_updated?: string | null
+          median_price?: number | null
+          overall_center: number
+          overall_range?: number
+          position: string
+          price_trend?: number | null
+          recent_sales_data?: Json | null
+          sample_count?: number
+        }
+        Update: {
+          age_center?: number
+          age_range?: number
+          avg_price?: number | null
+          created_at?: string | null
+          id?: number
+          last_updated?: string | null
+          median_price?: number | null
+          overall_center?: number
+          overall_range?: number
+          position?: string
+          price_trend?: number | null
+          recent_sales_data?: Json | null
+          sample_count?: number
+        }
+        Relationships: []
       }
       sales_sync_metadata: {
         Row: {
@@ -715,6 +766,36 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      analyze_multi_variable_pricing: {
+        Args: { days_back?: number; min_sales?: number }
+        Returns: {
+          overall_rating: number
+          player_age: number
+          player_position: string
+          avg_price: number
+          trimmed_avg_price: number
+          sale_count: number
+          base_value_estimate: number
+          position_premium: number
+          age_factor: number
+        }[]
+      }
+      calculate_base_player_value: {
+        Args: { player_overall: number }
+        Returns: number
+      }
+      calculate_comprehensive_player_value: {
+        Args: {
+          player_age: number
+          player_overall: number
+          player_position: string
+        }
+        Returns: number
+      }
+      calculate_ema_from_sales_data: {
+        Args: { sales_data: Json }
+        Returns: number
+      }
       get_contract_stats_for_player: {
         Args: {
           age_max?: number
@@ -783,6 +864,7 @@ export type Database = {
           selected_tags?: string[]
           shooting_max_filter?: number
           shooting_min_filter?: number
+          status_filter?: string[]
           tags_match_all?: boolean
           wallet_address_filter?: string
         }
@@ -801,6 +883,43 @@ export type Database = {
         }
         Returns: Json
       }
+      get_sales_price_vs_age_graph: {
+        Args: { days_back?: number }
+        Returns: {
+          player_age: number
+          avg_price: number
+          sale_count: number
+          min_price: number
+          max_price: number
+          trimmed_avg_price: number
+          trimmed_sale_count: number
+        }[]
+      }
+      get_sales_price_vs_overall_graph: {
+        Args: { days_back?: number }
+        Returns: {
+          overall_rating: number
+          avg_price: number
+          sale_count: number
+          min_price: number
+          max_price: number
+          trimmed_avg_price: number
+          trimmed_sale_count: number
+        }[]
+      }
+      get_sales_price_vs_position_graph: {
+        Args: { days_back?: number }
+        Returns: {
+          player_position: string
+          avg_price: number
+          sale_count: number
+          min_price: number
+          max_price: number
+          trimmed_avg_price: number
+          trimmed_sale_count: number
+          position_order: number
+        }[]
+      }
       get_sync_status: {
         Args: Record<PropertyKey, never>
         Returns: Json
@@ -814,6 +933,66 @@ export type Database = {
           total_value: number
           avg_overall: number
         }[]
+      }
+      test_market_value_updates: {
+        Args: { test_count?: number }
+        Returns: {
+          player_id: number
+          first_name: string
+          last_name: string
+          overall: number
+          age: number
+          player_position: string
+          old_method: string
+          new_method: string
+          old_value: number
+          new_value: number
+          sample_size: number
+          confidence: string
+        }[]
+      }
+      test_pricing_model_accuracy: {
+        Args: { days_back?: number; sample_size?: number }
+        Returns: {
+          test_count: number
+          avg_actual_price: number
+          avg_predicted_price: number
+          avg_absolute_error: number
+          avg_percentage_error: number
+          median_percentage_error: number
+          accuracy_within_10_percent: number
+          accuracy_within_20_percent: number
+          accuracy_within_30_percent: number
+        }[]
+      }
+      update_all_player_base_values: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      update_all_players_market_values: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      update_player_market_value: {
+        Args: { player_id: number }
+        Returns: undefined
+      }
+      update_player_market_value_fast: {
+        Args: { player_id: number }
+        Returns: undefined
+      }
+      update_players_market_values_batch: {
+        Args: { batch_size?: number; offset_val?: number }
+        Returns: {
+          processed_count: number
+          updated_count: number
+          error_count: number
+          total_players: number
+        }[]
+      }
+      update_sales_summary: {
+        Args: Record<PropertyKey, never>
+        Returns: number
       }
     }
     Enums: {

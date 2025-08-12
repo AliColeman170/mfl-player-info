@@ -12,7 +12,6 @@ import {
   TrendingUp,
   ShoppingCart,
   Activity,
-  List,
   Square,
   Calculator,
 } from 'lucide-react';
@@ -33,39 +32,18 @@ const STAGE_CONFIGS = [
     description: 'Import basic player data',
   },
   {
-    name: 'stage2-historical-sales',
-    apiName: 'sales_historical',
-    displayName: 'Historical Sales',
-    icon: TrendingUp,
-    description: 'One-time historical sales import',
+    name: 'stage2-sales',
+    apiName: 'sales',
+    displayName: 'Sales Sync',
+    icon: ShoppingCart,
+    description: 'Sync all sales data (incremental or complete import)',
   },
   {
-    name: 'stage3-historical-listings',
-    apiName: 'listings_historical',
-    displayName: 'Historical Listings',
-    icon: List,
-    description: 'One-time historical listings import',
-  },
-  {
-    name: 'stage4-market-values',
+    name: 'stage3-market-values',
     apiName: 'market_values',
     displayName: 'Market Values',
     icon: Activity,
-    description: 'Calculate market values',
-  },
-  {
-    name: 'stage5-live-sales',
-    apiName: 'sales_live',
-    displayName: 'Live Sales',
-    icon: ShoppingCart,
-    description: 'Sync new sales data',
-  },
-  {
-    name: 'stage6-live-listings',
-    apiName: 'listings_live',
-    displayName: 'Live Listings',
-    icon: Database,
-    description: 'Sync current listings',
+    description: 'Calculate market values using comprehensive pricing model',
   },
 ];
 
@@ -239,9 +217,9 @@ export function SyncStatusActions({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          windowDays: 540, // 18 months
+          windowDays: 180, // 6 months
           minSampleSize: 5,
-          forceUpdate: false,
+          forceUpdate: true,
         }),
       });
 

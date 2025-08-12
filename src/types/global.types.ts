@@ -181,6 +181,41 @@ export interface PlayerStats {
 
 export type StatKey = keyof PlayerStats;
 
+// Search and API response types
+export interface SearchPlayerResult {
+  id: number;
+  first_name: string | null;
+  last_name: string | null;
+  overall: number | null;
+  primary_position: string | null;
+  secondary_positions: string[] | null;
+  nationality?: string | null;
+  club_id?: number | null;
+  club_name?: string | null;
+  club_type?: string | null;
+  owner_wallet_address?: string | null;
+  owner_name?: string | null;
+  age?: number | null;
+  current_listing_price?: number | null;
+  // Stats (optional for search results)
+  pace?: number | null;
+  shooting?: number | null;
+  passing?: number | null;
+  dribbling?: number | null;
+  defense?: number | null;
+  physical?: number | null;
+  goalkeeping?: number | null;
+}
+
+export interface BaseAPIResponse {
+  success: boolean;
+  message: string;
+}
+
+export interface PlayerMutationResponse extends BaseAPIResponse {
+  player_id: number;
+}
+
 export interface MFLUser {
   walletAddress: string;
   name: string;

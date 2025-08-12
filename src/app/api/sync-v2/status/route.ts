@@ -44,11 +44,8 @@ export async function GET() {
     // Map stage definitions
     const stageDefinitions = [
       { name: 'players_import', displayName: 'Players Import', isOneTime: false },
-      { name: 'sales_historical', displayName: 'Historical Sales', isOneTime: true },
-      { name: 'listings_historical', displayName: 'Historical Listings', isOneTime: true },
+      { name: 'sales', displayName: 'Sales Sync', isOneTime: false },
       { name: 'market_values', displayName: 'Market Values', isOneTime: false },
-      { name: 'sales_live', displayName: 'Live Sales', isOneTime: false },
-      { name: 'listings_live', displayName: 'Live Listings', isOneTime: false },
     ];
 
     const mappedStages: SyncStageStatus[] = stageDefinitions.map(def => {

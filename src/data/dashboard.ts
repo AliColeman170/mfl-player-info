@@ -5,7 +5,7 @@ import { Listing } from '@/types/global.types';
 
 export interface MarketOverviewData {
   totalPlayers: number;
-  avgMarketValue: number;
+  totalSalesVolume: number;
   activeListings: number;
   contractedPlayers: number;
   totalMarketCap: number;
@@ -18,7 +18,7 @@ export async function getMarketOverview(): Promise<MarketOverviewData> {
   let totalPlayers = 0;
   let activeListings = 0;
   let contractedPlayers = 0;
-  let avgMarketValue = 0;
+  let totalSalesVolume = 0;
   let totalMarketCap = 0;
 
   try {
@@ -78,7 +78,25 @@ export async function getMarketOverview(): Promise<MarketOverviewData> {
       contractedPlayers = 0;
     }
 
-    // Get market data for calculations with optimized query
+    // Get total sales volume using RPC function
+    try {
+      const { data: salesVolumeData, error: salesVolumeError } = await supabase
+        .rpc('get_total_sales_volume');
+
+      if (salesVolumeError) {
+        console.error('Error fetching total sales volume:', salesVolumeError);
+      } else {
+        totalSalesVolume = salesVolumeData || 0;
+      }
+    } catch (salesVolumeTimeout) {
+      console.warn(
+        'Total sales volume query timed out, using fallback value:',
+        salesVolumeTimeout
+      );
+      totalSalesVolume = 0;
+    }
+
+    // Get total market cap calculation with optimized query
     try {
       const { data, error } = await supabase
         .from('players')
@@ -87,24 +105,18 @@ export async function getMarketOverview(): Promise<MarketOverviewData> {
         .limit(10000); // Limit to prevent timeout on large datasets
 
       if (error) {
-        console.error('Error fetching market overview data:', error);
+        console.error('Error fetching market cap data:', error);
       } else if (data && data.length > 0) {
         const marketValues = data
           .map((p) => p.market_value_estimate)
           .filter(Boolean) as number[];
-        avgMarketValue =
-          marketValues.length > 0
-            ? marketValues.reduce((sum, val) => sum + (val || 0), 0) /
-              marketValues.length
-            : 0;
         totalMarketCap = marketValues.reduce((sum, val) => sum + (val || 0), 0);
       }
     } catch (marketTimeout) {
       console.warn(
-        'Market values query timed out, using fallback values:',
+        'Market cap query timed out, using fallback values:',
         marketTimeout
       );
-      avgMarketValue = 0;
       totalMarketCap = 0;
     }
   } catch (error) {
@@ -114,7 +126,7 @@ export async function getMarketOverview(): Promise<MarketOverviewData> {
 
   return {
     totalPlayers,
-    avgMarketValue: Math.round(avgMarketValue),
+    totalSalesVolume,
     activeListings,
     contractedPlayers,
     totalMarketCap: Math.round(totalMarketCap),

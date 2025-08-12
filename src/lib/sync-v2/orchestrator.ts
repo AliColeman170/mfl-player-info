@@ -12,11 +12,8 @@ import { createProgressReporter, cleanupProgress } from './progress-broadcaster'
 
 // Import all stage functions
 import { importPlayersBasicData } from './stages/players-import';
-import { importHistoricalSales } from './stages/historical-sales';
-import { importHistoricalListings } from './stages/historical-listings';
+import { syncSales } from './stages/sales';
 import { calculateMarketValues } from './stages/market-values';
-import { syncLiveSales } from './stages/live-sales';
-import { syncLiveListings } from './stages/live-listings';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -49,18 +46,11 @@ const SYNC_STAGES: StageDefinition[] = [
     execute: () => importPlayersBasicData(),
   },
   {
-    name: 'sales_historical',
-    displayName: 'Historical Sales Import',
-    isOneTime: true,
-    isRequired: false,
-    execute: () => importHistoricalSales(),
-  },
-  {
-    name: 'listings_historical',
-    displayName: 'Historical Listings Import',
-    isOneTime: true,
-    isRequired: false,
-    execute: () => importHistoricalListings(),
+    name: 'sales',
+    displayName: 'Sales Sync',
+    isOneTime: false,
+    isRequired: true,
+    execute: () => syncSales(),
   },
   {
     name: 'market_values',
@@ -69,24 +59,10 @@ const SYNC_STAGES: StageDefinition[] = [
     isRequired: true,
     execute: () => calculateMarketValues(),
   },
-  {
-    name: 'sales_live',
-    displayName: 'Live Sales Sync',
-    isOneTime: false,
-    isRequired: true,
-    execute: () => syncLiveSales(),
-  },
-  {
-    name: 'listings_live',
-    displayName: 'Live Listings Sync',
-    isOneTime: false,
-    isRequired: true,
-    execute: () => syncLiveListings(),
-  },
 ];
 
 /**
- * Run the complete 6-stage sync process
+ * Run the complete 3-stage sync process
  */
 export async function runFullSync(
   options: SyncOrchestratorOptions = {}

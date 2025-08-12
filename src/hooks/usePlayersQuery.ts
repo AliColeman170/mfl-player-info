@@ -150,7 +150,7 @@ async function fetchPlayersFromDB({
   // Handle status filtering
   if (filters.status && filters.status.length > 0) {
     const statusConditions: string[] = [];
-    
+
     if (filters.status.includes('available')) {
       statusConditions.push('and(is_retired.eq.false,is_burned.eq.false)');
     }
@@ -160,7 +160,7 @@ async function fetchPlayersFromDB({
     if (filters.status.includes('burned')) {
       statusConditions.push('is_burned.eq.true');
     }
-    
+
     if (statusConditions.length > 0) {
       query = query.or(statusConditions.join(','));
     }
@@ -231,11 +231,6 @@ async function fetchPlayersFromDB({
 
   if (filters.positions && filters.positions.length > 0) {
     query = query.in('primary_position', filters.positions);
-  }
-  
-  // Handle primaryPositions field as well (for compatibility)
-  if (filters.primaryPositions && filters.primaryPositions.length > 0) {
-    query = query.in('primary_position', filters.primaryPositions);
   }
 
   if (filters.secondaryPositions && filters.secondaryPositions.length > 0) {
@@ -475,7 +470,7 @@ async function fetchPlayersFromDB({
     }
   } else {
     // Default sort by ID descending for consistent pagination
-    query = query.order('id', { ascending: false });
+    query = query.order('id', { ascending: true });
   }
 
   const { data, error } = await query;
@@ -538,7 +533,8 @@ async function fetchPlayersFromDB({
           estimate: row.market_value_estimate,
           low: row.market_value_low || 0,
           high: row.market_value_high || 0,
-          confidence: (row.market_value_confidence as 'high' | 'medium' | 'low') || 'low',
+          confidence:
+            (row.market_value_confidence as 'high' | 'medium' | 'low') || 'low',
           method: row.market_value_method || '',
           basedOn: '',
           sampleSize: 0,

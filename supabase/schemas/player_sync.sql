@@ -58,9 +58,9 @@ CREATE TABLE IF NOT EXISTS "public"."players" (
     "owner_last_active" bigint,
     -- Burned status
     "is_burned" boolean GENERATED ALWAYS AS (
-        CASE 
-            WHEN "owner_wallet_address" = '0x6fec8986261ecf49' THEN true 
-            ELSE false 
+        CASE
+            WHEN "owner_wallet_address" = '0x6fec8986261ecf49' THEN true
+            ELSE false
         END
     ) STORED,
     -- Market/listing data
@@ -85,6 +85,7 @@ CREATE TABLE IF NOT EXISTS "public"."players" (
     "market_value_sample_size" integer,
     "market_value_based_on" "text",
     "market_value_updated_at" timestamp with time zone,
+    "base_value_estimate" integer,
     "position_ratings" "jsonb",
     "best_position_rating" integer,
     "best_position_difference" integer,
@@ -119,7 +120,13 @@ CREATE TABLE IF NOT EXISTS "public"."sync_status" (
     "created_at" timestamp with time zone DEFAULT "now" (),
     CONSTRAINT "sync_status_sync_type_check" CHECK (
         (
-            "sync_type" = ANY (ARRAY['full'::"text", 'individual'::"text", 'listings'::"text"])
+            "sync_type" = ANY (
+                ARRAY[
+                    'full'::"text",
+                    'individual'::"text",
+                    'listings'::"text"
+                ]
+            )
         )
     ),
     CONSTRAINT "sync_status_status_check" CHECK (
@@ -169,8 +176,8 @@ CREATE TABLE IF NOT EXISTS "public"."sales_sync_metadata" (
     "total_saved" integer DEFAULT 0,
     "current_page" integer DEFAULT 1,
     "status" "text" DEFAULT 'running',
-    "started_at" timestamp with time zone DEFAULT "now"(),
-    "updated_at" timestamp with time zone DEFAULT "now"(),
+    "started_at" timestamp with time zone DEFAULT "now" (),
+    "updated_at" timestamp with time zone DEFAULT "now" (),
     "completed_at" timestamp with time zone,
     "error_message" "text"
 );
@@ -186,14 +193,13 @@ CREATE TABLE IF NOT EXISTS "public"."player_sync_metadata" (
     "total_saved" integer DEFAULT 0,
     "current_page" integer DEFAULT 1,
     "status" "text" DEFAULT 'running',
-    "started_at" timestamp with time zone DEFAULT "now"(),
-    "updated_at" timestamp with time zone DEFAULT "now"(),
+    "started_at" timestamp with time zone DEFAULT "now" (),
+    "updated_at" timestamp with time zone DEFAULT "now" (),
     "completed_at" timestamp with time zone,
     "error_message" "text"
 );
 
 ALTER TABLE "public"."player_sync_metadata" OWNER TO "postgres";
-
 
 CREATE SEQUENCE IF NOT EXISTS "public"."sales_sync_metadata_id_seq" AS bigint START
 WITH
@@ -219,14 +225,17 @@ ALTER TABLE "public"."sync_status_id_seq" OWNER TO "postgres";
 
 ALTER SEQUENCE "public"."sync_status_id_seq" OWNED BY "public"."sync_status"."id";
 
-
 ALTER TABLE ONLY "public"."sales_sync_metadata"
 ALTER COLUMN "id"
-SET DEFAULT "nextval" ('"public"."sales_sync_metadata_id_seq"'::"regclass");
+SET DEFAULT "nextval" (
+    '"public"."sales_sync_metadata_id_seq"'::"regclass"
+);
 
 ALTER TABLE ONLY "public"."player_sync_metadata"
 ALTER COLUMN "id"
-SET DEFAULT "nextval" ('"public"."player_sync_metadata_id_seq"'::"regclass");
+SET DEFAULT "nextval" (
+    '"public"."player_sync_metadata_id_seq"'::"regclass"
+);
 
 ALTER TABLE ONLY "public"."sync_status"
 ALTER COLUMN "id"
@@ -346,7 +355,9 @@ CREATE INDEX IF NOT EXISTS "idx_player_sync_metadata_status" ON "public"."player
 CREATE INDEX IF NOT EXISTS "idx_player_sync_metadata_started_at" ON "public"."player_sync_metadata" USING "btree" ("started_at");
 
 -- Trigger function for updated_at
-CREATE OR REPLACE FUNCTION "public"."update_updated_at_column" () RETURNS "trigger" LANGUAGE "plpgsql" AS $$
+CREATE OR REPLACE FUNCTION "public"."update_updated_at_column" () RETURNS "trigger" LANGUAGE "plpgsql"
+set
+    search_path = '' AS $$
 BEGIN
     NEW.updated_at = NOW();
     RETURN NEW;
@@ -394,7 +405,6 @@ GRANT ALL ON TABLE "public"."sales" TO "authenticated";
 
 GRANT ALL ON TABLE "public"."sales" TO "service_role";
 
-
 GRANT ALL ON TABLE "public"."sales_sync_metadata" TO "anon";
 
 GRANT ALL ON TABLE "public"."sales_sync_metadata" TO "authenticated";
@@ -432,15 +442,14 @@ CREATE TABLE IF NOT EXISTS "public"."market_multipliers" (
     "position" VARCHAR(10) NOT NULL,
     "age_range" VARCHAR(10) NOT NULL, -- '16-22', '23-27', '28-32', '33-40'
     "overall_range" VARCHAR(10) NOT NULL, -- '85-89', '80-84', etc.
-    "multiplier" DECIMAL(8,4) NOT NULL,
+    "multiplier" DECIMAL(8, 4) NOT NULL,
     "sample_size" INTEGER NOT NULL,
-    "avg_price" DECIMAL(10,2) NOT NULL,
-    "confidence_score" DECIMAL(3,2) NOT NULL, -- 0.0 to 1.0
+    "avg_price" DECIMAL(10, 2) NOT NULL,
+    "confidence_score" DECIMAL(3, 2) NOT NULL, -- 0.0 to 1.0
     "last_updated" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     "created_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    
     -- Composite unique constraint
-    UNIQUE("position", "age_range", "overall_range")
+    UNIQUE ("position", "age_range", "overall_range")
 );
 
 ALTER TABLE "public"."market_multipliers" OWNER TO "postgres";
@@ -462,11 +471,9 @@ CREATE TABLE IF NOT EXISTS "public"."market_multiplier_updates" (
 ALTER TABLE "public"."market_multiplier_updates" OWNER TO "postgres";
 
 -- Indexes for market multipliers
-CREATE INDEX IF NOT EXISTS "idx_market_multipliers_lookup" 
-ON "public"."market_multipliers"("position", "age_range", "overall_range");
+CREATE INDEX IF NOT EXISTS "idx_market_multipliers_lookup" ON "public"."market_multipliers" ("position", "age_range", "overall_range");
 
-CREATE INDEX IF NOT EXISTS "idx_market_multipliers_updated" 
-ON "public"."market_multipliers"("last_updated");
+CREATE INDEX IF NOT EXISTS "idx_market_multipliers_updated" ON "public"."market_multipliers" ("last_updated");
 
 -- Enable RLS
 ALTER TABLE "public"."players" ENABLE ROW LEVEL SECURITY;

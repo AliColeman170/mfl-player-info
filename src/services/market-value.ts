@@ -59,16 +59,15 @@ function generateComprehensiveMultipliers(): Record<string, Record<string, Recor
     'GK': 0.70    // Goalkeepers (specialized market)
   };
   
-  // Age multipliers (individual ages, relative to age 25 = 1.0)
+  // Age multipliers (individual ages, relative to age 25 = 1.0) - Smooth curve
   function getAgeMultiplier(age: number): number {
-    if (age <= 20) return 1.50;      // Very young talent
-    if (age <= 22) return 1.30;      // Young talent premium
-    if (age <= 24) return 1.10;      // Rising stars
-    if (age <= 27) return 1.00;      // BASELINE peak years
-    if (age <= 29) return 0.85;      // Still good
-    if (age <= 32) return 0.65;      // Declining
-    if (age <= 35) return 0.45;      // Veteran
-    return 0.30;                     // Old veteran
+    const ageMultipliers: Record<number, number> = {
+      16: 3.0, 17: 2.8, 18: 2.6, 19: 2.4, 20: 2.2, 21: 2.0, 22: 1.8, 23: 1.5, 24: 1.2,
+      25: 1.0, 26: 1.0, 27: 0.98, 28: 0.95, 29: 0.90, 30: 0.85, 31: 0.75, 32: 0.65,
+      33: 0.55, 34: 0.45, 35: 0.35
+    };
+    
+    return ageMultipliers[age] || (age > 35 ? 0.30 : 1.0);
   }
   
   // Overall rating multipliers (relative to 76-78 = 1.0)

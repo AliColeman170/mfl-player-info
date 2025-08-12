@@ -4,12 +4,10 @@ import { usePlayerQuery } from '@/hooks/usePlayerQuery';
 import { GoalkeeperStats } from './GoalkeeperStats';
 import { PositionRatings } from './PositionRatings';
 import { PlayerCardSVG } from './PlayerCardSVG';
-import { ContractStatsClient } from './ContractStatsClient';
 import { Badge } from '../UI/badge';
 import Image from 'next/image';
 import { PlayerContract } from './PlayerContract';
 import {
-  BadgeXIcon,
   CrownIcon,
   FlameIcon,
   InfoIcon,
@@ -32,6 +30,7 @@ import { Button } from '../UI/button';
 import { TagsList } from '../Tags/TagsList';
 import { useUser } from '../Wallet/UserProvider';
 import { use } from 'react';
+import { ContractStats } from './ContractStats';
 
 interface ClientPlayerProps {
   playerId: number;
@@ -114,8 +113,6 @@ export function ClientPlayer({ playerId }: ClientPlayerProps) {
   const { userPromise } = useUser();
   const user = use(userPromise);
   const isAuthenticated = !!user?.app_metadata?.address;
-
-  console.log({ player });
 
   if (isLoading) {
     return (
@@ -365,7 +362,7 @@ export function ClientPlayer({ playerId }: ClientPlayerProps) {
         <PositionRatings player={player} />
       )}
 
-      <ContractStatsClient player={player} />
+      <ContractStats player={player} />
     </div>
   );
 }

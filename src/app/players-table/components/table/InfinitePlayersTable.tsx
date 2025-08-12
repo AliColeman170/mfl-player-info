@@ -72,7 +72,6 @@ export function InfinitePlayersTable({
   
   useEffect(() => {
     if (filtersChanged) {
-      console.log('Filters changed, resetting scroll position');
       filtersRef.current = filters;
       
       if (tableContainerRef.current) {
@@ -133,19 +132,16 @@ export function InfinitePlayersTable({
   // Sync internal state with external state when it changes
   useEffect(() => {
     if (columnVisibility) {
-      console.log('InfinitePlayersTable: syncing with external state', columnVisibility);
       setInternalColumnVisibility(columnVisibility);
     }
   }, [columnVisibility]);
 
   const handleVisibilityChange: OnChangeFn<VisibilityState> = useCallback(
     (updater) => {
-      console.log('InfinitePlayersTable: handleVisibilityChange called', updater);
       const currentState = columnVisibility || internalColumnVisibility;
       const newState = typeof updater === 'function' 
         ? updater(currentState) 
         : updater;
-      console.log('InfinitePlayersTable: new state', newState);
       
       // Update internal state
       setInternalColumnVisibility(newState);
@@ -182,13 +178,9 @@ export function InfinitePlayersTable({
     if (onTableReady) {
       const tableControls = {
         toggleColumn: (columnId: string) => {
-          console.log('toggleColumn called for:', columnId);
           table.getColumn(columnId)?.toggleVisibility();
         },
         showAllColumns: () => {
-          console.log('showAllColumns called');
-          console.log('Current visibility:', table.getState().columnVisibility);
-          
           // Create a new state with all columns visible
           const allColumns = table.getAllColumns();
           const newVisibility: VisibilityState = {};
@@ -196,14 +188,10 @@ export function InfinitePlayersTable({
             newVisibility[column.id] = true;
           });
           
-          console.log('Setting all columns visible:', newVisibility);
           // Use the table's direct method
           table.setColumnVisibility(newVisibility);
         },
         hideAllColumns: () => {
-          console.log('hideAllColumns called');
-          console.log('Always visible columns:', columnConfig.alwaysVisible);
-          
           // Create a new state with only always visible columns showing
           const allColumns = table.getAllColumns();
           const newVisibility: VisibilityState = {};
@@ -211,13 +199,9 @@ export function InfinitePlayersTable({
             newVisibility[column.id] = columnConfig.alwaysVisible.includes(column.id);
           });
           
-          console.log('Setting visibility state:', newVisibility);
           table.setColumnVisibility(newVisibility);
         },
         resetColumns: () => {
-          console.log('resetColumns called');
-          console.log('Default visible:', columnConfig.defaultVisible);
-          
           // Create a new state based on default visibility
           const allColumns = table.getAllColumns();
           const newVisibility: VisibilityState = {};
@@ -225,7 +209,6 @@ export function InfinitePlayersTable({
             newVisibility[column.id] = columnConfig.defaultVisible.includes(column.id);
           });
           
-          console.log('Setting visibility state:', newVisibility);
           table.setColumnVisibility(newVisibility);
         },
         getCurrentVisibility: () => {
@@ -236,11 +219,6 @@ export function InfinitePlayersTable({
     }
   }, [table, onTableReady]);
 
-  // Debug: log table visibility state
-  useEffect(() => {
-    console.log('Table visible columns:', table.getVisibleLeafColumns().map(col => col.id));
-    console.log('Internal visibility state:', internalColumnVisibility);
-  }, [table, internalColumnVisibility]);
 
   const { rows } = table.getRowModel();
 
@@ -285,7 +263,6 @@ export function InfinitePlayersTable({
   // Reset infinite scroll trigger when filters change
   useEffect(() => {
     if (filtersChanged) {
-      console.log('Resetting infinite scroll trigger due to filter change');
       lastLoadTriggerRef.current = -1;
     }
   }, [filtersChanged]);
@@ -306,7 +283,6 @@ export function InfinitePlayersTable({
       const isNearBottom = scrollPercentage > 0.9;
       
       if (isNearBottom && scrollTop > lastLoadTriggerRef.current + 100) {
-        console.log('Infinite scroll: triggering load more at', scrollTop);
         lastLoadTriggerRef.current = scrollTop;
         onLoadMore();
       }
