@@ -58,11 +58,12 @@ function MarketOverviewError() {
   return (
     <Card className='col-span-full'>
       <CardContent className='flex flex-col items-center gap-3 py-6'>
-        <AlertTriangle className='size-8 text-destructive' />
+        <AlertTriangle className='text-destructive size-8' />
         <div className='text-center'>
           <p className='font-medium'>Unable to load market overview</p>
           <p className='text-muted-foreground text-sm'>
-            Please try refreshing the page. Some data may be temporarily unavailable.
+            Please try refreshing the page. Some data may be temporarily
+            unavailable.
           </p>
         </div>
       </CardContent>
@@ -84,7 +85,11 @@ async function MarketOverviewContent() {
         <MetricItem
           icon={<DollarSign className='size-5' />}
           label='Total Sales Volume'
-          value={`$${data.totalSalesVolume.toLocaleString()}`}
+          value={new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+            notation: 'compact',
+          }).format(data.totalSalesVolume)}
         />
         <MetricItem
           icon={<ListIcon className='size-5' />}

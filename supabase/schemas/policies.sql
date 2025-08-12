@@ -1,3 +1,6 @@
+-- Sales table policies - allow public read access
+CREATE POLICY "Enable select for sales" ON "public"."sales" FOR SELECT TO "authenticated", "anon" USING (true);
+
 CREATE POLICY "Enable delete for users based on wallet address" ON "public"."favourites" FOR DELETE TO "authenticated" USING (
     (
         (
