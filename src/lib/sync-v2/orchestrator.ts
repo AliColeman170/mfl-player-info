@@ -1,354 +1,265 @@
 import 'server-only';
-import { createClient } from '@supabase/supabase-js';
-import { 
-  startSyncExecution, 
+import {
+  startSyncExecution,
   completeSyncExecution, 
   updateSyncProgress,
   getSyncConfig,
   setSyncConfig,
-  type SyncResult 
+  type SyncResult,
 } from './core';
-import { createProgressReporter, cleanupProgress } from './progress-broadcaster';
+import { importPlayersBasicDataChunk, type ChunkedSyncResult } from './stages/players-import';
 
-// Import all stage functions
-import { importPlayersBasicData } from './stages/players-import';
-import { syncSales } from './stages/sales';
-import { calculateMarketValues } from './stages/market-values';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
-const ORCHESTRATOR_STAGE = 'full_sync';
-
-export interface SyncOrchestratorOptions {
-  runHistoricalImports?: boolean; // Whether to run one-time imports
-  skipStages?: string[]; // Stage names to skip
-  onStageComplete?: (stageName: string, result: SyncResult) => void;
-  onProgress?: (currentStage: number, totalStages: number, stageName: string) => void;
+export interface OrchestratorState {
+  executionId: number;
+  stage: string;
+  totalProcessed: number;
+  totalChunks: number;
+  currentChunk: number;
+  isComplete: boolean;
+  continueFrom: any;
+  errors: string[];
+  startedAt: string;
 }
 
-export interface StageDefinition {
-  name: string;
-  displayName: string;
-  isOneTime: boolean;
-  isRequired: boolean;
-  execute: () => Promise<SyncResult>;
+export interface OrchestratorResult extends SyncResult {
+  orchestratorId: string;
+  isComplete: boolean;
+  state?: OrchestratorState;
 }
-
-const SYNC_STAGES: StageDefinition[] = [
-  {
-    name: 'players_import',
-    displayName: 'Players Import',
-    isOneTime: false,
-    isRequired: true,
-    execute: () => importPlayersBasicData(),
-  },
-  {
-    name: 'sales',
-    displayName: 'Sales Sync',
-    isOneTime: false,
-    isRequired: true,
-    execute: () => syncSales(),
-  },
-  {
-    name: 'market_values',
-    displayName: 'Market Value Calculation',
-    isOneTime: false,
-    isRequired: true,
-    execute: () => calculateMarketValues(),
-  },
-];
 
 /**
- * Run the complete 3-stage sync process
+ * Server-side orchestrator that manages chunked imports with persistence
+ * Can survive page refreshes and continue running
  */
-export async function runFullSync(
-  options: SyncOrchestratorOptions = {}
-): Promise<{
-  success: boolean;
-  duration: number;
-  stageResults: Record<string, SyncResult>;
-  errors: string[];
-  executionId: number;
-}> {
-  const startTime = Date.now();
-  const stageResults: Record<string, SyncResult> = {};
-  const errors: string[] = [];
-  
-  console.log('[Full Sync] Starting complete sync orchestrator...');
-  
-  const executionId = await startSyncExecution(ORCHESTRATOR_STAGE, 'api');
-  const progressReporter = createProgressReporter(executionId, ORCHESTRATOR_STAGE, 'Full Sync');
-  
-  try {
-    // Filter stages based on options
-    let stagesToRun = SYNC_STAGES.filter(stage => {
-      // Skip if explicitly requested
-      if (options.skipStages?.includes(stage.name)) {
-        console.log(`[Full Sync] Skipping stage: ${stage.displayName} (explicitly skipped)`);
-        return false;
-      }
-      
-      // Skip one-time stages if not requested or already completed
-      if (stage.isOneTime && !options.runHistoricalImports) {
-        console.log(`[Full Sync] Skipping stage: ${stage.displayName} (one-time stage, not requested)`);
-        return false;
-      }
-      
-      return true;
-    });
+export class ChunkedImportOrchestrator {
+  private orchestratorId: string;
+  private state: OrchestratorState | null = null;
 
-    // Check if one-time stages are already completed
-    if (options.runHistoricalImports) {
-      for (const stage of stagesToRun) {
-        if (stage.isOneTime) {
-          const { data: stageInfo } = await supabase
-            .from('sync_stages')
-            .select('status, is_one_time')
-            .eq('stage_name', stage.name)
-            .single();
-          
-          if (stageInfo?.status === 'completed' && stageInfo.is_one_time) {
-            console.log(`[Full Sync] Skipping stage: ${stage.displayName} (already completed)`);
-            stagesToRun = stagesToRun.filter(s => s.name !== stage.name);
-          }
-        }
-      }
-    }
+  constructor(orchestratorId?: string) {
+    this.orchestratorId = orchestratorId || `orchestrator_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }
 
-    console.log(`[Full Sync] Running ${stagesToRun.length} stages: ${stagesToRun.map(s => s.displayName).join(', ')}`);
+  /**
+   * Save orchestrator state to database
+   */
+  private async saveState(state: OrchestratorState): Promise<void> {
+    const stateKey = `orchestrator_state_${this.orchestratorId}`;
+    await setSyncConfig(stateKey, JSON.stringify(state));
+    this.state = state;
+  }
 
-    // Update last full sync start time
-    await setSyncConfig('last_full_sync_started', new Date().toISOString());
+  /**
+   * Load orchestrator state from database  
+   */
+  private async loadState(): Promise<OrchestratorState | null> {
+    if (this.state) return this.state;
 
-    // Broadcast start
-    progressReporter.started('Initializing full sync', {
-      totalStages: stagesToRun.length,
-      stageNames: stagesToRun.map(s => s.displayName),
-    });
-
-    let totalProcessed = 0;
-
-    // Execute each stage in sequence
-    for (let i = 0; i < stagesToRun.length; i++) {
-      const stage = stagesToRun[i];
-      const stageStartTime = Date.now();
-      
+    const stateKey = `orchestrator_state_${this.orchestratorId}`;
+    const stateStr = await getSyncConfig(stateKey);
+    
+    if (stateStr && stateStr !== '0') {
       try {
-        console.log(`[Full Sync] Starting stage ${i + 1}/${stagesToRun.length}: ${stage.displayName}`);
-        
-        // Progress callback
-        if (options.onProgress) {
-          options.onProgress(i + 1, stagesToRun.length, stage.displayName);
-        }
-
-        // Broadcast stage start
-        progressReporter.progress(totalProcessed, undefined, `Starting ${stage.displayName}`, {
-          currentStage: i + 1,
-          totalStages: stagesToRun.length,
-          stageName: stage.displayName,
-        });
-
-        const result = await stage.execute();
-        const stageDuration = Date.now() - stageStartTime;
-        
-        stageResults[stage.name] = result;
-        totalProcessed += result.recordsProcessed;
-
-        if (result.success) {
-          console.log(`[Full Sync] ✅ Stage ${stage.displayName} completed in ${Math.round(stageDuration / 1000)}s (${result.recordsProcessed} records)`);
-          
-          // Broadcast stage completion
-          progressReporter.progress(totalProcessed, undefined, `Completed ${stage.displayName}`, {
-            currentStage: i + 1,
-            totalStages: stagesToRun.length,
-            stageName: stage.displayName,
-            stageRecords: result.recordsProcessed,
-            stageDuration,
-            stageSuccess: true,
-          });
-        } else {
-          console.error(`[Full Sync] ❌ Stage ${stage.displayName} failed: ${result.errors.slice(0, 3).join('; ')}`);
-          
-          // Broadcast stage failure
-          progressReporter.progress(totalProcessed, undefined, `Failed ${stage.displayName}`, {
-            currentStage: i + 1,
-            totalStages: stagesToRun.length,
-            stageName: stage.displayName,
-            stageSuccess: false,
-            stageError: result.errors[0],
-          });
-          
-          // For required stages, this is a critical failure
-          if (stage.isRequired) {
-            errors.push(`Critical stage failed: ${stage.displayName} - ${result.errors[0]}`);
-            console.error(`[Full Sync] Critical stage failure, stopping sync`);
-            break;
-          } else {
-            errors.push(`Optional stage failed: ${stage.displayName} - ${result.errors[0]}`);
-          }
-        }
-
-        // Stage complete callback
-        if (options.onStageComplete) {
-          options.onStageComplete(stage.name, result);
-        }
-
-        // Update progress
-        await updateSyncProgress(executionId, totalProcessed, 0, {
-          currentStage: stage.displayName,
-          stageNumber: i + 1,
-          totalStages: stagesToRun.length,
-          stageDuration,
-        });
-
-        // Brief pause between stages
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
+        this.state = JSON.parse(stateStr);
+        return this.state;
       } catch (error) {
-        console.error(`[Full Sync] Fatal error in stage ${stage.displayName}:`, error);
-        const errorMsg = error instanceof Error ? error.message : 'Unknown error';
-        errors.push(`Stage ${stage.displayName} fatal error: ${errorMsg}`);
-        
-        stageResults[stage.name] = {
-          success: false,
-          duration: Date.now() - stageStartTime,
-          recordsProcessed: 0,
-          recordsFailed: 0,
-          errors: [errorMsg],
-        };
-
-        // Stop on critical stage failure
-        if (stage.isRequired) {
-          console.error(`[Full Sync] Critical stage error, stopping sync`);
-          break;
-        }
+        console.error('[Orchestrator] Failed to parse saved state:', error);
+        return null;
       }
     }
+    
+    return null;
+  }
 
-    // Final results
-    const duration = Date.now() - startTime;
-    const success = errors.length === 0;
-    const completedStages = Object.values(stageResults).filter(r => r.success).length;
+  /**
+   * Clear orchestrator state from database
+   */
+  private async clearState(): Promise<void> {
+    const stateKey = `orchestrator_state_${this.orchestratorId}`;
+    await setSyncConfig(stateKey, '0');
+    this.state = null;
+  }
 
-    // Update last full sync completion time if successful
-    if (success) {
-      await setSyncConfig('last_full_sync_completed', new Date().toISOString());
-    }
-
-    // Broadcast completion
-    if (success) {
-      progressReporter.completed(totalProcessed, duration, {
-        completedStages,
-        totalStages: stagesToRun.length,
+  /**
+   * Start or continue a chunked player import
+   */
+  async runChunkedPlayersImport(): Promise<OrchestratorResult> {
+    const startTime = Date.now();
+    
+    // Try to load existing state
+    let state = await this.loadState();
+    
+    if (state) {
+      console.log('[Orchestrator] Resuming chunked import from saved state:', {
+        orchestratorId: this.orchestratorId,
+        currentChunk: state.currentChunk,
+        totalProcessed: state.totalProcessed,
       });
     } else {
-      progressReporter.failed(errors.slice(0, 3).join('; '), {
-        completedStages,
-        totalStages: stagesToRun.length,
-      });
+      // Start new orchestration
+      console.log('[Orchestrator] Starting new chunked import:', this.orchestratorId);
+      
+      const executionId = await startSyncExecution('players_import_orchestrator', 'api');
+      
+      state = {
+        executionId,
+        stage: 'players_import',
+        totalProcessed: 0,
+        totalChunks: 0,
+        currentChunk: 1,
+        isComplete: false,
+        continueFrom: null,
+        errors: [],
+        startedAt: new Date().toISOString(),
+      };
+      
+      await this.saveState(state);
     }
 
-    await completeSyncExecution(
-      executionId,
-      success ? 'completed' : 'failed',
-      errors.length > 0 ? errors.slice(0, 3).join('; ') : undefined
-    );
+    try {
+      // Run chunks until complete
+      while (!state.isComplete) {
+        console.log(`[Orchestrator] Running chunk ${state.currentChunk}...`);
+        
+        // Update progress in sync execution
+        await updateSyncProgress(state.executionId, state.totalProcessed, 0, {
+          orchestratorId: this.orchestratorId,
+          currentChunk: state.currentChunk,
+          stage: 'chunked_import',
+        });
 
-    console.log(`[Full Sync] ${success ? '✅ Completed' : '❌ Failed'} full sync in ${Math.round(duration / 1000)}s`);
-    console.log(`[Full Sync] Stages: ${completedStages}/${stagesToRun.length} successful, ${totalProcessed} total records processed`);
+        // Run the chunk
+        const chunkResult: ChunkedSyncResult = await importPlayersBasicDataChunk({
+          maxPagesPerChunk: 2,
+          continueFrom: state.continueFrom,
+        });
 
-    // Cleanup progress after a delay to allow final updates to be sent
-    setTimeout(() => cleanupProgress(executionId), 5000);
+        // Update state with chunk results
+        state.totalProcessed += chunkResult.recordsProcessed || 0;
+        state.totalChunks = state.currentChunk;
+        state.isComplete = chunkResult.isComplete;
+        state.continueFrom = chunkResult.continueFrom;
+        
+        if (chunkResult.errors.length > 0) {
+          state.errors.push(...chunkResult.errors);
+        }
 
+        if (!chunkResult.success) {
+          // Chunk failed - save state and return error
+          await this.saveState(state);
+          
+          await completeSyncExecution(
+            state.executionId, 
+            'failed', 
+            chunkResult.errors[0] || 'Chunk failed'
+          );
+
+          return {
+            success: false,
+            duration: Date.now() - startTime,
+            recordsProcessed: state.totalProcessed,
+            recordsFailed: 0,
+            errors: state.errors,
+            orchestratorId: this.orchestratorId,
+            isComplete: false,
+            state,
+          };
+        }
+
+        // Save state after each successful chunk
+        if (!state.isComplete) {
+          state.currentChunk++;
+          await this.saveState(state);
+          
+          console.log(`[Orchestrator] Chunk ${state.currentChunk - 1} complete. Total processed: ${state.totalProcessed}`);
+          
+          // Brief pause between chunks to avoid overwhelming the system
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+      }
+
+      // All chunks complete!
+      const duration = Date.now() - startTime;
+      const success = state.errors.length === 0;
+      
+      console.log(`[Orchestrator] Chunked import complete!`, {
+        orchestratorId: this.orchestratorId,
+        totalChunks: state.totalChunks,
+        totalProcessed: state.totalProcessed,
+        success,
+      });
+
+      await completeSyncExecution(
+        state.executionId,
+        success ? 'completed' : 'failed',
+        state.errors.length > 0 ? state.errors.slice(0, 3).join('; ') : undefined
+      );
+
+      // Clear the orchestrator state since we're done
+      await this.clearState();
+
+      return {
+        success,
+        duration,
+        recordsProcessed: state.totalProcessed,
+        recordsFailed: 0,
+        errors: state.errors,
+        orchestratorId: this.orchestratorId,
+        isComplete: true,
+        metadata: {
+          totalChunks: state.totalChunks,
+          orchestratorId: this.orchestratorId,
+        },
+      };
+
+    } catch (error) {
+      console.error('[Orchestrator] Fatal error:', error);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown orchestrator error';
+      
+      if (state) {
+        state.errors.push(errorMsg);
+        await this.saveState(state);
+        
+        await completeSyncExecution(state.executionId, 'failed', errorMsg);
+      }
+
+      return {
+        success: false,
+        duration: Date.now() - startTime,
+        recordsProcessed: state?.totalProcessed || 0,
+        recordsFailed: 0,
+        errors: [errorMsg, ...(state?.errors || [])],
+        orchestratorId: this.orchestratorId,
+        isComplete: false,
+        state,
+      };
+    }
+  }
+
+  /**
+   * Get current status of the orchestrator
+   */
+  async getStatus(): Promise<{ 
+    isRunning: boolean; 
+    state: OrchestratorState | null; 
+    orchestratorId: string;
+  }> {
+    const state = await this.loadState();
     return {
-      success,
-      duration,
-      stageResults,
-      errors,
-      executionId,
-    };
-
-  } catch (error) {
-    console.error('[Full Sync] Fatal orchestrator error:', error);
-    const errorMsg = error instanceof Error ? error.message : 'Unknown orchestrator error';
-    
-    await completeSyncExecution(executionId, 'failed', errorMsg);
-    
-    return {
-      success: false,
-      duration: Date.now() - startTime,
-      stageResults,
-      errors: [errorMsg, ...errors],
-      executionId,
+      isRunning: !!(state && !state.isComplete),
+      state,
+      orchestratorId: this.orchestratorId,
     };
   }
-}
 
-/**
- * Run daily sync (incremental stages only)
- */
-export async function runDailySync(): Promise<{
-  success: boolean;
-  duration: number;
-  stageResults: Record<string, SyncResult>;
-  errors: string[];
-  executionId: number;
-}> {
-  console.log('[Daily Sync] Starting daily incremental sync...');
-  
-  return runFullSync({
-    runHistoricalImports: false, // Skip one-time imports
-    skipStages: [], // Run all incremental stages
-  });
-}
-
-/**
- * Run initial setup sync (all stages including one-time imports)
- */
-export async function runInitialSetupSync(): Promise<{
-  success: boolean;
-  duration: number;
-  stageResults: Record<string, SyncResult>;
-  errors: string[];
-  executionId: number;
-}> {
-  console.log('[Initial Setup] Starting complete initial sync...');
-  
-  return runFullSync({
-    runHistoricalImports: true, // Include one-time imports
-    skipStages: [], // Run all stages
-  });
-}
-
-/**
- * Get sync orchestrator statistics
- */
-export async function getFullSyncStats() {
-  const { data: lastExecution } = await supabase
-    .from('sync_executions')
-    .select('*')
-    .eq('stage_name', ORCHESTRATOR_STAGE)
-    .order('started_at', { ascending: false })
-    .limit(1)
-    .single();
-
-  const lastStarted = await getSyncConfig('last_full_sync_started');
-  const lastCompleted = await getSyncConfig('last_full_sync_completed');
-
-  // Get status of all stages
-  const { data: stageStatuses } = await supabase
-    .from('sync_stages')
-    .select('name, status, is_one_time')
-    .in('name', SYNC_STAGES.map(s => s.name));
-
-  return {
-    lastExecution: lastExecution || null,
-    lastStarted: lastStarted || null,
-    lastCompleted: lastCompleted || null,
-    stageStatuses: stageStatuses || [],
-    totalStages: SYNC_STAGES.length,
-  };
+  /**
+   * Cancel the orchestrator
+   */
+  async cancel(): Promise<void> {
+    const state = await this.loadState();
+    if (state && !state.isComplete) {
+      await completeSyncExecution(state.executionId, 'failed', 'Cancelled by user');
+      await this.clearState();
+      console.log(`[Orchestrator] Cancelled: ${this.orchestratorId}`);
+    }
+  }
 }

@@ -36,8 +36,171 @@ const DEFAULT_OPTIONS: PlayersImportOptions = {
   retryDelay: 1000, // Reduced retry delay
 };
 
+export interface ChunkedImportOptions {
+  maxPagesPerChunk?: number;
+  continueFrom?: {
+    playerType: string;
+    lastPlayerId?: number;
+    processedCounts: Record<string, number>;
+  };
+}
+
+export interface ChunkedSyncResult extends SyncResult {
+  isComplete: boolean;
+  continueFrom?: {
+    playerType: string;
+    lastPlayerId?: number;
+    processedCounts: Record<string, number>;
+  };
+  totalProgress?: {
+    estimatedTotal: number;
+    processed: number;
+    percentage: number;
+  };
+}
+
 /**
- * Import players with basic data only (no market value calculations)
+ * Import players in chunks to work around Vercel's 5-minute timeout
+ */
+export async function importPlayersBasicDataChunk(
+  options: ChunkedImportOptions = {}
+): Promise<ChunkedSyncResult> {
+  const startTime = Date.now();
+  const { maxPagesPerChunk = 2, continueFrom } = options;
+  
+  console.log('[Players Import] Starting chunked import with options:', options);
+  
+  const executionId = await startSyncExecution('players_import', 'api');
+  let totalFetched = 0;
+  let totalProcessed = 0;
+  let totalFailed = 0;
+  const errors: string[] = [];
+  
+  try {
+    // Determine which player type to process and where to start
+    const playerTypes = ['active-available', 'active-burnt', 'retired-available', 'retired-burnt'];
+    let startFromType = continueFrom?.playerType || playerTypes[0];
+    let startFromIndex = playerTypes.indexOf(startFromType);
+    
+    // If continuing, start from the specified type
+    if (startFromIndex === -1) startFromIndex = 0;
+    
+    let processedCounts = continueFrom?.processedCounts || {
+      'active-available': 0,
+      'active-burnt': 0, 
+      'retired-available': 0,
+      'retired-burnt': 0,
+    };
+    
+    let isComplete = false;
+    let nextContinueFrom: ChunkedSyncResult['continueFrom'] | undefined;
+    
+    // Process one player type at a time
+    for (let typeIndex = startFromIndex; typeIndex < playerTypes.length && !isComplete; typeIndex++) {
+      const currentType = playerTypes[typeIndex];
+      const [status, burn] = currentType.split('-');
+      const isRetired = status === 'retired';
+      const isBurned = burn === 'burnt';
+      
+      console.log(`[Players Import] Processing ${currentType}, starting from player ID:`, continueFrom?.lastPlayerId);
+      
+      const chunkResult = await importPlayerTypeChunk(
+        isBurned,
+        isRetired,
+        executionId,
+        {
+          ...DEFAULT_OPTIONS,
+          batchSize: 1500,
+          maxRetries: 3,
+          retryDelay: 1000,
+        },
+        maxPagesPerChunk,
+        continueFrom?.playerType === currentType ? continueFrom.lastPlayerId : undefined
+      );
+      
+      totalFetched += chunkResult.fetched;
+      totalProcessed += chunkResult.processed;
+      totalFailed += chunkResult.failed;
+      errors.push(...chunkResult.errors);
+      
+      processedCounts[currentType] += chunkResult.processed;
+      
+      // If this chunk didn't complete the type, we need to continue from here
+      if (!chunkResult.isTypeComplete) {
+        nextContinueFrom = {
+          playerType: currentType,
+          lastPlayerId: chunkResult.lastPlayerId,
+          processedCounts,
+        };
+        break;
+      }
+      
+      // If we've completed all types, mark as complete
+      if (typeIndex === playerTypes.length - 1) {
+        isComplete = true;
+      }
+    }
+    
+    const success = errors.length === 0;
+    const duration = Date.now() - startTime;
+    
+    if (isComplete && success) {
+      // Reset config keys only when completely done
+      await Promise.all([
+        setSyncConfig('last_player_id_imported', '0'),
+        setSyncConfig('last_retired_player_id_imported', '0'),
+        setSyncConfig('last_burned_player_id_imported', '0'),
+      ]);
+      console.log('[Players Import] Complete import finished - config keys reset');
+    }
+    
+    await completeSyncExecution(
+      executionId,
+      success ? 'completed' : 'failed',
+      errors.length > 0 ? errors.slice(0, 3).join('; ') : undefined
+    );
+    
+    console.log(`[Players Import] Chunk completed: ${totalProcessed} processed, complete: ${isComplete}`);
+    
+    return {
+      success,
+      duration,
+      recordsProcessed: totalProcessed,
+      recordsFailed: totalFailed,
+      errors,
+      isComplete,
+      continueFrom: nextContinueFrom,
+      totalProgress: {
+        estimatedTotal: 45000, // Rough estimate
+        processed: Object.values(processedCounts).reduce((sum, count) => sum + count, 0),
+        percentage: Math.min(100, (Object.values(processedCounts).reduce((sum, count) => sum + count, 0) / 45000) * 100),
+      },
+      metadata: {
+        totalFetched,
+        processedCounts,
+        chunkSize: maxPagesPerChunk,
+      },
+    };
+    
+  } catch (error) {
+    console.error('[Players Import] Fatal error in chunk:', error);
+    const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+    
+    await completeSyncExecution(executionId, 'failed', errorMsg);
+    
+    return {
+      success: false,
+      duration: Date.now() - startTime,
+      recordsProcessed: totalProcessed,
+      recordsFailed: totalFailed,
+      errors: [errorMsg, ...errors],
+      isComplete: false,
+    };
+  }
+}
+
+/**
+ * Import players with basic data only (no market value calculations) - FULL IMPORT
  */
 export async function importPlayersBasicData(
   options: PlayersImportOptions = {}
@@ -146,7 +309,168 @@ export async function importPlayersBasicData(
 }
 
 /**
- * Import players by type (active or retired)
+ * Import players by type in chunks (active or retired) - LIMITED PAGES
+ */
+async function importPlayerTypeChunk(
+  isBurned: boolean,
+  isRetired: boolean,
+  executionId: number,
+  opts: Required<PlayersImportOptions>,
+  maxPages: number,
+  startFromPlayerId?: number
+): Promise<{
+  fetched: number;
+  processed: number;
+  failed: number;
+  errors: string[];
+  isTypeComplete: boolean;
+  lastPlayerId?: number;
+}> {
+  const playerType = isRetired ? 'retired' : 'active';
+  const playerBurn = isBurned ? 'burnt' : 'available';
+  console.log(`[Players Import] Starting chunked ${playerType} ${playerBurn} import (max ${maxPages} pages)`);
+
+  let totalFetched = 0;
+  let totalProcessed = 0;
+  let totalFailed = 0;
+  const errors: string[] = [];
+  let lastPlayerId: number | undefined = startFromPlayerId;
+  let isTypeComplete = false;
+
+  try {
+    // Get config key for resumable progress
+    const configKey = isRetired
+      ? 'last_retired_player_id_imported'
+      : isBurned
+        ? 'last_burned_player_id_imported'
+        : 'last_player_id_imported';
+    
+    // Use provided startFromPlayerId or get from config
+    if (!startFromPlayerId) {
+      const lastPlayerIdStr = await getSyncConfig(configKey);
+      lastPlayerId = lastPlayerIdStr && lastPlayerIdStr !== '0' 
+        ? parseInt(lastPlayerIdStr) 
+        : undefined;
+    }
+
+    let currentPage = 1;
+    let hasMore = true;
+
+    while (hasMore && currentPage <= maxPages) {
+      const pageStartTime = Date.now();
+      try {
+        console.log(`[Players Import] Fetching ${playerType} ${playerBurn} chunk page ${currentPage}${lastPlayerId ? `, from ID: ${lastPlayerId}` : ''}`);
+
+        // Fetch players page with timing
+        const apiStartTime = Date.now();
+        const playersPage = await withRetry(
+          () => fetchPlayersPage(opts.batchSize, lastPlayerId, isRetired, isBurned),
+          opts.maxRetries,
+          opts.retryDelay,
+          'players_import'
+        );
+        const apiDuration = Date.now() - apiStartTime;
+        console.log(`[Performance] API fetch took ${apiDuration}ms for ${playersPage?.length || 0} players`);
+
+        if (!playersPage || playersPage.length === 0) {
+          console.log(`[Players Import] No more ${playerType} ${playerBurn} players - type complete`);
+          isTypeComplete = true;
+          hasMore = false;
+          break;
+        }
+
+        totalFetched += playersPage.length;
+
+        // Process players with timing
+        const processingStartTime = Date.now();
+        const processingResult = await processPlayersBasic(playersPage, isRetired);
+        const processingDuration = Date.now() - processingStartTime;
+        console.log(`[Performance] Processing took ${processingDuration}ms for ${playersPage.length} players`);
+
+        totalProcessed += processingResult.processed;
+        totalFailed += processingResult.failed;
+        errors.push(...processingResult.errors);
+
+        // Update progress and save checkpoint
+        lastPlayerId = playersPage[playersPage.length - 1]?.id;
+        if (lastPlayerId) {
+          await setSyncConfig(configKey, lastPlayerId.toString());
+        }
+
+        await updateSyncProgress(executionId, totalProcessed, totalFailed, {
+          currentPage: `${playerType}-chunk-${currentPage}`,
+          totalFetched,
+          lastPlayerId,
+          playerType: `${playerType}-${playerBurn}`,
+          maxPages,
+        });
+
+        // Check if this was the last page for this type
+        if (playersPage.length < opts.batchSize) {
+          console.log(`[Players Import] ${playerType} ${playerBurn} type completed (last page: ${playersPage.length} < ${opts.batchSize})`);
+          isTypeComplete = true;
+          hasMore = false;
+        } else {
+          currentPage++;
+        }
+
+        const pageEndTime = Date.now();
+        console.log(`[Performance] Total page took ${pageEndTime - pageStartTime}ms`);
+        
+        // Short delay between pages
+        await sleep(200);
+
+      } catch (error) {
+        if (error instanceof SyncCancelledException) {
+          console.log(`[Players Import] ${playerType} ${playerBurn} chunk cancelled`);
+          errors.push(`${playerType} chunk cancelled`);
+          break;
+        }
+
+        console.error(`[Players Import] Error in ${playerType} ${playerBurn} chunk page ${currentPage}:`, error);
+        const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+        errors.push(`${playerType} chunk page ${currentPage}: ${errorMsg}`);
+        
+        // Continue to next page on error
+        currentPage++;
+        if (errors.length > 5) {
+          console.error(`[Players Import] Too many chunk errors, stopping ${playerType} ${playerBurn}`);
+          break;
+        }
+      }
+    }
+
+    // If we processed maxPages but there might be more, not complete
+    if (currentPage > maxPages && hasMore) {
+      isTypeComplete = false;
+    }
+
+    console.log(`[Players Import] ${playerType} ${playerBurn} chunk complete: ${totalProcessed} processed, isComplete: ${isTypeComplete}`);
+
+  } catch (error) {
+    if (error instanceof SyncCancelledException) {
+      console.log(`[Players Import] ${playerType} ${playerBurn} chunk cancelled`);
+      errors.push(`${playerType} chunk cancelled`);
+    } else {
+      console.error(`[Players Import] Fatal error in ${playerType} ${playerBurn} chunk:`, error);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      errors.push(`${playerType} chunk failed: ${errorMsg}`);
+      totalFailed = totalFetched;
+    }
+  }
+
+  return {
+    fetched: totalFetched,
+    processed: totalProcessed,
+    failed: totalFailed,
+    errors,
+    isTypeComplete,
+    lastPlayerId,
+  };
+}
+
+/**
+ * Import players by type (active or retired) - FULL TYPE IMPORT
  */
 async function importPlayersByType(
   isBurned: boolean,

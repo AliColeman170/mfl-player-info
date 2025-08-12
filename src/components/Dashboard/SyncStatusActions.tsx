@@ -29,7 +29,7 @@ const STAGE_CONFIGS = [
     apiName: 'players_import',
     displayName: 'Players Import',
     icon: Users,
-    description: 'Import basic player data',
+    description: 'Import basic player data (automatically chunked for Vercel)',
   },
   {
     name: 'stage2-sales',
@@ -70,36 +70,134 @@ export function SyncStatusActions({
     }
   }, [currentExecutionId, syncExecutionId]);
 
+  const runChunkedImport = async (displayName: string, toastId?: string) => {
+    let continueFrom: any = null;
+    let totalProcessed = 0;
+    let chunkNumber = 1;
+    let isComplete = false;
+
+    while (!isComplete) {
+      try {
+        console.log(`[Chunked Import] Running chunk ${chunkNumber}...`);
+        
+        const response = await fetch(`/api/sync-v2/stage1-players`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            maxPages: 2, // 2 pages per chunk (~3000 players)
+            continueFrom,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const result = await response.json();
+
+        if (!result.success) {
+          throw new Error(result.error || result.errors?.[0] || 'Chunk failed');
+        }
+
+        totalProcessed += result.recordsProcessed || 0;
+        isComplete = result.isComplete;
+        continueFrom = result.continueFrom;
+
+        // Update progress toast
+        const progressMsg = result.totalProgress 
+          ? `${Math.round(result.totalProgress.percentage)}% complete (${totalProcessed.toLocaleString()} players)`
+          : `Chunk ${chunkNumber} complete (${totalProcessed.toLocaleString()} players)`;
+
+        if (toastId) {
+          toast.loading(`${displayName} - ${progressMsg}`, { id: toastId });
+        }
+
+        console.log(`[Chunked Import] Chunk ${chunkNumber} complete:`, {
+          processed: result.recordsProcessed,
+          totalProcessed,
+          isComplete,
+          hasMore: !!continueFrom,
+        });
+
+        chunkNumber++;
+
+        // Brief pause between chunks
+        if (!isComplete) {
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+
+      } catch (error) {
+        console.error(`[Chunked Import] Chunk ${chunkNumber} failed:`, error);
+        throw error;
+      }
+    }
+
+    return {
+      success: true,
+      recordsProcessed: totalProcessed,
+      chunks: chunkNumber - 1,
+    };
+  };
+
   const runStage = async (stageName: string, displayName: string) => {
     setLoadingStages((prev) => new Set(prev).add(stageName));
 
+    // Create a persistent toast for progress updates
+    const toastId = `${stageName}-${Date.now()}`;
+    toast.loading(`Starting ${displayName}...`, { id: toastId });
+
     try {
-      const response = await fetch(`/api/sync-v2/${stageName}`, {
-        method: 'POST',
-      });
+      let result: any;
 
-      const result = await response.json();
-
-      if (result.success) {
-        toast.success(`${displayName} completed successfully`, {
-          description: `Processed ${result.recordsProcessed?.toLocaleString() || 0} records in ${Math.round((result.duration || 0) / 1000)}s`,
+      // Use server-side orchestrator for players import (survives page refreshes)
+      if (stageName === 'stage1-players') {
+        const response = await fetch(`/api/sync-v2/stage1-players`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            useOrchestrator: true, // Use server-side orchestrator
+          }),
         });
 
-        // Invalidate sync status query to trigger refresh
-        queryClient.invalidateQueries({ queryKey: ['sync-status'] });
+        result = await response.json();
+
+        if (result.success) {
+          toast.success(`${displayName} completed successfully`, {
+            id: toastId,
+            description: `Processed ${result.recordsProcessed?.toLocaleString() || 0} players across ${result.metadata?.totalChunks || 1} chunks`,
+          });
+        }
       } else {
-        toast.error(`${displayName} failed`, {
-          description:
-            result.errors?.[0] || result.error || 'Unknown error occurred',
+        // Regular single-request stages
+        const response = await fetch(`/api/sync-v2/${stageName}`, {
+          method: 'POST',
         });
 
-        // Still invalidate to show the failed state
-        queryClient.invalidateQueries({ queryKey: ['sync-status'] });
+        result = await response.json();
+
+        if (result.success) {
+          toast.success(`${displayName} completed successfully`, {
+            id: toastId,
+            description: `Processed ${result.recordsProcessed?.toLocaleString() || 0} records in ${Math.round((result.duration || 0) / 1000)}s`,
+          });
+        }
       }
+
+      if (!result.success) {
+        toast.error(`${displayName} failed`, {
+          id: toastId,
+          description: result.errors?.[0] || result.error || 'Unknown error occurred',
+        });
+      }
+
+      // Invalidate sync status query to trigger refresh
+      queryClient.invalidateQueries({ queryKey: ['sync-status'] });
+
     } catch (error) {
       console.error(`Error running ${stageName}:`, error);
       toast.error(`${displayName} failed`, {
-        description: 'Network error occurred',
+        id: toastId,
+        description: error instanceof Error ? error.message : 'Network error occurred',
       });
 
       // Invalidate query even on network errors
