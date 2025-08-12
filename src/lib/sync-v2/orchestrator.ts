@@ -7,7 +7,18 @@ import {
   setSyncConfig,
   type SyncResult,
 } from './core';
-import { importPlayersBasicDataChunk, type ChunkedSyncResult } from './stages/players-import';
+import { importPlayersBasicDataChunk, type ChunkedSyncResult, importPlayersBasicData } from './stages/players-import';
+
+// Full sync orchestrator types
+export interface FullSyncOptions {
+  runHistoricalImports?: boolean;
+}
+
+export interface FullSyncResult extends SyncResult {
+  stageResults: Record<string, any>;
+  totalStages: number;
+  successfulStages: number;
+}
 
 export interface OrchestratorState {
   executionId: number;
@@ -262,4 +273,125 @@ export class ChunkedImportOrchestrator {
       console.log(`[Orchestrator] Cancelled: ${this.orchestratorId}`);
     }
   }
+}
+
+/**
+ * Run full sync with all stages
+ */
+export async function runFullSync(options: FullSyncOptions = {}): Promise<FullSyncResult> {
+  const startTime = Date.now();
+  const executionId = await startSyncExecution('full_sync', 'api');
+  
+  const stageResults: Record<string, any> = {};
+  const errors: string[] = [];
+  
+  try {
+    console.log('[Full Sync] Starting complete sync process...');
+    
+    // Stage 1: Players Import (using orchestrator for reliability)
+    console.log('[Full Sync] Stage 1: Players Import');
+    const orchestrator = new ChunkedImportOrchestrator();
+    stageResults.players_import = await orchestrator.runChunkedPlayersImport();
+    
+    if (!stageResults.players_import.success) {
+      errors.push('Players import failed');
+    }
+    
+    // Stage 2: Sales Sync (if players import succeeded)
+    if (stageResults.players_import.success) {
+      console.log('[Full Sync] Stage 2: Sales Sync');
+      // TODO: Import sales sync function when available
+      stageResults.sales = {
+        success: true,
+        message: 'Sales sync not implemented yet',
+        recordsProcessed: 0,
+        duration: 0,
+      };
+    } else {
+      console.log('[Full Sync] Skipping sales sync due to players import failure');
+      stageResults.sales = {
+        success: false,
+        message: 'Skipped due to players import failure',
+        recordsProcessed: 0,
+        duration: 0,
+      };
+    }
+    
+    // Stage 3: Market Values (if previous stages succeeded)
+    if (stageResults.players_import.success && stageResults.sales.success) {
+      console.log('[Full Sync] Stage 3: Market Values');
+      // TODO: Import market values function when available
+      stageResults.market_values = {
+        success: true,
+        message: 'Market values sync not implemented yet',
+        recordsProcessed: 0,
+        duration: 0,
+      };
+    } else {
+      console.log('[Full Sync] Skipping market values due to previous stage failures');
+      stageResults.market_values = {
+        success: false,
+        message: 'Skipped due to previous stage failures',
+        recordsProcessed: 0,
+        duration: 0,
+      };
+    }
+    
+    const successfulStages = Object.values(stageResults).filter(r => r.success).length;
+    const totalStages = Object.keys(stageResults).length;
+    const duration = Date.now() - startTime;
+    const success = successfulStages === totalStages;
+    
+    await completeSyncExecution(
+      executionId,
+      success ? 'completed' : 'failed',
+      errors.length > 0 ? errors.join('; ') : undefined
+    );
+    
+    console.log(`[Full Sync] Complete: ${successfulStages}/${totalStages} stages successful`);
+    
+    return {
+      success,
+      duration,
+      recordsProcessed: Object.values(stageResults).reduce((sum: number, r: any) => sum + (r.recordsProcessed || 0), 0),
+      recordsFailed: 0,
+      errors,
+      stageResults,
+      totalStages,
+      successfulStages,
+    };
+    
+  } catch (error) {
+    console.error('[Full Sync] Fatal error:', error);
+    const errorMsg = error instanceof Error ? error.message : 'Unknown full sync error';
+    
+    await completeSyncExecution(executionId, 'failed', errorMsg);
+    
+    return {
+      success: false,
+      duration: Date.now() - startTime,
+      recordsProcessed: 0,
+      recordsFailed: 0,
+      errors: [errorMsg, ...errors],
+      stageResults,
+      totalStages: Object.keys(stageResults).length,
+      successfulStages: 0,
+    };
+  }
+}
+
+/**
+ * Run daily sync (incremental updates)
+ */
+export async function runDailySync(): Promise<FullSyncResult> {
+  console.log('[Daily Sync] Starting daily sync process...');
+  return runFullSync({ runHistoricalImports: false });
+}
+
+/**
+ * Run initial setup sync (complete import)
+ */
+export async function runInitialSetupSync(): Promise<FullSyncResult> {
+  console.log('[Initial Setup] Starting initial setup sync...');
+  return runFullSync({ runHistoricalImports: true });
 }

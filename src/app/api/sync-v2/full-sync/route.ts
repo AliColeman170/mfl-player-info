@@ -37,8 +37,6 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({
       syncType,
-      totalStages: Object.keys(result.stageResults).length,
-      successfulStages: Object.values(result.stageResults).filter((r: any) => r.success).length,
       ...result,
     });
     

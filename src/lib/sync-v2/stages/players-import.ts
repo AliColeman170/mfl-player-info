@@ -113,6 +113,7 @@ export async function importPlayersBasicDataChunk(
           batchSize: 1500,
           maxRetries: 3,
           retryDelay: 1000,
+          onProgress: () => {}, // Provide empty function to satisfy Required type
         },
         maxPagesPerChunk,
         continueFrom?.playerType === currentType ? continueFrom.lastPlayerId : undefined
