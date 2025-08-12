@@ -1,43 +1,96 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { runFullSync, runDailySync, runInitialSetupSync } from '@/lib/sync-v2/orchestrator';
 
-export const maxDuration = 600; // 10 minutes
+export const maxDuration = 300; // 5 minutes - simplified approach
 
 export async function POST(request: NextRequest) {
   try {
-    console.log(`[API] Full sync endpoint called`);
+    console.log(`[API] Full sync endpoint called - simplified sequential approach`);
     const { searchParams } = new URL(request.url);
     const syncType = searchParams.get('type') || 'daily';
     
-    console.log(`[API] Starting Full Sync (type: ${syncType})`);
+    const startTime = Date.now();
+    const stageResults: any = {};
+    const errors: string[] = [];
+    let overallSuccess = true;
     
-    let result;
+    console.log(`[API] Starting sequential sync (type: ${syncType})`);
     
-    switch (syncType) {
-      case 'initial':
-        result = await runInitialSetupSync();
-        break;
-      case 'daily':
-        result = await runDailySync();
-        break;
-      case 'full':
-        result = await runFullSync({
-          runHistoricalImports: true,
-        });
-        break;
-      default:
-        return NextResponse.json(
-          {
-            success: false,
-            error: 'Invalid sync type. Use: initial, daily, or full',
-          },
-          { status: 400 }
-        );
+    // Stage 1: Players Import
+    try {
+      console.log(`[API] Running Stage 1: Players Import`);
+      const playersResponse = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/sync-v2/stage1-players`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ maxPages: 2 }),
+      });
+      
+      const playersResult = await playersResponse.json();
+      stageResults.players_import = playersResult;
+      
+      if (!playersResult.success) {
+        errors.push(`Players import failed: ${playersResult.error}`);
+        overallSuccess = false;
+      }
+    } catch (error) {
+      const errorMsg = `Players import error: ${error instanceof Error ? error.message : 'Unknown error'}`;
+      errors.push(errorMsg);
+      overallSuccess = false;
+      stageResults.players_import = { success: false, error: errorMsg };
     }
+    
+    // Stage 2: Sales Sync
+    try {
+      console.log(`[API] Running Stage 2: Sales Sync`);
+      const salesResponse = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/sync-v2/stage2-sales`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      
+      const salesResult = await salesResponse.json();
+      stageResults.sales = salesResult;
+      
+      if (!salesResult.success) {
+        errors.push(`Sales sync failed: ${salesResult.error}`);
+        overallSuccess = false;
+      }
+    } catch (error) {
+      const errorMsg = `Sales sync error: ${error instanceof Error ? error.message : 'Unknown error'}`;
+      errors.push(errorMsg);
+      overallSuccess = false;
+      stageResults.sales = { success: false, error: errorMsg };
+    }
+    
+    // Stage 3: Market Values
+    try {
+      console.log(`[API] Running Stage 3: Market Values`);
+      const marketResponse = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/sync-v2/stage3-market-values`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      
+      const marketResult = await marketResponse.json();
+      stageResults.market_values = marketResult;
+      
+      if (!marketResult.success) {
+        errors.push(`Market values failed: ${marketResult.error}`);
+        overallSuccess = false;
+      }
+    } catch (error) {
+      const errorMsg = `Market values error: ${error instanceof Error ? error.message : 'Unknown error'}`;
+      errors.push(errorMsg);
+      overallSuccess = false;
+      stageResults.market_values = { success: false, error: errorMsg };
+    }
+    
+    const duration = Math.round((Date.now() - startTime) / 1000);
     
     return NextResponse.json({
       syncType,
-      ...result,
+      success: overallSuccess,
+      duration,
+      stageResults,
+      errors,
+      message: overallSuccess ? 'Full sync completed successfully' : 'Full sync completed with errors',
     });
     
   } catch (error) {

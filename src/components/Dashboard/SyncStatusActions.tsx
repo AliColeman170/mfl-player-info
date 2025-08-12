@@ -149,13 +149,13 @@ export function SyncStatusActions({
     try {
       let result: any;
 
-      // Use server-side orchestrator for players import (survives page refreshes)
+      // Use regular stage API for players import
       if (stageName === 'stage1-players') {
         const response = await fetch(`/api/sync-v2/stage1-players`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            useOrchestrator: true, // Use server-side orchestrator
+            maxPages: 2, // Process 2 pages (~3000 players)
           }),
         });
 
