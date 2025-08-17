@@ -1,13 +1,10 @@
-import { Metadata } from 'next';
+import type { Metadata } from 'next';
 import { MarketOverviewCard } from '@/components/Dashboard/MarketOverviewCard';
 import { RecentSalesCard } from '@/components/Dashboard/RecentSalesCard';
 import { RecentListingsCard } from '@/components/Dashboard/RecentListingsCard';
 import { TopRatedPlayersCard } from '@/components/Dashboard/TopRatedPlayersCard';
 import { FavoritePlayersCard } from '@/components/Dashboard/FavoritePlayersCard';
 import { TopOwnersCard } from '@/components/Dashboard/TopOwnersCard';
-import { SyncStatusCard } from '@/components/Dashboard/SyncStatusCard';
-import { getUser } from '@/data/auth';
-import { createClient } from '@/lib/supabase/server';
 
 export const metadata: Metadata = {
   alternates: {
@@ -17,10 +14,6 @@ export const metadata: Metadata = {
 };
 
 export default async function Home() {
-  const supabase = await createClient();
-  const user = await getUser(supabase);
-  const isAdmin = user?.app_metadata?.address === '0xb6fbc6072df85634';
-
   return (
     <div className='container mx-auto flex flex-col gap-y-8'>
       {/* Dashboard Grid */}
@@ -54,13 +47,6 @@ export default async function Home() {
         <div className='lg:col-span-6'>
           <RecentListingsCard />
         </div>
-
-        {/* Sync Status - Full width - Admin only */}
-        {isAdmin && (
-          <div className='lg:col-span-12'>
-            <SyncStatusCard />
-          </div>
-        )}
       </div>
     </div>
   );

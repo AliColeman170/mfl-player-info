@@ -1,10 +1,7 @@
 import { Suspense } from 'react';
-import { DashboardCard } from './DashboardCard';
-import { Badge } from '@/components/UI/badge';
 import { Skeleton } from '@/components/UI/skeleton';
 import { getMarketOverview } from '@/data/dashboard';
 import {
-  TrendingUp,
   Users,
   ListIcon,
   FileText,
@@ -72,41 +69,38 @@ function MarketOverviewError() {
 }
 
 async function MarketOverviewContent() {
-  try {
-    const data = await getMarketOverview();
+  const data = await getMarketOverview();
 
-    return (
-      <div className='grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4'>
-        <MetricItem
-          icon={<Users className='size-5' />}
-          label='Total Players'
-          value={data.totalPlayers}
-        />
-        <MetricItem
-          icon={<DollarSign className='size-5' />}
-          label='Total Sales Volume'
-          value={new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD',
-            notation: 'compact',
-          }).format(data.totalSalesVolume)}
-        />
-        <MetricItem
-          icon={<ListIcon className='size-5' />}
-          label='Active Listings'
-          value={data.activeListings}
-        />
-        <MetricItem
-          icon={<FileText className='size-5' />}
-          label='Contracted Players'
-          value={data.contractedPlayers}
-        />
-      </div>
-    );
-  } catch (error) {
-    console.error('Error in MarketOverviewContent:', error);
-    return <MarketOverviewError />;
-  }
+  if (!data.success) return <MarketOverviewError />;
+
+  return (
+    <div className='grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4'>
+      <MetricItem
+        icon={<Users className='size-5' />}
+        label='Total Players'
+        value={data.totalPlayers}
+      />
+      <MetricItem
+        icon={<DollarSign className='size-5' />}
+        label='Total Sales Volume'
+        value={new Intl.NumberFormat('en-US', {
+          style: 'currency',
+          currency: 'USD',
+          notation: 'compact',
+        }).format(data.totalSalesVolume)}
+      />
+      <MetricItem
+        icon={<ListIcon className='size-5' />}
+        label='Active Listings'
+        value={data.activeListings}
+      />
+      <MetricItem
+        icon={<FileText className='size-5' />}
+        label='Contracted Players'
+        value={data.contractedPlayers}
+      />
+    </div>
+  );
 }
 
 export function MarketOverviewCard() {

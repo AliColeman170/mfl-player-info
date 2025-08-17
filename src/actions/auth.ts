@@ -2,7 +2,7 @@
 
 import { appIdentifier, fcl } from '@/flow/api';
 import { addNonce, checkNonce, removeNonce } from '@/utils/nonces';
-import { adminAuthClient } from '@/lib/supabase/admin';
+import { supabaseAdmin } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 import { CurrentUser, Service } from '@onflow/typedefs';
 import { randomBytes } from 'crypto';
@@ -57,10 +57,12 @@ export async function login(credentials: CurrentUser, redirectTo?: string) {
     return { success: false, message: error.message };
   }
 
-  const { error: updateError } =
-    await adminAuthClient.auth.admin.updateUserById(data.user.id, {
+  const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
+    data.user.id,
+    {
       app_metadata: { address: credentials.addr },
-    });
+    }
+  );
 
   if (updateError) {
     console.log('Error updating user app_metadata.');

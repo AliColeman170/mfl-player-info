@@ -773,6 +773,51 @@ export type Database = {
         }
         Relationships: []
       }
+      upstash_workflow_executions: {
+        Row: {
+          completed_at: string | null
+          completed_steps: number | null
+          created_at: string | null
+          error_message: string | null
+          id: string
+          progress: Json | null
+          started_at: string | null
+          status: string
+          total_steps: number | null
+          updated_at: string | null
+          workflow_name: string
+          workflow_run_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          completed_steps?: number | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          progress?: Json | null
+          started_at?: string | null
+          status?: string
+          total_steps?: number | null
+          updated_at?: string | null
+          workflow_name: string
+          workflow_run_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          completed_steps?: number | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          progress?: Json | null
+          started_at?: string | null
+          status?: string
+          total_steps?: number | null
+          updated_at?: string | null
+          workflow_name?: string
+          workflow_run_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -781,15 +826,15 @@ export type Database = {
       analyze_multi_variable_pricing: {
         Args: { days_back?: number; min_sales?: number }
         Returns: {
+          age_factor: number
+          avg_price: number
+          base_value_estimate: number
           overall_rating: number
           player_age: number
           player_position: string
-          avg_price: number
-          trimmed_avg_price: number
-          sale_count: number
-          base_value_estimate: number
           position_premium: number
-          age_factor: number
+          sale_count: number
+          trimmed_avg_price: number
         }[]
       }
       calculate_base_player_value: {
@@ -818,25 +863,25 @@ export type Database = {
           position_filter?: string
         }
         Returns: {
-          division: number
-          total_contracts: number
-          min_revenue_share: number
-          max_revenue_share: number
           avg_revenue_share: number
+          division: number
+          max_revenue_share: number
+          min_revenue_share: number
+          total_contracts: number
         }[]
       }
       get_favorite_players: {
         Args: { limit_count?: number }
         Returns: {
-          id: number
-          first_name: string
-          last_name: string
-          overall: number
-          primary_position: string
-          market_value_estimate: number
           age: number
           club_name: string
           favorite_count: number
+          first_name: string
+          id: number
+          last_name: string
+          market_value_estimate: number
+          overall: number
+          primary_position: string
         }[]
       }
       get_filter_counts: {
@@ -898,11 +943,11 @@ export type Database = {
       get_sales_price_vs_age_graph: {
         Args: { days_back?: number }
         Returns: {
-          player_age: number
           avg_price: number
-          sale_count: number
-          min_price: number
           max_price: number
+          min_price: number
+          player_age: number
+          sale_count: number
           trimmed_avg_price: number
           trimmed_sale_count: number
         }[]
@@ -910,11 +955,11 @@ export type Database = {
       get_sales_price_vs_overall_graph: {
         Args: { days_back?: number }
         Returns: {
-          overall_rating: number
           avg_price: number
-          sale_count: number
-          min_price: number
           max_price: number
+          min_price: number
+          overall_rating: number
+          sale_count: number
           trimmed_avg_price: number
           trimmed_sale_count: number
         }[]
@@ -922,14 +967,14 @@ export type Database = {
       get_sales_price_vs_position_graph: {
         Args: { days_back?: number }
         Returns: {
-          player_position: string
           avg_price: number
-          sale_count: number
-          min_price: number
           max_price: number
+          min_price: number
+          player_position: string
+          position_order: number
+          sale_count: number
           trimmed_avg_price: number
           trimmed_sale_count: number
-          position_order: number
         }[]
       }
       get_sync_status: {
@@ -939,11 +984,11 @@ export type Database = {
       get_top_owners: {
         Args: { limit_count?: number }
         Returns: {
-          owner_wallet_address: string
+          avg_overall: number
           owner_name: string
+          owner_wallet_address: string
           player_count: number
           total_value: number
-          avg_overall: number
         }[]
       }
       get_total_sales_volume: {
@@ -953,32 +998,32 @@ export type Database = {
       test_market_value_updates: {
         Args: { test_count?: number }
         Returns: {
-          player_id: number
+          age: number
+          confidence: string
           first_name: string
           last_name: string
-          overall: number
-          age: number
-          player_position: string
-          old_method: string
           new_method: string
-          old_value: number
           new_value: number
+          old_method: string
+          old_value: number
+          overall: number
+          player_id: number
+          player_position: string
           sample_size: number
-          confidence: string
         }[]
       }
       test_pricing_model_accuracy: {
         Args: { days_back?: number; sample_size?: number }
         Returns: {
-          test_count: number
-          avg_actual_price: number
-          avg_predicted_price: number
-          avg_absolute_error: number
-          avg_percentage_error: number
-          median_percentage_error: number
           accuracy_within_10_percent: number
           accuracy_within_20_percent: number
           accuracy_within_30_percent: number
+          avg_absolute_error: number
+          avg_actual_price: number
+          avg_percentage_error: number
+          avg_predicted_price: number
+          median_percentage_error: number
+          test_count: number
         }[]
       }
       update_all_player_base_values: {
@@ -1000,10 +1045,10 @@ export type Database = {
       update_players_market_values_batch: {
         Args: { batch_size?: number; offset_val?: number }
         Returns: {
-          processed_count: number
-          updated_count: number
           error_count: number
+          processed_count: number
           total_players: number
+          updated_count: number
         }[]
       }
       update_sales_summary: {

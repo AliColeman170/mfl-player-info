@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { importMissingPlayer } from '@/lib/sync-v2/core';
+import { importMissingPlayer } from '@/lib/sync/core';
 
 export const maxDuration = 600; // 10 minutes
 

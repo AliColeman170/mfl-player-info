@@ -4,6 +4,7 @@ import { fetchAllPlayerSales } from '@/lib/pagination';
 import { Listing } from '@/types/global.types';
 
 export interface MarketOverviewData {
+  success: boolean;
   totalPlayers: number;
   totalSalesVolume: number;
   activeListings: number;
@@ -11,7 +12,9 @@ export interface MarketOverviewData {
   totalMarketCap: number;
 }
 
-export async function getMarketOverview(): Promise<MarketOverviewData> {
+export async function getMarketOverview(): Promise<
+  MarketOverviewData | { success: false }
+> {
   const supabase = await createClient();
 
   // Initialize fallback values
@@ -80,8 +83,8 @@ export async function getMarketOverview(): Promise<MarketOverviewData> {
 
     // Get total sales volume using RPC function
     try {
-      const { data: salesVolumeData, error: salesVolumeError } = await supabase
-        .rpc('get_total_sales_volume');
+      const { data: salesVolumeData, error: salesVolumeError } =
+        await supabase.rpc('get_total_sales_volume');
 
       if (salesVolumeError) {
         console.error('Error fetching total sales volume:', salesVolumeError);
@@ -122,9 +125,13 @@ export async function getMarketOverview(): Promise<MarketOverviewData> {
   } catch (error) {
     console.error('Error in getMarketOverview:', error);
     // Return fallback data instead of throwing
+    return {
+      success: false,
+    };
   }
 
   return {
+    success: true,
     totalPlayers,
     totalSalesVolume,
     activeListings,

@@ -283,3 +283,36 @@ GRANT ALL ON SEQUENCE "public"."sync_executions_id_seq" TO "anon";
 GRANT ALL ON SEQUENCE "public"."sync_executions_id_seq" TO "authenticated";
 
 GRANT ALL ON SEQUENCE "public"."sync_executions_id_seq" TO "service_role";
+
+-- Upstash workflow status tracking
+CREATE TABLE IF NOT EXISTS "public"."upstash_workflow_executions" (
+    "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    "workflow_run_id" text UNIQUE NOT NULL,
+    "workflow_name" text NOT NULL,
+    "status" text NOT NULL DEFAULT 'running' CHECK (
+        status IN ('running', 'completed', 'failed', 'cancelled')
+    ),
+    "started_at" timestamp with time zone DEFAULT now(),
+    "completed_at" timestamp with time zone,
+    "error_message" text,
+    "progress" jsonb DEFAULT '{}',
+    "total_steps" integer DEFAULT 0,
+    "completed_steps" integer DEFAULT 0,
+    "created_at" timestamp with time zone DEFAULT now(),
+    "updated_at" timestamp with time zone DEFAULT now()
+);
+
+-- Indexes for Upstash workflow executions
+CREATE INDEX IF NOT EXISTS "idx_upstash_workflow_executions_status" ON "public"."upstash_workflow_executions" ("status");
+CREATE INDEX IF NOT EXISTS "idx_upstash_workflow_executions_workflow_name" ON "public"."upstash_workflow_executions" ("workflow_name");
+CREATE INDEX IF NOT EXISTS "idx_upstash_workflow_executions_started_at" ON "public"."upstash_workflow_executions" ("started_at" DESC);
+
+-- Update trigger for Upstash workflow executions
+CREATE TRIGGER update_upstash_workflow_executions_updated_at BEFORE
+UPDATE ON "public"."upstash_workflow_executions" FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column ();
+
+-- Permissions for Upstash workflow executions
+GRANT ALL ON TABLE "public"."upstash_workflow_executions" TO "anon";
+GRANT ALL ON TABLE "public"."upstash_workflow_executions" TO "authenticated";
+GRANT ALL ON TABLE "public"."upstash_workflow_executions" TO "service_role";

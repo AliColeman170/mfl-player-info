@@ -2,8 +2,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import React from 'react';
 import { createColumnHelper } from '@tanstack/react-table';
-import { HeartIcon as HeartIconOutline } from '@heroicons/react/24/outline';
-import { ArrowTrendingUpIcon } from '@heroicons/react/20/solid';
 import { cn } from '@/utils/helpers';
 import { getTierFromOverall, getTierClasses } from '@/lib/tier-colors';
 import { ToggleFavouriteButton } from '@/components/Favourites/ToggleFavouriteButton';
@@ -12,17 +10,14 @@ import { PlayerWithFavouriteData } from '../../types';
 import { Badge } from '@/components/UI/badge';
 import { Button } from '@/components/UI/button';
 import {
-  AccessibilityIcon,
-  AmbulanceIcon,
   FlameIcon,
+  HeartIcon,
   Loader2Icon,
   LockIcon,
   MoreVerticalIcon,
   RefreshCwIcon,
   ShieldXIcon,
-  SofaIcon,
-  TentIcon,
-  TentTreeIcon,
+  TrendingUpIcon,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -75,7 +70,7 @@ const PlayerActionsCell = React.memo(function PlayerActionsCell({
 
   const refreshPlayerMutation = useMutation({
     mutationFn: async (playerId: number) => {
-      const response = await fetch('/api/sync-v2/single-player', {
+      const response = await fetch('/api/sync/single-player', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -200,7 +195,7 @@ export const columns = [
     id: 'favourite',
     header: () => (
       <div className='flex w-8 items-center justify-center'>
-        <HeartIconOutline className='text-muted-foreground size-4' />
+        <HeartIcon className='text-muted-foreground size-4' />
       </div>
     ),
     cell: ({ row }) => (
@@ -356,7 +351,7 @@ export const columns = [
         return (
           <div className='flex items-center justify-center'>
             <Badge className='gap-1 bg-yellow-300 text-[10px] text-black hover:bg-yellow-400 dark:bg-yellow-400/10 dark:text-yellow-400'>
-              <ArrowTrendingUpIcon className='size-3.5 shrink-0' />
+              <TrendingUpIcon className='size-3.5 shrink-0' />
               <span className='truncate text-ellipsis'>Development Center</span>
             </Badge>
           </div>
@@ -688,7 +683,6 @@ export const columns = [
     enableSorting: true,
     size: 130,
   }),
-
 
   // Tags
   columnHelper.accessor((row) => row.tags, {
