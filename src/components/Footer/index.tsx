@@ -5,7 +5,7 @@ export function Footer() {
     <footer className='mx-auto mt-8 w-full max-w-xl px-6 py-8 text-center lg:px-8'>
       <div className='flex items-center justify-center space-x-3'>
         <Link
-          href={process.env.NEXT_BUY_ME_A_COFFEE_URL!}
+          href={process.env.NEXT_PUBLIC_BUY_ME_A_COFFEE_URL!}
           target='_blank'
           className='text-muted-foreground/80 hover:text-muted-foreground/70'
         >
