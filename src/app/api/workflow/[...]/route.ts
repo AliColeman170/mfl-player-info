@@ -1,20 +1,14 @@
 import 'server-only';
-import { createClient } from '@supabase/supabase-js';
 import { Listing, Player } from '@/types/global.types';
 import { createWorkflow, serveMany } from '@upstash/workflow/nextjs';
-import type {
-  FailureFunctionPayload,
-  WorkflowContext,
-} from '@upstash/workflow';
+import type { WorkflowContext } from '@upstash/workflow';
 import { updateMarketMultipliers } from '@/services/market-multiplier-updater';
 import {
-  getSyncConfig,
   setSyncConfig,
   upsertPlayersToDatabase,
   getQueryParams,
   getSalesQueryParams,
   upsertSalesToDatabase,
-  getLastSaleCursor,
   MAX_PLAYERS_LIMIT,
   MAX_SALES_LIMIT,
   DEV_CUT_OFF,

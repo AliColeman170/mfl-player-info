@@ -19,9 +19,20 @@ export async function POST(request: NextRequest) {
 
     console.log(`Triggering workflow: ${workflowName}`);
 
+    let url = `${process.env.NEXT_PUBLIC_SITE_URL}/api/workflow/${workflowName}`;
+
+    if (
+      process.env.NEXT_PUBLIC_VERCEL_ENV &&
+      process.env.NEXT_PUBLIC_VERCEL_ENV !== 'production'
+    ) {
+      url = `${url}?x-vercel-protection-bypass=${process.env.VERCEL_AUTOMATION_BYPASS_SECRET}`;
+    }
+
     const result = await client.trigger({
-      url: `${process.env.NEXT_PUBLIC_SITE_URL}/api/workflow/${workflowName}`,
-      body: {},
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+      },
     });
 
     return NextResponse.json({
