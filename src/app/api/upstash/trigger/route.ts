@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     console.log(`Triggering workflow: ${workflowName}`);
 
     const result = await client.trigger({
-      url: `${process.env.NEXT_SITE_URL}/api/workflow/${workflowName}`,
+      url: `${process.env.NEXT_PUBLIC_SITE_URL}/api/workflow/${workflowName}`,
       body: {},
     });
 

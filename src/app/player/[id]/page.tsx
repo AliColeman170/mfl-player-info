@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!player) return notFound();
 
   const title = `${player.first_name} ${player.last_name} | #${id} | MFL Player Info`;
-  const url = `${process.env.NEXT_SITE_URL}/player/${id}`;
+  const url = `${process.env.NEXT_PUBLIC_SITE_URL}/player/${id}`;
 
   return {
     title,

@@ -12,11 +12,11 @@ export async function GET(req: NextRequest) {
 
   // Font
   const interBold = fetch(
-    new URL('./assets/fonts/Inter-Bold.ttf', process.env.NEXT_SITE_URL)
+    new URL('./assets/fonts/Inter-Bold.ttf', process.env.NEXT_PUBLIC_SITE_URL)
   ).then((res) => res.arrayBuffer());
 
   const defaultImage = await fetch(
-    new URL('./assets/images/placeholder.png', process.env.NEXT_SITE_URL)
+    new URL('./assets/images/placeholder.png', process.env.NEXT_PUBLIC_SITE_URL)
   ).then((res) => res.arrayBuffer());
 
   return new ImageResponse(

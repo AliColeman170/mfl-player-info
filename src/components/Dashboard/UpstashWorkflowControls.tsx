@@ -5,14 +5,7 @@ import { createClient } from '@supabase/supabase-js';
 import { Button } from '@/components/UI/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/UI/card';
 import { Badge } from '@/components/UI/badge';
-import {
-  PlayIcon,
-  Square,
-  RefreshCcwIcon,
-  Loader2,
-  SquareIcon,
-  XIcon,
-} from 'lucide-react';
+import { PlayIcon, RefreshCcwIcon, Loader2, XIcon } from 'lucide-react';
 import { toast } from 'sonner';
 
 const supabase = createClient(
@@ -43,7 +36,7 @@ interface WorkflowExecution {
 export function UpstashWorkflowControls() {
   const [loading, setLoading] = useState(false);
 
-  const baseUrl = process.env.NEXT_SITE_URL || 'http://localhost:3000';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL;
 
   // Use React Query to fetch workflow status from Supabase directly
   const {
@@ -92,7 +85,7 @@ export function UpstashWorkflowControls() {
   const triggerWorkflow = async (workflowName: string) => {
     setLoading(true);
     try {
-      const baseUrl = process.env.NEXT_SITE_URL || 'http://localhost:3000';
+      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL;
 
       console.log(
         `Triggering workflow: ${workflowName} at ${baseUrl}/api/upstash/trigger`
