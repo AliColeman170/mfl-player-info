@@ -154,6 +154,11 @@ const importActivePlayers = createWorkflow(
     return { success: true, totalFetched, totalProcessed, totalFailed };
   },
   {
+    url:
+      process.env.NEXT_PUBLIC_VERCEL_ENV &&
+      process.env.NEXT_PUBLIC_VERCEL_ENV !== 'production'
+        ? `${process.env.NEXT_PUBLIC_SITE_URL}/api/workflow/import-active-players?x-vercel-protection-bypass=${process.env.VERCEL_AUTOMATION_BYPASS_SECRET}`
+        : `${process.env.NEXT_PUBLIC_SITE_URL}/api/workflow/import-active-players`,
     failureFunction: async (failureData: {
       context: Omit<
         WorkflowContext<unknown>,
@@ -318,6 +323,11 @@ const importRetiredPlayers = createWorkflow(
     return { success: true, totalFetched, totalProcessed, totalFailed };
   },
   {
+    url:
+      process.env.NEXT_PUBLIC_VERCEL_ENV &&
+      process.env.NEXT_PUBLIC_VERCEL_ENV !== 'production'
+        ? `${process.env.NEXT_PUBLIC_SITE_URL}/api/workflow/import-retired-players?x-vercel-protection-bypass=${process.env.VERCEL_AUTOMATION_BYPASS_SECRET}`
+        : `${process.env.NEXT_PUBLIC_SITE_URL}/api/workflow/import-retired-players`,
     failureFunction: async (failureData: {
       context: Omit<
         WorkflowContext<unknown>,
@@ -482,6 +492,11 @@ const importBurnedPlayers = createWorkflow(
     return { success: true, totalFetched, totalProcessed, totalFailed };
   },
   {
+    url:
+      process.env.NEXT_PUBLIC_VERCEL_ENV &&
+      process.env.NEXT_PUBLIC_VERCEL_ENV !== 'production'
+        ? `${process.env.NEXT_PUBLIC_SITE_URL}/api/workflow/import-burned-players?x-vercel-protection-bypass=${process.env.VERCEL_AUTOMATION_BYPASS_SECRET}`
+        : `${process.env.NEXT_PUBLIC_SITE_URL}/api/workflow/import-burned-players`,
     failureFunction: async (failureData: {
       context: Omit<
         WorkflowContext<unknown>,
@@ -649,6 +664,12 @@ const importRetiredAndBurnedPlayers = createWorkflow(
     return { success: true, totalFetched, totalProcessed, totalFailed };
   },
   {
+    url:
+      process.env.NEXT_PUBLIC_VERCEL_ENV &&
+      process.env.NEXT_PUBLIC_VERCEL_ENV !== 'production'
+        ? `${process.env.NEXT_PUBLIC_SITE_URL}/api/workflow/import-retired-burned-players?x-vercel-protection-bypass=${process.env.VERCEL_AUTOMATION_BYPASS_SECRET}`
+        : `${process.env.NEXT_PUBLIC_SITE_URL}/api/workflow/import-retired-burned-players`,
+
     failureFunction: async (failureData: {
       context: Omit<
         WorkflowContext<unknown>,
