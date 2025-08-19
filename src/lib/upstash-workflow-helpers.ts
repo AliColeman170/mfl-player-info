@@ -23,7 +23,7 @@ const MAX_PLAYERS_LIMIT = 1500; // Max limit for player fetches
 const MAX_SALES_LIMIT = 50; // Max limit for sales fetches
 const BATCH_SIZE = 100; // Players batch size for upserts
 const SALES_BATCH_SIZE = 2500; // Sales batch size for upserts
-const MARKET_VALUE_BATCH_SIZE = 1000; // Sales batch size for upserts
+const MARKET_VALUE_BATCH_SIZE = 500; // Sales batch size for upserts
 
 const DEV_CUT_OFF = 5000; // For development, limit to 5000 players
 const DEV_SALES_CUT_OFF = 200; // For development, limit to 200 sales

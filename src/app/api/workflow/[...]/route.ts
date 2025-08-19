@@ -1058,7 +1058,7 @@ const updateMarketValues = createWorkflow(
     while (currentOffset < totalPlayers) {
       // Call the new batch processing function
       const { data: batchResults, error: batchError } = await context.run(
-        'update-players-market-values',
+        `update-players-market-values-batch-${currentOffset}`,
         async () => {
           console.log('[STEP 4] Update Players Market Values');
           console.log(
