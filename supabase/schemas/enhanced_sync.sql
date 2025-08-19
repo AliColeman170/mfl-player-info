@@ -8,6 +8,8 @@ CREATE TABLE IF NOT EXISTS "public"."sync_config" (
     "updated_at" timestamp with time zone DEFAULT now()
 );
 
+ALTER TABLE "public"."sync_config" ENABLE ROW LEVEL SECURITY;
+
 -- Insert initial sync configuration
 INSERT INTO
     "public"."sync_config" (config_key, config_value, description)
@@ -70,19 +72,9 @@ CREATE INDEX IF NOT EXISTS "idx_players_basic_synced" ON "public"."players" ("ba
 
 CREATE INDEX IF NOT EXISTS "idx_players_market_calculated" ON "public"."players" ("market_value_calculated_at");
 
--- Update triggers for updated_at columns
-CREATE OR REPLACE FUNCTION update_updated_at_column () RETURNS TRIGGER
-set
-    search_path = '' AS $$
-BEGIN
-    NEW.updated_at = now();
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
 CREATE TRIGGER update_sync_config_updated_at BEFORE
 UPDATE ON "public"."sync_config" FOR EACH ROW
-EXECUTE FUNCTION update_updated_at_column ();
+EXECUTE FUNCTION public.update_updated_at_column ();
 
 -- Permissions
 GRANT ALL ON TABLE "public"."sync_config" TO "anon";
@@ -115,6 +107,8 @@ CREATE TABLE IF NOT EXISTS "public"."upstash_workflow_executions" (
     "updated_at" timestamp with time zone DEFAULT now()
 );
 
+ALTER TABLE "public"."upstash_workflow_executions" ENABLE ROW LEVEL SECURITY;
+
 -- Indexes for Upstash workflow executions
 CREATE INDEX IF NOT EXISTS "idx_upstash_workflow_executions_status" ON "public"."upstash_workflow_executions" ("status");
 
@@ -125,7 +119,7 @@ CREATE INDEX IF NOT EXISTS "idx_upstash_workflow_executions_started_at" ON "publ
 -- Update trigger for Upstash workflow executions
 CREATE TRIGGER update_upstash_workflow_executions_updated_at BEFORE
 UPDATE ON "public"."upstash_workflow_executions" FOR EACH ROW
-EXECUTE FUNCTION update_updated_at_column ();
+EXECUTE FUNCTION public.update_updated_at_column ();
 
 -- Permissions for Upstash workflow executions
 GRANT ALL ON TABLE "public"."upstash_workflow_executions" TO "anon";
@@ -133,3 +127,40 @@ GRANT ALL ON TABLE "public"."upstash_workflow_executions" TO "anon";
 GRANT ALL ON TABLE "public"."upstash_workflow_executions" TO "authenticated";
 
 GRANT ALL ON TABLE "public"."upstash_workflow_executions" TO "service_role";
+
+-- Sales summary table for fast market value calculations
+CREATE TABLE IF NOT EXISTS "public"."sales_summary" (
+    "id" SERIAL PRIMARY KEY,
+    "position" VARCHAR(10) NOT NULL,
+    "age_center" INTEGER NOT NULL,
+    "overall_center" INTEGER NOT NULL,
+    "age_range" INTEGER NOT NULL DEFAULT 3, -- ±3 years
+    "overall_range" INTEGER NOT NULL DEFAULT 3, -- ±3 overall
+    "sample_count" INTEGER NOT NULL DEFAULT 0,
+    "avg_price" NUMERIC(10, 2),
+    "median_price" NUMERIC(10, 2),
+    "recent_sales_data" JSONB, -- For EMA calculations
+    "price_trend" NUMERIC(5, 4), -- Price change trend
+    "last_updated" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    "created_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    -- Composite unique constraint
+    UNIQUE (
+        "position",
+        "age_center",
+        "overall_center",
+        "age_range",
+        "overall_range"
+    )
+);
+
+-- Index for fast lookups
+CREATE INDEX IF NOT EXISTS "idx_sales_summary_lookup" ON "public"."sales_summary" ("position", "age_center", "overall_center");
+
+-- Permissions for Upstash workflow executions
+GRANT ALL ON TABLE "public"."sales_summary" TO "anon";
+
+GRANT ALL ON TABLE "public"."sales_summary" TO "authenticated";
+
+GRANT ALL ON TABLE "public"."sales_summary" TO "service_role";
+
+ALTER TABLE "public"."sales_summary" ENABLE ROW LEVEL SECURITY;

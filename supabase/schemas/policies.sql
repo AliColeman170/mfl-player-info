@@ -9,7 +9,12 @@ CREATE POLICY "Enable delete for users based on wallet address" ON "public"."fav
         (
             SELECT
                 (
-                    ("auth"."jwt" () -> 'app_metadata'::"text") ->> 'address'::"text"
+                    (
+                        (
+                            select
+                                auth.jwt ()
+                        ) -> 'app_metadata'::"text"
+                    ) ->> 'address'::"text"
                 )
         ) = "wallet_address"
     )
@@ -26,7 +31,12 @@ SELECT
             (
                 SELECT
                     (
-                        ("auth"."jwt" () -> 'app_metadata'::"text") ->> 'address'::"text"
+                        (
+                            (
+                                select
+                                    auth.jwt ()
+                            ) -> 'app_metadata'::"text"
+                        ) ->> 'address'::"text"
                     )
             ) = "wallet_address"
         )
@@ -39,7 +49,12 @@ FOR UPDATE
             (
                 SELECT
                     (
-                        ("auth"."jwt" () -> 'app_metadata'::"text") ->> 'address'::"text"
+                        (
+                            (
+                                select
+                                    auth.jwt ()
+                            ) -> 'app_metadata'::"text"
+                        ) ->> 'address'::"text"
                     )
             ) = "wallet_address"
         )
@@ -50,7 +65,12 @@ WITH
             (
                 SELECT
                     (
-                        ("auth"."jwt" () -> 'app_metadata'::"text") ->> 'address'::"text"
+                        (
+                            (
+                                select
+                                    auth.jwt ()
+                            ) -> 'app_metadata'::"text"
+                        ) ->> 'address'::"text"
                     )
             ) = "wallet_address"
         )

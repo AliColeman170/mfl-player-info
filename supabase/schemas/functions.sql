@@ -1498,34 +1498,6 @@ BEGIN
 END;
 $$;
 
--- Sales summary table for fast market value calculations
-CREATE TABLE IF NOT EXISTS "public"."sales_summary" (
-  "id" SERIAL PRIMARY KEY,
-  "position" VARCHAR(10) NOT NULL,
-  "age_center" INTEGER NOT NULL,
-  "overall_center" INTEGER NOT NULL,
-  "age_range" INTEGER NOT NULL DEFAULT 3, -- ±3 years
-  "overall_range" INTEGER NOT NULL DEFAULT 3, -- ±3 overall
-  "sample_count" INTEGER NOT NULL DEFAULT 0,
-  "avg_price" NUMERIC(10, 2),
-  "median_price" NUMERIC(10, 2),
-  "recent_sales_data" JSONB, -- For EMA calculations
-  "price_trend" NUMERIC(5, 4), -- Price change trend
-  "last_updated" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  "created_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  -- Composite unique constraint
-  UNIQUE (
-    "position",
-    "age_center",
-    "overall_center",
-    "age_range",
-    "overall_range"
-  )
-);
-
--- Index for fast lookups
-CREATE INDEX IF NOT EXISTS "idx_sales_summary_lookup" ON "public"."sales_summary" ("position", "age_center", "overall_center");
-
 -- Function to update sales summary data (simplified for reliability)
 CREATE OR REPLACE FUNCTION update_sales_summary () RETURNS INTEGER LANGUAGE plpgsql SECURITY DEFINER
 SET
