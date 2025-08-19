@@ -1040,7 +1040,7 @@ const updateMarketValues = createWorkflow(
         .from('players')
         .select('*', { count: 'exact', head: true })
         .not('overall', 'is', null);
-
+      console.log(`[Market Values] Total players to process: ${totalPlayers}`);
       return totalPlayers || 0;
     });
 
