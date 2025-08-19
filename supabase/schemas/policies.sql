@@ -1,5 +1,8 @@
 -- Sales table policies - allow public read access
-CREATE POLICY "Enable select for sales" ON "public"."sales" FOR SELECT TO "authenticated", "anon" USING (true);
+CREATE POLICY "Enable select for sales" ON "public"."sales" FOR
+SELECT
+    TO "authenticated",
+    "anon" USING (true);
 
 CREATE POLICY "Enable delete for users based on wallet address" ON "public"."favourites" FOR DELETE TO "authenticated" USING (
     (
@@ -55,14 +58,9 @@ WITH
 
 -- Players table policies
 -- Allow read access to all users (players data is public)
-CREATE POLICY "Enable read access for all users" ON "public"."players" FOR SELECT USING (true);
+CREATE POLICY "Enable read access for all users" ON "public"."players" FOR
+SELECT
+    USING (true);
 
 -- Only allow service role to insert/update/delete players (sync operations)
 CREATE POLICY "Enable all operations for service role" ON "public"."players" FOR ALL TO "service_role" USING (true);
-
--- Sync status table policies
--- Allow read access to all users (sync status is public info)
-CREATE POLICY "Enable read access for all users" ON "public"."sync_status" FOR SELECT USING (true);
-
--- Only allow service role to insert/update/delete sync status (sync operations)
-CREATE POLICY "Enable all operations for service role" ON "public"."sync_status" FOR ALL TO "service_role" USING (true);

@@ -62,7 +62,7 @@ const importActivePlayers = createWorkflow(
 
       // Step 2 - Fetch players
       const { body: players } = await context.call<Player[]>(
-        'fetch-players', // Step name
+        `fetch-players-before-id-${params.beforePlayerId ?? 0}`, // Step name
         {
           url,
           method: 'GET', // HTTP method
@@ -81,7 +81,7 @@ const importActivePlayers = createWorkflow(
 
       // Step 3 - Upsert players into database
       const { processed, failed } = await context.run(
-        'upsert-players-to-database',
+        `upsert-players-to-database-${players[0].id}-${players[players.length - 1].id}`,
         async () => {
           console.log(
             `[STEP 3] Upsert Players ${players[0].id} to ${players[players.length - 1].id}`
@@ -93,39 +93,43 @@ const importActivePlayers = createWorkflow(
       totalProcessed += processed;
       totalFailed += failed;
 
-      // Update progress in database
-      await context.run(`update-progress-${totalProcessed}`, async () => {
-        await supabase
-          .from('upstash_workflow_executions')
-          .update({
-            progress: {
-              phase: 'processing',
-              totalFetched,
-              totalProcessed,
-              totalFailed,
-            },
-          })
-          .eq('workflow_run_id', workflowRunId);
-      });
-
       // Update progress and save checkpoint
       nextPlayerCursorId = players[players.length - 1]?.id;
-      if (nextPlayerCursorId) {
-        await setSyncConfig(configKey, nextPlayerCursorId.toString());
-      }
 
-      // Check if this was the last page for this type
-      if (
-        players.length < MAX_PLAYERS_LIMIT ||
-        (process.env.NODE_ENV === 'development' &&
-          totalProcessed >= DEV_CUT_OFF)
-      ) {
-        console.log(
-          `[Workflow] ${configKey} players completed - ${totalFetched} total fetched.`
-        );
-        hasMore = false;
-        await setSyncConfig(configKey, '0');
-      }
+      // Update progress in database
+      await context.run(
+        `update-progress-${totalProcessed}-next-${nextPlayerCursorId.toString() ?? '0'}`,
+        async () => {
+          if (nextPlayerCursorId) {
+            await setSyncConfig(configKey, nextPlayerCursorId.toString());
+          }
+
+          await supabase
+            .from('upstash_workflow_executions')
+            .update({
+              progress: {
+                phase: 'processing',
+                totalFetched,
+                totalProcessed,
+                totalFailed,
+              },
+            })
+            .eq('workflow_run_id', workflowRunId);
+
+          // Check if this was the last page for this type
+          if (
+            players.length < MAX_PLAYERS_LIMIT ||
+            (process.env.NODE_ENV === 'development' &&
+              totalProcessed >= DEV_CUT_OFF)
+          ) {
+            console.log(
+              `[Workflow] ${configKey} players completed - ${totalFetched} total fetched.`
+            );
+            hasMore = false;
+            await setSyncConfig(configKey, '0');
+          }
+        }
+      );
     }
 
     console.log('[Workflow] Active Players import completed successfully.', {
@@ -907,21 +911,6 @@ const importSales = createWorkflow(
       totalProcessed += processed;
       totalFailed += failed;
 
-      // Update progress in database
-      await context.run(`update-progress-${totalProcessed}`, async () => {
-        await supabase
-          .from('upstash_workflow_executions')
-          .update({
-            progress: {
-              phase: 'processing',
-              totalFetched,
-              totalProcessed,
-              totalFailed,
-            },
-          })
-          .eq('workflow_run_id', workflowRunId);
-      });
-
       // Update progress and save checkpoint
       nextListingCursorId = listings[listings.length - 1]?.listingResourceId;
 
@@ -936,6 +925,24 @@ const importSales = createWorkflow(
         );
         hasMore = false;
       }
+
+      // Update progress in database
+      await context.run(
+        `update-progress-${totalProcessed}-next-${nextListingCursorId ?? 0}`,
+        async () => {
+          await supabase
+            .from('upstash_workflow_executions')
+            .update({
+              progress: {
+                phase: 'processing',
+                totalFetched,
+                totalProcessed,
+                totalFailed,
+              },
+            })
+            .eq('workflow_run_id', workflowRunId);
+        }
+      );
     }
 
     console.log('[Workflow] Sales import completed successfully.', {
@@ -1015,7 +1022,7 @@ const updateMarketValues = createWorkflow(
 
     await context.run('update-market-multipliers', async () => {
       console.log('[STEP 1] Update Market Multipliers');
-      return await updateMarketMultipliers({
+      await updateMarketMultipliers({
         windowDays: 90,
         minSampleSize: 3,
         forceUpdate: true,
@@ -1024,7 +1031,7 @@ const updateMarketValues = createWorkflow(
 
     await context.run('update-sales-summary', async () => {
       console.log('[STEP 2] Update Sales Summary');
-      return await supabase.rpc('update_sales_summary');
+      await supabase.rpc('update_sales_summary');
     });
 
     const totalPlayers = await context.run('count-players', async () => {

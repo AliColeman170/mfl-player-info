@@ -107,43 +107,6 @@ CREATE TABLE IF NOT EXISTS "public"."players" (
 
 ALTER TABLE "public"."players" OWNER TO "postgres";
 
-CREATE TABLE IF NOT EXISTS "public"."sync_status" (
-    "id" bigint NOT NULL,
-    "sync_type" "text" NOT NULL,
-    "status" "text" NOT NULL,
-    "total_players" integer,
-    "synced_players" integer DEFAULT 0,
-    "failed_players" integer DEFAULT 0,
-    "started_at" timestamp with time zone DEFAULT "now" (),
-    "completed_at" timestamp with time zone,
-    "error_message" "text",
-    "created_at" timestamp with time zone DEFAULT "now" (),
-    CONSTRAINT "sync_status_sync_type_check" CHECK (
-        (
-            "sync_type" = ANY (
-                ARRAY[
-                    'full'::"text",
-                    'individual'::"text",
-                    'listings'::"text"
-                ]
-            )
-        )
-    ),
-    CONSTRAINT "sync_status_status_check" CHECK (
-        (
-            "status" = ANY (
-                ARRAY[
-                    'running'::"text",
-                    'completed'::"text",
-                    'failed'::"text"
-                ]
-            )
-        )
-    )
-);
-
-ALTER TABLE "public"."sync_status" OWNER TO "postgres";
-
 -- Sales table to store all marketplace sales data
 CREATE TABLE IF NOT EXISTS "public"."sales" (
     "listing_resource_id" bigint NOT NULL,
@@ -167,95 +130,12 @@ CREATE TABLE IF NOT EXISTS "public"."sales" (
 
 ALTER TABLE "public"."sales" OWNER TO "postgres";
 
--- Sales sync metadata table to track resumable sync progress
-CREATE TABLE IF NOT EXISTS "public"."sales_sync_metadata" (
-    "id" bigint NOT NULL,
-    "sync_type" "text" NOT NULL DEFAULT 'full',
-    "last_listing_id" bigint,
-    "total_fetched" integer DEFAULT 0,
-    "total_saved" integer DEFAULT 0,
-    "current_page" integer DEFAULT 1,
-    "status" "text" DEFAULT 'running',
-    "started_at" timestamp with time zone DEFAULT "now" (),
-    "updated_at" timestamp with time zone DEFAULT "now" (),
-    "completed_at" timestamp with time zone,
-    "error_message" "text"
-);
-
-ALTER TABLE "public"."sales_sync_metadata" OWNER TO "postgres";
-
--- Player sync metadata table to track resumable sync progress
-CREATE TABLE IF NOT EXISTS "public"."player_sync_metadata" (
-    "id" bigint NOT NULL,
-    "sync_type" "text" NOT NULL DEFAULT 'full',
-    "last_player_id" bigint,
-    "total_fetched" integer DEFAULT 0,
-    "total_saved" integer DEFAULT 0,
-    "current_page" integer DEFAULT 1,
-    "status" "text" DEFAULT 'running',
-    "started_at" timestamp with time zone DEFAULT "now" (),
-    "updated_at" timestamp with time zone DEFAULT "now" (),
-    "completed_at" timestamp with time zone,
-    "error_message" "text"
-);
-
-ALTER TABLE "public"."player_sync_metadata" OWNER TO "postgres";
-
-CREATE SEQUENCE IF NOT EXISTS "public"."sales_sync_metadata_id_seq" AS bigint START
-WITH
-    1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1;
-
-ALTER TABLE "public"."sales_sync_metadata_id_seq" OWNER TO "postgres";
-
-ALTER SEQUENCE "public"."sales_sync_metadata_id_seq" OWNED BY "public"."sales_sync_metadata"."id";
-
-CREATE SEQUENCE IF NOT EXISTS "public"."player_sync_metadata_id_seq" AS bigint START
-WITH
-    1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1;
-
-ALTER TABLE "public"."player_sync_metadata_id_seq" OWNER TO "postgres";
-
-ALTER SEQUENCE "public"."player_sync_metadata_id_seq" OWNED BY "public"."player_sync_metadata"."id";
-
-CREATE SEQUENCE IF NOT EXISTS "public"."sync_status_id_seq" AS bigint START
-WITH
-    1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1;
-
-ALTER TABLE "public"."sync_status_id_seq" OWNER TO "postgres";
-
-ALTER SEQUENCE "public"."sync_status_id_seq" OWNED BY "public"."sync_status"."id";
-
-ALTER TABLE ONLY "public"."sales_sync_metadata"
-ALTER COLUMN "id"
-SET DEFAULT "nextval" (
-    '"public"."sales_sync_metadata_id_seq"'::"regclass"
-);
-
-ALTER TABLE ONLY "public"."player_sync_metadata"
-ALTER COLUMN "id"
-SET DEFAULT "nextval" (
-    '"public"."player_sync_metadata_id_seq"'::"regclass"
-);
-
-ALTER TABLE ONLY "public"."sync_status"
-ALTER COLUMN "id"
-SET DEFAULT "nextval" ('"public"."sync_status_id_seq"'::"regclass");
-
 -- Primary key constraints
 ALTER TABLE ONLY "public"."players"
 ADD CONSTRAINT "players_pkey" PRIMARY KEY ("id");
 
 ALTER TABLE ONLY "public"."sales"
 ADD CONSTRAINT "sales_pkey" PRIMARY KEY ("listing_resource_id");
-
-ALTER TABLE ONLY "public"."sales_sync_metadata"
-ADD CONSTRAINT "sales_sync_metadata_pkey" PRIMARY KEY ("id");
-
-ALTER TABLE ONLY "public"."player_sync_metadata"
-ADD CONSTRAINT "player_sync_metadata_pkey" PRIMARY KEY ("id");
-
-ALTER TABLE ONLY "public"."sync_status"
-ADD CONSTRAINT "sync_status_pkey" PRIMARY KEY ("id");
 
 -- Indexes for performance
 CREATE INDEX IF NOT EXISTS "idx_players_overall" ON "public"."players" USING "btree" ("overall");
@@ -322,10 +202,6 @@ CREATE INDEX IF NOT EXISTS "idx_players_is_retired" ON "public"."players" USING 
 
 CREATE INDEX IF NOT EXISTS "idx_players_is_burned" ON "public"."players" USING "btree" ("is_burned");
 
-CREATE INDEX IF NOT EXISTS "idx_sync_status_type" ON "public"."sync_status" USING "btree" ("status", "sync_type");
-
-CREATE INDEX IF NOT EXISTS "idx_sync_status_started_at" ON "public"."sync_status" USING "btree" ("started_at");
-
 -- Sales table indexes for fast market value calculations
 CREATE INDEX IF NOT EXISTS "idx_sales_player_id" ON "public"."sales" USING "btree" ("player_id");
 
@@ -343,16 +219,6 @@ CREATE INDEX IF NOT EXISTS "idx_sales_overall_age" ON "public"."sales" USING "bt
 CREATE INDEX IF NOT EXISTS "idx_sales_position_overall" ON "public"."sales" USING "btree" ("player_position", "player_overall");
 
 CREATE INDEX IF NOT EXISTS "idx_sales_imported_at" ON "public"."sales" USING "btree" ("imported_at");
-
--- Sales sync metadata indexes
-CREATE INDEX IF NOT EXISTS "idx_sales_sync_metadata_status" ON "public"."sales_sync_metadata" USING "btree" ("status");
-
-CREATE INDEX IF NOT EXISTS "idx_sales_sync_metadata_started_at" ON "public"."sales_sync_metadata" USING "btree" ("started_at");
-
--- Player sync metadata indexes
-CREATE INDEX IF NOT EXISTS "idx_player_sync_metadata_status" ON "public"."player_sync_metadata" USING "btree" ("status");
-
-CREATE INDEX IF NOT EXISTS "idx_player_sync_metadata_started_at" ON "public"."player_sync_metadata" USING "btree" ("started_at");
 
 -- Trigger function for updated_at
 CREATE OR REPLACE FUNCTION "public"."update_updated_at_column" () RETURNS "trigger" LANGUAGE "plpgsql"
@@ -372,14 +238,6 @@ CREATE TRIGGER "update_sales_updated_at" BEFORE
 UPDATE ON "public"."sales" FOR EACH ROW
 EXECUTE FUNCTION "public"."update_updated_at_column" ();
 
-CREATE TRIGGER "update_sales_sync_metadata_updated_at" BEFORE
-UPDATE ON "public"."sales_sync_metadata" FOR EACH ROW
-EXECUTE FUNCTION "public"."update_updated_at_column" ();
-
-CREATE TRIGGER "update_player_sync_metadata_updated_at" BEFORE
-UPDATE ON "public"."player_sync_metadata" FOR EACH ROW
-EXECUTE FUNCTION "public"."update_updated_at_column" ();
-
 -- Permissions
 GRANT ALL ON TABLE "public"."players" TO "anon";
 
@@ -387,47 +245,11 @@ GRANT ALL ON TABLE "public"."players" TO "authenticated";
 
 GRANT ALL ON TABLE "public"."players" TO "service_role";
 
-GRANT ALL ON TABLE "public"."sync_status" TO "anon";
-
-GRANT ALL ON TABLE "public"."sync_status" TO "authenticated";
-
-GRANT ALL ON TABLE "public"."sync_status" TO "service_role";
-
-GRANT ALL ON SEQUENCE "public"."sync_status_id_seq" TO "anon";
-
-GRANT ALL ON SEQUENCE "public"."sync_status_id_seq" TO "authenticated";
-
-GRANT ALL ON SEQUENCE "public"."sync_status_id_seq" TO "service_role";
-
 GRANT ALL ON TABLE "public"."sales" TO "anon";
 
 GRANT ALL ON TABLE "public"."sales" TO "authenticated";
 
 GRANT ALL ON TABLE "public"."sales" TO "service_role";
-
-GRANT ALL ON TABLE "public"."sales_sync_metadata" TO "anon";
-
-GRANT ALL ON TABLE "public"."sales_sync_metadata" TO "authenticated";
-
-GRANT ALL ON TABLE "public"."sales_sync_metadata" TO "service_role";
-
-GRANT ALL ON SEQUENCE "public"."sales_sync_metadata_id_seq" TO "anon";
-
-GRANT ALL ON SEQUENCE "public"."sales_sync_metadata_id_seq" TO "authenticated";
-
-GRANT ALL ON SEQUENCE "public"."sales_sync_metadata_id_seq" TO "service_role";
-
-GRANT ALL ON TABLE "public"."player_sync_metadata" TO "anon";
-
-GRANT ALL ON TABLE "public"."player_sync_metadata" TO "authenticated";
-
-GRANT ALL ON TABLE "public"."player_sync_metadata" TO "service_role";
-
-GRANT ALL ON SEQUENCE "public"."player_sync_metadata_id_seq" TO "anon";
-
-GRANT ALL ON SEQUENCE "public"."player_sync_metadata_id_seq" TO "authenticated";
-
-GRANT ALL ON SEQUENCE "public"."player_sync_metadata_id_seq" TO "service_role";
 
 -- Add foreign key constraints
 ALTER TABLE ONLY "public"."favourites"
@@ -479,12 +301,6 @@ CREATE INDEX IF NOT EXISTS "idx_market_multipliers_updated" ON "public"."market_
 ALTER TABLE "public"."players" ENABLE ROW LEVEL SECURITY;
 
 ALTER TABLE "public"."sales" ENABLE ROW LEVEL SECURITY;
-
-ALTER TABLE "public"."sales_sync_metadata" ENABLE ROW LEVEL SECURITY;
-
-ALTER TABLE "public"."player_sync_metadata" ENABLE ROW LEVEL SECURITY;
-
-ALTER TABLE "public"."sync_status" ENABLE ROW LEVEL SECURITY;
 
 ALTER TABLE "public"."market_multipliers" ENABLE ROW LEVEL SECURITY;
 

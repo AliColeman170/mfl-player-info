@@ -327,7 +327,9 @@ export async function upsertSalesToDatabase(
   let processed = 0;
   let failed = 0;
 
-  const allDbRecords = transformSaleData(listings);
+  const allDbRecords = transformSaleData(
+    listings.filter((sale) => sale.player!.id >= 42)
+  );
 
   // Process in small, fast batches with no delays
   for (let i = 0; i < allDbRecords.length; i += BATCH_SIZE) {
@@ -360,4 +362,10 @@ export async function upsertSalesToDatabase(
 }
 
 // Export constants
-export { MAX_PLAYERS_LIMIT, MAX_SALES_LIMIT, DEV_CUT_OFF, DEV_SALES_CUT_OFF, SALES_BATCH_SIZE };
+export {
+  MAX_PLAYERS_LIMIT,
+  MAX_SALES_LIMIT,
+  DEV_CUT_OFF,
+  DEV_SALES_CUT_OFF,
+  SALES_BATCH_SIZE,
+};
