@@ -1980,3 +1980,29 @@ BEGIN
   END LOOP;
 END;
 $$;
+
+-- RPC function to update sync_config with total player count
+CREATE OR REPLACE FUNCTION update_total_player_count () RETURNS TABLE (total_count bigint, updated_at timestamptz) LANGUAGE plpgsql security definer
+set
+  search_path = '' AS $$
+DECLARE
+  player_count bigint;
+BEGIN
+  -- Get the total count of players
+  SELECT COUNT(*) INTO player_count FROM public.players;
+  
+  -- Upsert the config value
+  INSERT INTO public.sync_config (config_key, config_value, updated_at)
+  VALUES ('total_player_count', player_count::text, NOW())
+  ON CONFLICT (config_key) 
+  DO UPDATE SET 
+    config_value = player_count::text,
+    updated_at = NOW();
+  
+  -- Return the count and timestamp
+  RETURN QUERY
+  SELECT 
+    player_count as total_count,
+    NOW() as updated_at;
+END;
+$$;

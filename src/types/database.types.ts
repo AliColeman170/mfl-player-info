@@ -156,6 +156,18 @@ export type Database = {
         }
         Relationships: []
       }
+      player_count: {
+        Row: {
+          count: number | null
+        }
+        Insert: {
+          count?: number | null
+        }
+        Update: {
+          count?: number | null
+        }
+        Relationships: []
+      }
       players: {
         Row: {
           age: number | null
@@ -837,6 +849,13 @@ export type Database = {
       update_sales_summary: {
         Args: Record<PropertyKey, never>
         Returns: number
+      }
+      update_total_player_count: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          total_count: number
+          updated_at: string
+        }[]
       }
     }
     Enums: {

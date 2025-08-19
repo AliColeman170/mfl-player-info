@@ -786,6 +786,10 @@ const importAllPlayers = createWorkflow(
       totalFailed,
     });
 
+    await context.run('update-total-player-count', async () => {
+      await supabase.rpc('update_total_player_count');
+    });
+
     // Mark workflow as completed
     await context.run('mark-workflow-complete', async () => {
       await supabase
@@ -1036,11 +1040,15 @@ const updateMarketValues = createWorkflow(
 
     const totalPlayers = await context.run('count-players', async () => {
       console.log('[STEP 3] Count Players');
-      const { count: totalPlayers } = await supabase
-        .from('players')
-        .select('*', { count: 'exact', head: true });
-      console.log(`[Market Values] Total players to process: ${totalPlayers}`);
-      return totalPlayers || 0;
+      const { data: config } = await supabase
+        .from('sync_config')
+        .select('config_key, config_value')
+        .eq('config_key', 'total_player_count')
+        .single();
+      console.log(
+        `[Market Values] Total players to process: ${config?.config_value}`
+      );
+      return config?.config_value ? parseInt(config.config_value) : 0;
     });
 
     if (!totalPlayers || totalPlayers === 0) return;
