@@ -156,48 +156,6 @@ export type Database = {
         }
         Relationships: []
       }
-      player_sync_metadata: {
-        Row: {
-          completed_at: string | null
-          current_page: number | null
-          error_message: string | null
-          id: number
-          last_player_id: number | null
-          started_at: string | null
-          status: string | null
-          sync_type: string
-          total_fetched: number | null
-          total_saved: number | null
-          updated_at: string | null
-        }
-        Insert: {
-          completed_at?: string | null
-          current_page?: number | null
-          error_message?: string | null
-          id?: number
-          last_player_id?: number | null
-          started_at?: string | null
-          status?: string | null
-          sync_type?: string
-          total_fetched?: number | null
-          total_saved?: number | null
-          updated_at?: string | null
-        }
-        Update: {
-          completed_at?: string | null
-          current_page?: number | null
-          error_message?: string | null
-          id?: number
-          last_player_id?: number | null
-          started_at?: string | null
-          status?: string | null
-          sync_type?: string
-          total_fetched?: number | null
-          total_saved?: number | null
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
       players: {
         Row: {
           age: number | null
@@ -563,48 +521,6 @@ export type Database = {
         }
         Relationships: []
       }
-      sales_sync_metadata: {
-        Row: {
-          completed_at: string | null
-          current_page: number | null
-          error_message: string | null
-          id: number
-          last_listing_id: number | null
-          started_at: string | null
-          status: string | null
-          sync_type: string
-          total_fetched: number | null
-          total_saved: number | null
-          updated_at: string | null
-        }
-        Insert: {
-          completed_at?: string | null
-          current_page?: number | null
-          error_message?: string | null
-          id?: number
-          last_listing_id?: number | null
-          started_at?: string | null
-          status?: string | null
-          sync_type?: string
-          total_fetched?: number | null
-          total_saved?: number | null
-          updated_at?: string | null
-        }
-        Update: {
-          completed_at?: string | null
-          current_page?: number | null
-          error_message?: string | null
-          id?: number
-          last_listing_id?: number | null
-          started_at?: string | null
-          status?: string | null
-          sync_type?: string
-          total_fetched?: number | null
-          total_saved?: number | null
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
       sync_config: {
         Row: {
           config_key: string
@@ -629,135 +545,6 @@ export type Database = {
           description?: string | null
           id?: number
           updated_at?: string | null
-        }
-        Relationships: []
-      }
-      sync_executions: {
-        Row: {
-          completed_at: string | null
-          duration_ms: number | null
-          error_message: string | null
-          execution_type: string
-          id: number
-          progress_data: Json | null
-          records_failed: number | null
-          records_processed: number | null
-          stage_name: string
-          started_at: string | null
-          status: string
-          triggered_by: string | null
-        }
-        Insert: {
-          completed_at?: string | null
-          duration_ms?: number | null
-          error_message?: string | null
-          execution_type: string
-          id?: number
-          progress_data?: Json | null
-          records_failed?: number | null
-          records_processed?: number | null
-          stage_name: string
-          started_at?: string | null
-          status?: string
-          triggered_by?: string | null
-        }
-        Update: {
-          completed_at?: string | null
-          duration_ms?: number | null
-          error_message?: string | null
-          execution_type?: string
-          id?: number
-          progress_data?: Json | null
-          records_failed?: number | null
-          records_processed?: number | null
-          stage_name?: string
-          started_at?: string | null
-          status?: string
-          triggered_by?: string | null
-        }
-        Relationships: []
-      }
-      sync_stages: {
-        Row: {
-          created_at: string | null
-          description: string | null
-          error_message: string | null
-          id: number
-          is_one_time: boolean | null
-          last_run_at: string | null
-          last_success_at: string | null
-          progress: Json | null
-          stage_name: string
-          stage_order: number
-          status: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          description?: string | null
-          error_message?: string | null
-          id?: number
-          is_one_time?: boolean | null
-          last_run_at?: string | null
-          last_success_at?: string | null
-          progress?: Json | null
-          stage_name: string
-          stage_order: number
-          status?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          description?: string | null
-          error_message?: string | null
-          id?: number
-          is_one_time?: boolean | null
-          last_run_at?: string | null
-          last_success_at?: string | null
-          progress?: Json | null
-          stage_name?: string
-          stage_order?: number
-          status?: string | null
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
-      sync_status: {
-        Row: {
-          completed_at: string | null
-          created_at: string | null
-          error_message: string | null
-          failed_players: number | null
-          id: number
-          started_at: string | null
-          status: string
-          sync_type: string
-          synced_players: number | null
-          total_players: number | null
-        }
-        Insert: {
-          completed_at?: string | null
-          created_at?: string | null
-          error_message?: string | null
-          failed_players?: number | null
-          id?: number
-          started_at?: string | null
-          status: string
-          sync_type: string
-          synced_players?: number | null
-          total_players?: number | null
-        }
-        Update: {
-          completed_at?: string | null
-          created_at?: string | null
-          error_message?: string | null
-          failed_players?: number | null
-          id?: number
-          started_at?: string | null
-          status?: string
-          sync_type?: string
-          synced_players?: number | null
-          total_players?: number | null
         }
         Relationships: []
       }
@@ -976,10 +763,6 @@ export type Database = {
           trimmed_avg_price: number
           trimmed_sale_count: number
         }[]
-      }
-      get_sync_status: {
-        Args: Record<PropertyKey, never>
-        Returns: Json
       }
       get_top_owners: {
         Args: { limit_count?: number }
