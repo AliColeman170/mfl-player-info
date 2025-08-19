@@ -790,23 +790,6 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: number
       }
-      test_market_value_updates: {
-        Args: { test_count?: number }
-        Returns: {
-          age: number
-          confidence: string
-          first_name: string
-          last_name: string
-          new_method: string
-          new_value: number
-          old_method: string
-          old_value: number
-          overall: number
-          player_id: number
-          player_position: string
-          sample_size: number
-        }[]
-      }
       test_pricing_model_accuracy: {
         Args: { days_back?: number; sample_size?: number }
         Returns: {
@@ -842,7 +825,6 @@ export type Database = {
         Returns: {
           error_count: number
           processed_count: number
-          total_players: number
           updated_count: number
         }[]
       }

@@ -1475,102 +1475,6 @@ BEGIN
 END;
 $$;
 
--- Efficient batch update function for market values
-CREATE OR REPLACE FUNCTION update_players_market_values_batch (
-  batch_size INTEGER DEFAULT 1000,
-  offset_start INTEGER DEFAULT 0
-) RETURNS TABLE (
-  updated_count INTEGER,
-  batch_start INTEGER,
-  batch_end INTEGER
-) LANGUAGE plpgsql security definer
-set
-  search_path = '' AS $$
-DECLARE
-  player_record RECORD;
-  current_count INTEGER := 0;
-  start_id INTEGER;
-  end_id INTEGER;
-BEGIN
-  -- Get the batch of players to update
-  FOR player_record IN 
-    SELECT id FROM public.players 
-    WHERE overall IS NOT NULL 
-    ORDER BY id
-    LIMIT batch_size OFFSET offset_start
-  LOOP
-    -- Track start and end IDs
-    IF current_count = 0 THEN
-      start_id := player_record.id;
-    END IF;
-    end_id := player_record.id;
-    
-    -- Update this player
-    PERFORM public.update_player_market_value(player_record.id);
-    current_count := current_count + 1;
-  END LOOP;
-  
-  -- Return results
-  RETURN QUERY SELECT current_count, start_id, end_id;
-END;
-$$;
-
--- Test function to update just a few players for validation
-CREATE OR REPLACE FUNCTION test_market_value_updates (test_count INTEGER DEFAULT 10) RETURNS TABLE (
-  player_id BIGINT,
-  first_name TEXT,
-  last_name TEXT,
-  overall INTEGER,
-  age INTEGER,
-  player_position TEXT,
-  old_method TEXT,
-  new_method TEXT,
-  old_value INTEGER,
-  new_value INTEGER,
-  sample_size INTEGER,
-  confidence TEXT
-) LANGUAGE plpgsql security definer
-set
-  search_path = '' AS $$
-DECLARE
-  player_record RECORD;
-BEGIN
-  -- Get a sample of players and show before/after comparison
-  FOR player_record IN 
-    SELECT 
-      p.id, p.first_name, p.last_name, p.overall, p.age, p.primary_position,
-      p.market_value_method as old_method_val,
-      p.market_value_estimate as old_estimate
-    FROM public.players p
-    WHERE p.overall IS NOT NULL 
-    AND p.overall BETWEEN 50 AND 80  -- Focus on mid-range players for testing
-    ORDER BY RANDOM()
-    LIMIT test_count
-  LOOP
-    -- Store old values and update the player
-    PERFORM public.update_player_market_value(player_record.id);
-    
-    -- Return comparison data
-    RETURN QUERY
-    SELECT 
-      player_record.id,
-      player_record.first_name,
-      player_record.last_name,
-      player_record.overall,
-      player_record.age,
-      player_record.primary_position,
-      player_record.old_method_val,
-      p.market_value_method,
-      player_record.old_estimate,
-      p.market_value_estimate,
-      p.market_value_sample_size,
-      p.market_value_confidence
-    FROM public.players p
-    WHERE p.id = player_record.id;
-  END LOOP;
-END;
-$$;
-
 -- Trigger function to automatically update market value when player data changes
 CREATE OR REPLACE FUNCTION trigger_update_player_market_value () RETURNS TRIGGER LANGUAGE plpgsql
 set
@@ -1847,13 +1751,6 @@ BEGIN
 END;
 $$;
 
--- Trigger removed to improve player import performance
--- Market values are now calculated via API endpoints instead of automatic triggers
--- Drop existing functions with different signatures
-DROP FUNCTION IF EXISTS update_players_market_values_batch (integer, integer);
-
-DROP FUNCTION IF EXISTS test_market_value_updates (integer);
-
 -- Ultra-fast bulk update function using single SQL operation per chunk
 CREATE OR REPLACE FUNCTION update_players_market_values_batch (
   batch_size INTEGER DEFAULT 5000,
@@ -1861,18 +1758,14 @@ CREATE OR REPLACE FUNCTION update_players_market_values_batch (
 ) RETURNS TABLE (
   processed_count INTEGER,
   updated_count INTEGER,
-  error_count INTEGER,
-  total_players INTEGER
+  error_count INTEGER
 ) LANGUAGE plpgsql security definer
 set
   search_path = '' AS $$
 DECLARE
-  total INTEGER;
   updated INTEGER := 0;
   processed INTEGER := 0;
 BEGIN
-  -- Get total count
-  SELECT COUNT(*) INTO total FROM public.players WHERE overall IS NOT NULL;
   
   -- Single bulk UPDATE statement using CTE for maximum performance
   WITH batch_players AS (
@@ -1916,68 +1809,7 @@ BEGIN
   ) batch_count;
   
   -- Return results
-  RETURN QUERY SELECT processed, updated, 0, total;
-END;
-$$;
-
--- Test function to update just a few players for validation (fixed column name)
-CREATE OR REPLACE FUNCTION test_market_value_updates (test_count INTEGER DEFAULT 10) RETURNS TABLE (
-  player_id BIGINT,
-  first_name TEXT,
-  last_name TEXT,
-  overall INTEGER,
-  age INTEGER,
-  player_position TEXT,
-  old_method TEXT,
-  new_method TEXT,
-  old_value INTEGER,
-  new_value INTEGER,
-  sample_size INTEGER,
-  confidence TEXT
-) LANGUAGE plpgsql security definer
-set
-  search_path = '' AS $$
-DECLARE
-  player_record RECORD;
-BEGIN
-  -- Get a sample of players and their current values
-  FOR player_record IN
-    SELECT 
-      p.id,
-      p.first_name,
-      p.last_name,
-      p.overall,
-      p.age,
-      p.primary_position AS player_position,
-      p.market_value_method AS old_method_val,
-      p.market_value_estimate AS old_estimate
-    FROM public.players p
-    WHERE p.overall IS NOT NULL 
-    AND p.overall BETWEEN 50 AND 80  -- Focus on mid-range players for testing
-    ORDER BY RANDOM()
-    LIMIT test_count
-  LOOP
-    -- Store old values and update the player
-    PERFORM public.update_player_market_value(player_record.id);
-    
-    -- Return comparison data
-    RETURN QUERY
-    SELECT 
-      player_record.id,
-      player_record.first_name,
-      player_record.last_name,
-      player_record.overall,
-      player_record.age,
-      player_record.player_position,
-      player_record.old_method_val,
-      p.market_value_method,
-      player_record.old_estimate,
-      p.market_value_estimate,
-      p.market_value_sample_size,
-      p.market_value_confidence
-    FROM public.players p
-    WHERE p.id = player_record.id;
-  END LOOP;
+  RETURN QUERY SELECT processed, updated, 0;
 END;
 $$;
 
