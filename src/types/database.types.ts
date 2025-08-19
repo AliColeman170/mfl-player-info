@@ -823,9 +823,7 @@ export type Database = {
       update_players_market_values_batch: {
         Args: { batch_size?: number; offset_val?: number }
         Returns: {
-          error_count: number
           processed_count: number
-          updated_count: number
         }[]
       }
       update_sales_summary: {

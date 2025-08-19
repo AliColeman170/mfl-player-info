@@ -1739,11 +1739,7 @@ $$;
 CREATE OR REPLACE FUNCTION update_players_market_values_batch (
   batch_size INTEGER DEFAULT 5000,
   offset_val INTEGER DEFAULT 0
-) RETURNS TABLE (
-  processed_count INTEGER,
-  updated_count INTEGER,
-  error_count INTEGER
-) LANGUAGE plpgsql security definer
+) RETURNS TABLE (processed_count INTEGER) LANGUAGE plpgsql security definer
 set
   search_path = '' AS $$
 DECLARE
