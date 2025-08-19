@@ -13,7 +13,7 @@ import {
   MAX_SALES_LIMIT,
   DEV_CUT_OFF,
   DEV_SALES_CUT_OFF,
-  SALES_BATCH_SIZE,
+  MARKET_VALUE_BATCH_SIZE,
 } from '@/lib/upstash-workflow-helpers';
 import { supabaseAdmin as supabase } from '@/lib/supabase/admin';
 
@@ -1062,10 +1062,10 @@ const updateMarketValues = createWorkflow(
         async () => {
           console.log('[STEP 4] Update Players Market Values');
           console.log(
-            `[Market Values] Processing batch starting at offset ${currentOffset} (batch size: ${SALES_BATCH_SIZE})`
+            `[Market Values] Processing batch starting at offset ${currentOffset} (batch size: ${MARKET_VALUE_BATCH_SIZE})`
           );
           return await supabase.rpc('update_players_market_values_batch', {
-            batch_size: SALES_BATCH_SIZE,
+            batch_size: MARKET_VALUE_BATCH_SIZE,
             offset_val: currentOffset,
           });
         }
@@ -1097,9 +1097,9 @@ const updateMarketValues = createWorkflow(
       });
 
       // If we processed fewer players than the batch size, we're done
-      if (processed_count < SALES_BATCH_SIZE) {
+      if (processed_count < MARKET_VALUE_BATCH_SIZE) {
         console.log(
-          `[Market Values] Processed ${processed_count} < ${SALES_BATCH_SIZE}, reached end of players`
+          `[Market Values] Processed ${processed_count} < ${MARKET_VALUE_BATCH_SIZE}, reached end of players`
         );
         break;
       }
