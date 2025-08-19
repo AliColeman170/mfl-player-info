@@ -1,3 +1,15 @@
+alter role anon
+set
+  statement_timeout = '30s';
+
+alter role authenticated
+set
+  statement_timeout = '30s';
+
+alter role service_role
+set
+  statement_timeout = '5min';
+
 -- RPC function to get total sales volume across all sales
 CREATE OR REPLACE FUNCTION get_total_sales_volume () RETURNS BIGINT LANGUAGE plpgsql
 SET
@@ -1736,7 +1748,6 @@ set
   search_path = '' AS $$
 DECLARE
   updated INTEGER := 0;
-  processed INTEGER := 0;
 BEGIN
   
   -- Single bulk UPDATE statement using CTE for maximum performance
@@ -1772,16 +1783,8 @@ BEGIN
   -- Get the row count from the update
   GET DIAGNOSTICS updated = ROW_COUNT;
   
-  -- Count how many players we processed
-  SELECT COUNT(*) INTO processed FROM (
-    SELECT id FROM public.players 
-    WHERE overall IS NOT NULL
-    ORDER BY id
-    LIMIT batch_size OFFSET offset_val
-  ) batch_count;
-  
   -- Return results
-  RETURN QUERY SELECT processed, updated, 0;
+  RETURN QUERY SELECT updated;
 END;
 $$;
 

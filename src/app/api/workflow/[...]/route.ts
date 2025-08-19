@@ -1021,7 +1021,6 @@ const updateMarketValues = createWorkflow(
     });
 
     let totalProcessed = 0;
-    let totalFailed = 0;
     const errors: string[] = [];
 
     await context.run('update-market-multipliers', async () => {
@@ -1077,10 +1076,9 @@ const updateMarketValues = createWorkflow(
       }
 
       const result = batchResults[0];
-      const { processed_count, updated_count, error_count } = result;
+      const { processed_count } = result;
 
-      totalProcessed += updated_count;
-      totalFailed += error_count;
+      totalProcessed += processed_count;
 
       // Update progress in database
       await context.run(`update-progress-${totalProcessed}`, async () => {
@@ -1090,7 +1088,6 @@ const updateMarketValues = createWorkflow(
             progress: {
               phase: 'processing',
               totalProcessed,
-              totalFailed,
             },
           })
           .eq('workflow_run_id', workflowRunId);
@@ -1109,7 +1106,7 @@ const updateMarketValues = createWorkflow(
 
     const success = errors.length === 0;
     console.log(
-      `[Market Values] Market values update completed. Success: ${success}, Processed: ${totalProcessed}, Failed: ${totalFailed}`
+      `[Market Values] Market values update completed. Success: ${success}, Processed: ${totalProcessed}`
     );
 
     // Mark workflow as completed
@@ -1122,7 +1119,6 @@ const updateMarketValues = createWorkflow(
           progress: {
             phase: 'completed',
             totalProcessed,
-            totalFailed,
             progressPercent: 100,
           },
         })
@@ -1132,7 +1128,6 @@ const updateMarketValues = createWorkflow(
     return {
       success,
       recordsProcessed: totalProcessed,
-      recordsFailed: totalFailed,
     };
   },
   {

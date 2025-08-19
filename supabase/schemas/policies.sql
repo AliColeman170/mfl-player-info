@@ -84,3 +84,19 @@ SELECT
 
 -- Only allow service role to insert/update/delete players (sync operations)
 CREATE POLICY "Enable all operations for service role" ON "public"."players" FOR ALL TO "service_role" USING (true);
+
+CREATE POLICY "Enable select for users based on wallet address" ON "public"."upstash_workflow_executions" FOR
+SELECT
+    TO "authenticated" USING (
+        (
+            SELECT
+                (
+                    (
+                        (
+                            select
+                                auth.jwt ()
+                        ) -> 'app_metadata'::"text"
+                    ) ->> 'address'::"text"
+                )
+        ) = '0xb6fbc6072df85634'
+    );
