@@ -1038,8 +1038,7 @@ const updateMarketValues = createWorkflow(
       console.log('[STEP 3] Count Players');
       const { count: totalPlayers } = await supabase
         .from('players')
-        .select('*', { count: 'exact', head: true })
-        .not('overall', 'is', null);
+        .select('*', { count: 'exact', head: true });
       console.log(`[Market Values] Total players to process: ${totalPlayers}`);
       return totalPlayers || 0;
     });
