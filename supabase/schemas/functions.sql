@@ -1761,9 +1761,13 @@ BEGIN
       public.calculate_comprehensive_player_value(bp.overall, bp.age, bp.primary_position) as estimated_value,
       -- Simple confidence and method for bulk operation
       CASE 
-        WHEN bp.overall >= 85 AND bp.age <= 25 THEN 'High'
-        WHEN bp.overall >= 75 OR bp.age <= 30 THEN 'Medium' 
-        ELSE 'Low'
+        WHEN bp.overall >= 90 THEN 'Low'
+        WHEN bp.overall >= 85 AND bp.age <= 22 THEN 'Low'
+        WHEN bp.overall >= 85 AND bp.age >= 30 THEN 'Low'
+        WHEN bp.overall >= 85 THEN 'Medium'
+        WHEN bp.age <= 22 THEN 'Medium' 
+        WHEN bp.age >= 30 THEN 'Medium'
+        ELSE 'High'
       END as confidence_level,
       'Comprehensive formula + market multipliers' as method_used
     FROM batch_players bp
