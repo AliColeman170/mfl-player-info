@@ -12,11 +12,11 @@ export async function GET(req: NextRequest) {
 
   // Font
   const interBold = fetch(
-    new URL('./assets/fonts/Inter-Bold.ttf', process.env.NEXT_SITE_URL)
+    new URL('./assets/fonts/Inter-Bold.ttf', process.env.NEXT_PUBLIC_SITE_URL)
   ).then((res) => res.arrayBuffer());
 
   const defaultImage = await fetch(
-    new URL('./assets/images/placeholder.png', process.env.NEXT_SITE_URL)
+    new URL('./assets/images/placeholder.png', process.env.NEXT_PUBLIC_SITE_URL)
   ).then((res) => res.arrayBuffer());
 
   return new ImageResponse(
@@ -71,6 +71,7 @@ export async function GET(req: NextRequest) {
           </div>
           <div tw='flex w-full items-end justify-between px-24'>
             <div tw='flex relative'>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 tw={`${player1 ? '-mt-8' : ''}`}
                 width={`${player1 ? '328' : '314'}`}
@@ -91,6 +92,7 @@ export async function GET(req: NextRequest) {
             </div>
             <div tw='flex items-center h-full text-white text-7xl'>v</div>
             <div tw='flex relative'>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 tw={`${player2 ? '-mt-8' : ''}`}
                 width={`${player2 ? '328' : '314'}`}

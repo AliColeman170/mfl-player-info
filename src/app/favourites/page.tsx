@@ -2,7 +2,7 @@ import { Favourites } from '@/components/Favourites';
 import { NotLoggedIn } from '@/components/Favourites/NotLoggedIn';
 import { Suspense } from 'react';
 import { Metadata } from 'next';
-import { createClient } from '@/utils/supabase/server';
+import { createClient } from '@/lib/supabase/server';
 import { getUser } from '@/data/auth';
 import { SpinnerIcon } from '@/components/SpinnerIcon';
 

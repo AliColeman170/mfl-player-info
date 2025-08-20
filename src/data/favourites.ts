@@ -10,13 +10,13 @@ export const getFavouriteByPlayer = cache(
   async (supabase: SupabaseClient<Database>, player: Player) => {
     const user = await getUser(supabase);
 
-    if (!user?.user_metadata.address) return null;
+    if (!user?.app_metadata.address) return null;
 
     const { data: favourite } = await supabase
       .from('favourites')
       .select()
       .eq('player_id', player.id)
-      .eq('wallet_address', user.user_metadata.address)
+      .eq('wallet_address', user.app_metadata.address)
       .maybeSingle();
 
     return favourite;
@@ -27,12 +27,12 @@ export const getFavourites = cache(
   async (supabase: SupabaseClient<Database>) => {
     const user = await getUser(supabase);
 
-    if (!user?.user_metadata.address) return [];
+    if (!user?.app_metadata.address) return [];
 
     const { data: favourites } = await supabase
       .from('favourites')
       .select()
-      .eq('wallet_address', user.user_metadata.address);
+      .eq('wallet_address', user.app_metadata.address);
 
     return favourites;
   }

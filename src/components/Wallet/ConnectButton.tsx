@@ -7,7 +7,7 @@ import { SpinnerIcon } from '../SpinnerIcon';
 import { usePathname } from 'next/navigation';
 import { login } from '@/actions/auth';
 import { toast } from 'sonner';
-import { Button } from '../UI/Button';
+import { Button } from '../UI/button';
 
 export function ConnectButton({ showText = false }) {
   let [isPending, startTransition] = useTransition();
@@ -25,7 +25,7 @@ export function ConnectButton({ showText = false }) {
   }
 
   return (
-    <Button onClick={handleLogin} type='button' size='lg'>
+    <Button onClick={handleLogin} type='button'>
       {isPending ? <SpinnerIcon className='animate-spin' /> : <WalletIcon />}
       {showText && <span className='ml-2'>Connect Wallet</span>}
     </Button>

@@ -1,5 +1,5 @@
 import { Database } from '@/types/database.types';
-import { createClient } from '@/utils/supabase/server';
+import { createClient } from '@/lib/supabase/server';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { cache } from 'react';
 import { getUserProfile } from './user';
@@ -18,7 +18,7 @@ export const getAuthUserProfile = async () => {
 
   if (!user) return null;
 
-  const userProfile = await getUserProfile(user?.user_metadata.address);
+  const userProfile = await getUserProfile(user?.app_metadata.address);
 
   if (!userProfile) return null;
 

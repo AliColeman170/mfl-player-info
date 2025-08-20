@@ -2,28 +2,35 @@ import Link from 'next/link';
 import { MFLIcon } from '../MFLIcon';
 import { Wallet } from '../Wallet';
 import { Suspense } from 'react';
-import { Button } from '../UI/Button';
-import { SpinnerIcon } from '../SpinnerIcon';
+import { Button } from '../UI/button';
+import { CommandMenu } from '../Search/CommandMenu';
+import { Loader2Icon } from 'lucide-react';
 
 export function Header() {
   return (
     <header className='border-border mb-8 border-b'>
-      <div className='mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 sm:py-6 lg:px-8'>
-        <div className='flex items-center justify-between sm:grid sm:grid-cols-[50px_1fr_50px]'>
-          <div className='hidden sm:block'></div>
-          <div className='flex flex-col sm:flex-row sm:items-center sm:justify-center sm:space-x-4'>
-            <Link href='/'>
-              <MFLIcon className='w-16 sm:w-24' />
-            </Link>
-            <h1 className='border-foreground mt-0.5 text-lg leading-4 font-bold tracking-tight sm:mt-0 sm:border-l-2 sm:pl-4 sm:text-2xl'>
-              <Link href='/'>Player Info</Link>
-            </h1>
+      <div className='mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 lg:px-8'>
+        <div className='grid grid-cols-[auto_1fr_auto] items-center justify-start gap-6 sm:grid-cols-[1fr_auto_auto] lg:grid-cols-[60px_1fr_60px]'>
+          <div className='flex items-center justify-start'>
+            <div className='relative isolate flex flex-col items-center justify-start gap-0.5'>
+              <Link href='/' className='absolute inset-0 z-1 size-full'></Link>
+              <MFLIcon className='h-4 translate-x-0.5' />
+              <h1 className='text-foreground text-xs/3 font-semibold italic'>
+                <Link href='/'>Player Info</Link>
+              </h1>
+            </div>
           </div>
-          <div>
+
+          {/* Search - hidden on mobile, shown on tablet+ */}
+          <div className='mx-auto w-full max-w-xl flex-1'>
+            <CommandMenu />
+          </div>
+
+          <div className='flex items-center gap-4'>
             <Suspense
               fallback={
-                <Button size='lg' disabled>
-                  <SpinnerIcon className='animate-spin' />
+                <Button disabled>
+                  <Loader2Icon className='animate-spin' />
                 </Button>
               }
             >

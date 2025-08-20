@@ -15,7 +15,7 @@ export function PositionalFamiliarityToggleWrapper({
   player2: Player;
 }) {
   const [enablePositionalFamiliarity, setEnablePositionalFamiliarity] =
-    useState<boolean>(false);
+    useState<boolean>(true);
 
   return (
     <>
@@ -40,7 +40,7 @@ export function PositionalFamiliarityToggleWrapper({
               aria-hidden='true'
               className={cn(
                 enablePositionalFamiliarity ? 'translate-x-5' : 'translate-x-0',
-                'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out'
+                'pointer-events-none inline-block size-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out'
               )}
             />
           </Switch>

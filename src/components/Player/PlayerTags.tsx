@@ -1,7 +1,7 @@
 import { getFavouriteByPlayer } from '@/data/favourites';
 import { TagsList } from '../Tags/TagsList';
 import { Player } from '@/types/global.types';
-import { createClient } from '@/utils/supabase/server';
+import { createClient } from '@/lib/supabase/server';
 
 export async function PlayerTags({ player }: { player: Player }) {
   const supabase = await createClient();
@@ -18,7 +18,6 @@ export async function PlayerTags({ player }: { player: Player }) {
         <TagsList
           playerId={player.id}
           tags={favourite.tags}
-          isFavourite={favourite.is_favourite}
           wrap={true}
         />
       </dd>

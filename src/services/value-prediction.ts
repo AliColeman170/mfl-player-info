@@ -1,7 +1,13 @@
 import 'server-only';
 import { Player } from '@/types/global.types';
-import { fetchRecentSalesFeed } from '@/lib/pagination';
+import { getRecentSalesFromDB } from '@/data/sales';
+import { createClient } from '@supabase/supabase-js';
 import { analyzeMarketPrices, transpose, multiply, multiplyVector, inverse } from '@/utils/statistics';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
 /**
  * Training data point for regression model
@@ -215,16 +221,20 @@ async function buildTrainingDataset(): Promise<TrainingDataPoint[]> {
   try {
     console.log('Building regression training dataset...');
     
-    // Fetch recent sales to get price data
-    const recentSales = await fetchRecentSalesFeed({ maxPages: 10, daysBack: 60 });
+    // Fetch recent sales from database instead of API
+    const recentSales = await getRecentSalesFromDB({ 
+      limit: 1000, 
+      daysBack: 60, 
+      minPrice: 1 
+    });
     console.log(`Found ${recentSales.length} recent sales for training`);
 
     // Group sales by player ID and calculate average prices
     const playerPrices = new Map<number, number[]>();
     
     recentSales.forEach(sale => {
-      if (sale.player?.id && sale.price > 0) {
-        const playerId = sale.player.id;
+      if (sale.player_id && sale.price > 0) {
+        const playerId = sale.player_id;
         if (!playerPrices.has(playerId)) {
           playerPrices.set(playerId, []);
         }
@@ -243,26 +253,41 @@ async function buildTrainingDataset(): Promise<TrainingDataPoint[]> {
 
     console.log(`Found ${playerAveragePrices.size} players with reliable price data`);
 
+    // Get player IDs that have sufficient sales data
+    const playerIds = Array.from(playerAveragePrices.keys());
+    
+    // Fetch player data from database in batches
+    const { data: playersWithData, error } = await supabase
+      .from('players')
+      .select(`
+        id, overall, age, pace, shooting, passing, dribbling, 
+        defense, physical, goalkeeping, primary_position
+      `)
+      .in('id', playerIds);
+    
+    if (error) {
+      console.error('Error fetching player data:', error);
+      throw new Error('Failed to fetch player data for regression');
+    }
+    
     // Create training data points
     const trainingData: TrainingDataPoint[] = [];
     
     for (const [playerId, avgPrice] of playerAveragePrices) {
-      // Find the player from the sales data
-      const saleWithPlayer = recentSales.find(sale => sale.player?.id === playerId);
-      if (saleWithPlayer?.player) {
-        const player = saleWithPlayer.player;
-        
+      // Find the player data
+      const playerData = playersWithData?.find((p: any) => p.id === playerId);
+      if (playerData) {
         trainingData.push({
-          overall: player.metadata.overall,
-          age: player.metadata.age,
-          pace: player.metadata.pace,
-          shooting: player.metadata.shooting,
-          passing: player.metadata.passing,
-          dribbling: player.metadata.dribbling,
-          defense: player.metadata.defense,
-          physical: player.metadata.physical,
-          goalkeeping: player.metadata.goalkeeping,
-          position: player.metadata.positions[0],
+          overall: playerData.overall || 0,
+          age: playerData.age || 0,
+          pace: playerData.pace || 0,
+          shooting: playerData.shooting || 0,
+          passing: playerData.passing || 0,
+          dribbling: playerData.dribbling || 0,
+          defense: playerData.defense || 0,
+          physical: playerData.physical || 0,
+          goalkeeping: playerData.goalkeeping || 0,
+          position: playerData.primary_position || 'ST',
           actualPrice: avgPrice,
         });
       }

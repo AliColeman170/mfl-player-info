@@ -7,7 +7,7 @@ type NonGKPlayerStats = Omit<PlayerStats, 'goalkeeping'>;
 
 type StatKey = keyof NonGKPlayerStats;
 
-export async function PlayerStatsComparison({
+export function PlayerStatsComparison({
   player1,
   player2,
 }: {

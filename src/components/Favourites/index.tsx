@@ -1,38 +1,23 @@
-import { getPlayerPositionRatings } from '@/utils/helpers';
-import { getFavourites } from '@/data/favourites';
-import { getPlayerById } from '@/data/players';
-import { PlayerWithFavouriteData } from '@/types/global.types';
-import { TableWrapper } from '../Table/TableWrapper';
-import { createClient } from '@/utils/supabase/server';
+'use client';
 
-async function getFavouritesData() {
-  const supabase = await createClient();
-  const favourites = await getFavourites(supabase);
+import { PlayersTableContainer } from '@/app/players-table/components/PlayersTableContainer';
+import { TableControlsProvider } from '@/app/players-table/contexts/TableControlsContext';
+import { useSearchParams } from 'next/navigation';
+import { useEffect } from 'react';
 
-  if (!favourites) return [];
+export function Favourites() {
+  const searchParams = useSearchParams();
+  
+  // Set favourites filter when component mounts
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams);
+    params.set('favourites', 'favourites');
+    window.history.replaceState(null, '', `?${params.toString()}`);
+  }, [searchParams]);
 
-  const players = await Promise.all(
-    favourites.map((fav) => getPlayerById(fav.player_id))
+  return (
+    <TableControlsProvider>
+      <PlayersTableContainer />
+    </TableControlsProvider>
   );
-
-  const playersWithFavData: PlayerWithFavouriteData[] = players.map(
-    (player) => {
-      const fave = favourites.find((f) => f.player_id == player.id);
-
-      return {
-        ...player,
-        position_ratings: getPlayerPositionRatings(player, true),
-        is_favourite: fave!.is_favourite,
-        tags: fave!.tags,
-      };
-    }
-  );
-
-  return playersWithFavData;
-}
-
-export async function Favourites() {
-  const favourites = await getFavouritesData();
-
-  return <TableWrapper players={favourites} />;
 }

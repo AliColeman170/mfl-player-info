@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/sync-v2/full-sync?type=daily",
+      "schedule": "0 2 * * *"
+    }
+  ]
+}

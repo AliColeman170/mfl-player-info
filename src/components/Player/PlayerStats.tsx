@@ -1,7 +1,7 @@
 import type { Player, PlayerStats, StatKey } from '@/types/global.types';
-import { cn, getRarityClassNames } from '@/utils/helpers';
+import { cn } from '@/utils/helpers';
 import { StyledRatingValue } from './StyledRatingValue';
-import { Button } from '../UI/Button';
+import { Button } from '../UI/button';
 import { MinusIcon, PlusIcon } from '@heroicons/react/20/solid';
 
 export function PlayerStatsTable({
@@ -26,7 +26,7 @@ export function PlayerStatsTable({
         return (
           <div
             key={key}
-            className='border-border text-muted-foreground border-b px-1.5 py-1 text-center text-sm font-semibold tracking-wide whitespace-nowrap uppercase first:pl-0 last:pr-0 sm:px-2 sm:text-base'
+            className='border-border text-foreground/80 border-b px-1.5 py-1 text-center text-sm font-semibold tracking-wide whitespace-nowrap uppercase'
           >
             {key.substring(0, 3)}
           </div>
@@ -38,29 +38,16 @@ export function PlayerStatsTable({
         return (
           <div
             key={`${key}-${val}`}
-            className='my-4 flex flex-col items-center justify-start gap-1.5 px-1'
+            className='flex flex-col items-center justify-start gap-1.5 px-1 pt-2'
           >
-            <StyledRatingValue rating={val} />
-            {isTrainingMode && (
-              <div className='grid grid-cols-2 justify-center gap-x-1 gap-y-1.5'>
-                <Button
-                  variant='secondary'
-                  size='sm'
-                  onClick={() => minusStatValue(key as StatKey)}
-                >
-                  <MinusIcon className='size-4' />
-                </Button>
-                <Button
-                  variant='secondary'
-                  size='sm'
-                  onClick={() => plusStatValue(key as StatKey)}
-                >
-                  <PlusIcon className='size-4' />
-                </Button>
-                <div className='col-span-2 flex justify-center'>
+            <div className='relative'>
+              <StyledRatingValue rating={val} size='lg' />
+
+              {diff > 0 ? (
+                <div className='absolute -top-1 right-0 flex translate-x-1/2 items-center justify-center'>
                   <div
                     className={cn(
-                      'rounded-md px-2 py-0.5 text-[11px]',
+                      'rounded-sm px-1 text-[10px]/3.5 tabular-nums',
                       diff > 0 && 'bg-green-600 text-green-50',
                       diff === 0 && 'bg-secondary text-secondary-foreground',
                       diff < 0 && 'bg-red-500 text-white'
@@ -70,11 +57,31 @@ export function PlayerStatsTable({
                     {diff}
                   </div>
                 </div>
+              ) : null}
+            </div>
+            {isTrainingMode && (
+              <div className='grid grid-cols-2 justify-center gap-x-1 gap-y-2'>
+                <Button
+                  variant='secondary'
+                  size='sm'
+                  className='h-6 has-[>svg]:px-2'
+                  onClick={() => minusStatValue(key as StatKey)}
+                >
+                  <MinusIcon className='size-3' />
+                </Button>
+                <Button
+                  variant='secondary'
+                  size='sm'
+                  className='h-6 has-[>svg]:px-2'
+                  onClick={() => plusStatValue(key as StatKey)}
+                >
+                  <PlusIcon className='size-3' />
+                </Button>
                 {diff !== 0 && (
                   <Button
                     variant='link'
                     onClick={() => resetStatValue(key as StatKey)}
-                    className='col-span-2 h-auto py-0.5 text-xs'
+                    className='col-span-2 h-auto py-0 text-xs'
                   >
                     Reset
                   </Button>

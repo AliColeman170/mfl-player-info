@@ -6,11 +6,11 @@ import {
 } from '@heroicons/react/20/solid';
 import { SpinnerIcon } from '../SpinnerIcon';
 import { Suspense } from 'react';
-import { FavouriteButton } from './FavouriteButton';
+import { ToggleFavouriteButton } from '../Favourites/ToggleFavouriteButton';
 import { ForSale } from './ForSale';
 import { PlayerContract } from './PlayerContract';
 import { Player } from '@/types/global.types';
-import { Button } from '../UI/Button';
+import { Button } from '../UI/button';
 
 function LoadingFavouriteButton() {
   return (
@@ -33,14 +33,14 @@ export function ImageCard({ player }: { player: Player }) {
         priority
       />
       <div className='mt-3 flex flex-col items-center justify-center gap-1'>
-        <PlayerContract player={player} />
+        <PlayerContract club={player.activeContract?.club} />
         <Suspense>
           <ForSale player={player} />
         </Suspense>
       </div>
       <div className='mt-4 flex items-center justify-center space-x-1.5'>
         <Suspense fallback={<LoadingFavouriteButton />}>
-          <FavouriteButton player={player} />
+          <ToggleFavouriteButton player={player} isFavourite={false} variant="secondary" />
         </Suspense>
         <Button asChild size='sm' variant='secondary'>
           <Link
