@@ -1,6 +1,11 @@
 import { Suspense } from 'react';
 import { Skeleton } from '@/components/UI/skeleton';
-import { getMarketOverview } from '@/data/dashboard';
+import {
+  getContractedPlayers,
+  getTotalPlayers,
+  getTotalSalesCount,
+  getTotalSalesVolume,
+} from '@/data/dashboard';
 import {
   Users,
   ListIcon,
@@ -33,31 +38,43 @@ function MetricItem({ icon, label, value, className = '' }: MetricItemProps) {
   );
 }
 
+function MetricItemSkeleton() {
+  return (
+    <Card>
+      <CardContent className='flex flex-col items-start gap-3.5'>
+        <Skeleton className='size-5 flex-shrink-0 rounded' />
+        <div className='flex min-w-0 flex-1 flex-col gap-1'>
+          <Skeleton className='h-9 w-16' />
+          <Skeleton className='h-3.5 w-20' />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 function MarketOverviewSkeleton() {
   return (
     <div className='grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4'>
       {Array.from({ length: 4 }).map((_, i) => (
-        <Card key={i}>
-          <CardContent className='flex flex-col items-start gap-3.5'>
-            <Skeleton className='size-5 flex-shrink-0 rounded' />
-            <div className='flex min-w-0 flex-1 flex-col gap-1'>
-              <Skeleton className='h-9 w-16' />
-              <Skeleton className='h-3.5 w-20' />
-            </div>
-          </CardContent>
-        </Card>
+        <MetricItemSkeleton key={i} />
       ))}
     </div>
   );
 }
 
-function MarketOverviewError() {
+function MarketOverviewError({
+  title = 'Unable to load',
+  className,
+}: {
+  title?: string;
+  className?: string;
+}) {
   return (
-    <Card className='col-span-full'>
+    <Card className={`${className}`}>
       <CardContent className='flex flex-col items-center gap-3 py-6'>
         <AlertTriangle className='text-destructive size-8' />
         <div className='text-center'>
-          <p className='font-medium'>Unable to load market overview</p>
+          <p className='font-medium'>{title}</p>
           <p className='text-muted-foreground text-sm'>
             Please try refreshing the page. Some data may be temporarily
             unavailable.
@@ -68,45 +85,94 @@ function MarketOverviewError() {
   );
 }
 
-async function MarketOverviewContent() {
-  const data = await getMarketOverview();
+async function TotalPlayersContent() {
+  const data = await getTotalPlayers();
 
   if (!data.success) return <MarketOverviewError />;
 
   return (
-    <div className='grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4'>
-      <MetricItem
-        icon={<Users className='size-5' />}
-        label='Total Players'
-        value={data.totalPlayers}
-      />
-      <MetricItem
-        icon={<FileText className='size-5' />}
-        label='Contracted Players'
-        value={data.contractedPlayers}
-      />
-      <MetricItem
-        icon={<DollarSign className='size-5' />}
-        label='Total Sales Volume'
-        value={new Intl.NumberFormat('en-US', {
-          style: 'currency',
-          currency: 'USD',
-          notation: 'compact',
-        }).format(data.totalSalesVolume)}
-      />
-      <MetricItem
-        icon={<ListIcon className='size-5' />}
-        label='Total Sales'
-        value={data.totalSalesCount}
-      />
-    </div>
+    <MetricItem
+      icon={<Users className='size-5' />}
+      label='Total Players'
+      value={data.totalPlayers}
+    />
   );
 }
 
-export function MarketOverviewCard() {
+export function TotalPlayersCard() {
   return (
-    <Suspense fallback={<MarketOverviewSkeleton />}>
-      <MarketOverviewContent />
+    <Suspense fallback={<MetricItemSkeleton />}>
+      <TotalPlayersContent />
+    </Suspense>
+  );
+}
+
+async function ContractedPlayersContent() {
+  const data = await getContractedPlayers();
+
+  if (!data.success) return <MarketOverviewError />;
+
+  return (
+    <MetricItem
+      icon={<FileText className='size-5' />}
+      label='Contracted Players'
+      value={data.contractedPlayers}
+    />
+  );
+}
+
+export function ContractedPlayersCard() {
+  return (
+    <Suspense fallback={<MetricItemSkeleton />}>
+      <ContractedPlayersContent />
+    </Suspense>
+  );
+}
+
+async function TotalSalesVolumeContent() {
+  const data = await getTotalSalesVolume();
+
+  if (!data.success) return <MarketOverviewError />;
+
+  return (
+    <MetricItem
+      icon={<DollarSign className='size-5' />}
+      label='Total Sales Volume'
+      value={new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        notation: 'compact',
+      }).format(data.totalSalesVolume)}
+    />
+  );
+}
+
+export function TotalSalesVolumeCard() {
+  return (
+    <Suspense fallback={<MetricItemSkeleton />}>
+      <TotalSalesVolumeContent />
+    </Suspense>
+  );
+}
+
+async function TotalSalesCountContent() {
+  const data = await getTotalSalesCount();
+
+  if (!data.success) return <MarketOverviewError />;
+
+  return (
+    <MetricItem
+      icon={<ListIcon className='size-5' />}
+      label='Total Sales'
+      value={data.totalSales}
+    />
+  );
+}
+
+export function TotalSalesCard() {
+  return (
+    <Suspense fallback={<MetricItemSkeleton />}>
+      <TotalSalesCountContent />
     </Suspense>
   );
 }

@@ -1,5 +1,10 @@
 import type { Metadata } from 'next';
-import { MarketOverviewCard } from '@/components/Dashboard/MarketOverviewCard';
+import {
+  ContractedPlayersCard,
+  TotalPlayersCard,
+  TotalSalesCard,
+  TotalSalesVolumeCard,
+} from '@/components/Dashboard/MarketOverviewCard';
 import { RecentSalesCard } from '@/components/Dashboard/RecentSalesCard';
 import { RecentListingsCard } from '@/components/Dashboard/RecentListingsCard';
 import { TopRatedPlayersCard } from '@/components/Dashboard/TopRatedPlayersCard';
@@ -20,7 +25,12 @@ export default async function Home() {
       <div className='grid grid-cols-1 gap-6 lg:grid-cols-12'>
         {/* Market Overview - Full width on mobile, spans 12 cols on large screens */}
         <div className='lg:col-span-12'>
-          <MarketOverviewCard />
+          <div className='grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4'>
+            <TotalPlayersCard />
+            <ContractedPlayersCard />
+            <TotalSalesVolumeCard />
+            <TotalSalesCard />
+          </div>
         </div>
 
         {/* Top Rated Players - 3-column layout */}
