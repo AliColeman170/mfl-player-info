@@ -282,10 +282,6 @@ export function ComparePlayerCard({ playerId }: ComparePlayerCardProps) {
                       ~${player.marketValue.estimate}
                     </span>
                   </div>
-                  <div className='text-muted-foreground mt-0.75 text-xs'>
-                    Range: ${player.marketValue.low}-$
-                    {player.marketValue.high}
-                  </div>
                 </div>
               </div>
             ) : (

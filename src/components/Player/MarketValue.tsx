@@ -55,10 +55,6 @@ export async function MarketValue({ player }: MarketValueProps) {
           <ConfidenceBadge confidence={marketValue.confidence} />
           <span className='font-medium'>~${marketValue.estimatedValue}</span>
         </div>
-        <div className='mt-1 text-xs text-gray-500'>
-          Range: ${marketValue.priceRange.low}-$
-          {marketValue.priceRange.high}
-        </div>
       </div>
     );
   } catch (error) {

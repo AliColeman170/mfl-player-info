@@ -31,8 +31,6 @@ export function ToggleFavouriteButton({
   const user = use(userPromise);
   const toggleFavouriteMutation = useToggleFavourite();
 
-  console.log({ player });
-
   async function toggleFavourite() {
     if (!user?.app_metadata.address) return;
 

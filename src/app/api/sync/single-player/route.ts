@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { importMissingPlayer } from '@/lib/sync/core';
+import { importSinglePlayer } from '@/lib/sync/core';
 
 export const maxDuration = 600; // 10 minutes
 
@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
     }
     console.log(`[API] Single Player Import: Player ID ${res.playerId}`);
 
-    const result = await importMissingPlayer(res.playerId);
+    const result = await importSinglePlayer(res.playerId);
 
     return NextResponse.json({
       stage: 'single-player',

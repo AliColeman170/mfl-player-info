@@ -77,7 +77,7 @@ export function sleep(ms: number): Promise<void> {
  * Import a single player by ID when missing from database
  * Used to recover from foreign key constraint errors during sales/listings import
  */
-export async function importMissingPlayer(playerId: number): Promise<boolean> {
+export async function importSinglePlayer(playerId: number): Promise<boolean> {
   console.log(`[Core] Attempting to import missing player ${playerId}`);
 
   try {
@@ -86,7 +86,7 @@ export async function importMissingPlayer(playerId: number): Promise<boolean> {
       () => fetchPlayerFromAPI(playerId),
       3, // maxRetries
       PLAYERS_API_RATE_LIMIT_DELAY,
-      'missing_player_import'
+      'single_player_import'
     );
 
     if (!player) {
@@ -195,9 +195,6 @@ export async function importMissingPlayer(playerId: number): Promise<boolean> {
 
     console.log(`[Core] Successfully imported missing player ${playerId}`);
 
-    // Rate limiting delay
-    await sleep(PLAYERS_API_RATE_LIMIT_DELAY);
-
     return true;
   } catch (error) {
     console.error(`[Core] Error importing missing player ${playerId}:`, error);
@@ -229,8 +226,8 @@ async function fetchPlayerFromAPI(playerId: number): Promise<Player | null> {
     throw new Error(errorMessage);
   }
 
-  const player = await response.json();
-  return player;
+  const data = await response.json();
+  return data.player;
 }
 
 /**
