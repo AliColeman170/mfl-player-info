@@ -100,3 +100,7 @@ SELECT
                 )
         ) = '0xb6fbc6072df85634'
     );
+
+create policy "Enable read access for all users" on "public"."sync_config" as PERMISSIVE for
+SELECT
+    to public using (true);

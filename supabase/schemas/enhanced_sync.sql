@@ -10,47 +10,6 @@ CREATE TABLE IF NOT EXISTS "public"."sync_config" (
 
 ALTER TABLE "public"."sync_config" ENABLE ROW LEVEL SECURITY;
 
--- Insert initial sync configuration
-INSERT INTO
-    "public"."sync_config" (config_key, config_value, description)
-VALUES
-    (
-        'first_sale_id',
-        NULL,
-        'First sale ID imported during historical sync'
-    ),
-    (
-        'first_listing_id',
-        NULL,
-        'First listing ID imported during historical sync'
-    ),
-    (
-        'last_sale_id_synced',
-        NULL,
-        'Last sale ID processed in live sync'
-    ),
-    (
-        'last_listing_id_synced',
-        NULL,
-        'Last listing ID processed in live sync'
-    ),
-    (
-        'sync_batch_size',
-        '100',
-        'Default batch size for processing records'
-    ),
-    (
-        'api_rate_limit_delay',
-        '3000',
-        'Delay between API calls in milliseconds'
-    ),
-    (
-        'max_retries',
-        '5',
-        'Maximum retries for failed API calls'
-    )
-ON CONFLICT (config_key) DO NOTHING;
-
 -- Indexes for performance
 CREATE INDEX IF NOT EXISTS "idx_sync_config_key" ON "public"."sync_config" ("config_key");
 
