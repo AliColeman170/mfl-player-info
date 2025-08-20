@@ -147,7 +147,9 @@ export function ClientPlayer({ playerId }: ClientPlayerProps) {
       <div className='grid grid-cols-1 gap-y-8 @sm/main:grid-cols-3 @sm/main:items-center @sm/main:gap-8'>
         {/* Player Card SVG */}
         <div className='relative'>
-          <PlayerCardSVG player={player} />
+          <div className='mx-auto w-full max-w-48'>
+            <PlayerCardSVG player={player} />
+          </div>
 
           {/* Action buttons below card - matching ImageCard layout */}
           <div className='mt-4 flex items-center justify-center gap-x-1.5'>

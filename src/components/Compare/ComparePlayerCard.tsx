@@ -142,7 +142,9 @@ export function ComparePlayerCard({ playerId }: ComparePlayerCardProps) {
       <div className='grid grid-cols-1 gap-y-6 @sm/main:grid-cols-3 @sm/main:items-start @sm/main:gap-6'>
         {/* Player Card SVG */}
         <div className='relative'>
-          <PlayerCardSVG player={player} />
+          <div className='mx-auto w-full max-w-48'>
+            <PlayerCardSVG player={player} />
+          </div>
 
           {/* Action buttons below card */}
           <div className='mt-4 flex items-center justify-center gap-x-1.5'>

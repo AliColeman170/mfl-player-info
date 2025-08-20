@@ -27,10 +27,7 @@ export function PositionalRatingsComparison({
           if (position === 'GK' && !isPlayer1Goalkeeper && !isPlayer2Goalkeeper)
             return null;
           return (
-            <div
-              key={index}
-              className='grid grid-cols-[auto_1fr_auto] gap-x-1.5 py-2'
-            >
+            <div key={index} className='grid grid-cols-3 gap-x-1.5 py-2'>
               <div className='flex items-center justify-start gap-x-1.5 sm:gap-x-3'>
                 <StyledRatingValue
                   rating={player1PositionRatings[index].rating}

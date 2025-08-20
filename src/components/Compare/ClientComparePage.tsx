@@ -145,7 +145,7 @@ export function ClientComparePage() {
 
       {/* Comparison Tables */}
       {player1 && player2 && (
-        <div className='space-y-8'>
+        <div className='flex flex-col items-center gap-y-6'>
           <PlayerStatsComparison player1={player1} player2={player2} />
           <PositionalFamiliarityToggleWrapper
             player1={player1}

@@ -51,7 +51,7 @@ async function TopOwnersContent() {
             key={owner.owner_wallet_address}
             className='group bg-muted/50 hover:bg-muted/70 flex items-center gap-3 rounded-lg px-3 py-2 transition-colors'
           >
-            <div className='text-muted-foreground flex items-center px-2 text-sm/10'>
+            <div className='text-muted-foreground flex items-center px-1 text-sm/10 sm:px-2'>
               #{index + 1}
             </div>
             {/* Owner Info */}

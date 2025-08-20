@@ -7,7 +7,7 @@ export interface MarketOverviewData {
   success: boolean;
   totalPlayers: number;
   totalSalesVolume: number;
-  activeListings: number;
+  totalSalesCount: number;
   contractedPlayers: number;
   totalMarketCap: number;
 }
@@ -19,7 +19,7 @@ export async function getMarketOverview(): Promise<
 
   // Initialize fallback values
   let totalPlayers = 0;
-  let activeListings = 0;
+  let totalSalesCount = 0;
   let contractedPlayers = 0;
   let totalSalesVolume = 0;
   let totalMarketCap = 0;
@@ -36,25 +36,23 @@ export async function getMarketOverview(): Promise<
       totalPlayers = totalPlayersCount || 0;
     }
 
-    // Get active listings count with timeout handling
+    // Get total sales count with timeout handling
     try {
-      const { count: activeListingsCount, error: listingsError } =
-        await supabase
-          .from('players')
-          .select('id', { count: 'exact', head: true })
-          .not('current_listing_id', 'is', null);
+      const { count: salesCount, error: salesError } = await supabase
+        .from('sales')
+        .select('listing_resource_id', { count: 'exact', head: true });
 
-      if (listingsError) {
-        console.error('Error fetching active listings count:', listingsError);
+      if (salesError) {
+        console.error('Error fetching total sales count:', salesError);
       } else {
-        activeListings = activeListingsCount || 0;
+        totalSalesCount = salesCount || 0;
       }
     } catch (listingsTimeout) {
       console.warn(
         'Active listings query timed out, using fallback value:',
         listingsTimeout
       );
-      activeListings = 0;
+      totalSalesCount = 0;
     }
 
     // Get contracted players count
@@ -134,7 +132,7 @@ export async function getMarketOverview(): Promise<
     success: true,
     totalPlayers,
     totalSalesVolume,
-    activeListings,
+    totalSalesCount,
     contractedPlayers,
     totalMarketCap: Math.round(totalMarketCap),
   };

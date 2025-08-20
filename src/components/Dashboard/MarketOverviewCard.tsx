@@ -81,6 +81,11 @@ async function MarketOverviewContent() {
         value={data.totalPlayers}
       />
       <MetricItem
+        icon={<FileText className='size-5' />}
+        label='Contracted Players'
+        value={data.contractedPlayers}
+      />
+      <MetricItem
         icon={<DollarSign className='size-5' />}
         label='Total Sales Volume'
         value={new Intl.NumberFormat('en-US', {
@@ -91,13 +96,8 @@ async function MarketOverviewContent() {
       />
       <MetricItem
         icon={<ListIcon className='size-5' />}
-        label='Active Listings'
-        value={data.activeListings}
-      />
-      <MetricItem
-        icon={<FileText className='size-5' />}
-        label='Contracted Players'
-        value={data.contractedPlayers}
+        label='Total Sales'
+        value={data.totalSalesCount}
       />
     </div>
   );

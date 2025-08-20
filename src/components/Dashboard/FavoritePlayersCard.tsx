@@ -42,7 +42,7 @@ async function FavoritePlayersContent() {
   }
 
   return (
-    <div className='space-y-2'>
+    <div className='flex flex-col gap-2'>
       {players.map((player) => {
         const tier = getTierFromOverall(player.overall!);
         const tierClasses = getTierClasses(tier);

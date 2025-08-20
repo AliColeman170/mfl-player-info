@@ -127,7 +127,7 @@ export async function getLastSaleCursor(): Promise<number | null> {
   return lastSale?.listing_resource_id || null;
 }
 
-function transformPlayerData(players: Player[]) {
+function transformPlayerData(players: Player[], isRetired: boolean = false) {
   return players.map((player) => {
     const computedFields = calculateEssentialFields(player);
 
@@ -142,7 +142,7 @@ function transformPlayerData(players: Player[]) {
       primary_position: player.metadata.positions?.[0] || null,
       secondary_positions: player.metadata.positions?.slice(1) || [],
       preferred_foot: player.metadata.preferredFoot || null,
-      is_retired: false,
+      is_retired: isRetired,
 
       // Player stats
       overall: player.metadata.overall || null,
@@ -201,13 +201,14 @@ function transformPlayerData(players: Player[]) {
 }
 
 export async function upsertPlayersToDatabase(
-  players: Player[]
+  players: Player[],
+  isRetired: boolean = false
 ): Promise<UpsertPlayersResult> {
   const errors: string[] = [];
   let processed = 0;
   let failed = 0;
 
-  const allDbRecords = transformPlayerData(players);
+  const allDbRecords = transformPlayerData(players, isRetired);
 
   // Process in small, fast batches with no delays
   for (let i = 0; i < allDbRecords.length; i += BATCH_SIZE) {

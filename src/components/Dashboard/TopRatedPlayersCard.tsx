@@ -57,12 +57,10 @@ async function TopRatedPlayersContent() {
 
               {/* Player Info */}
               <div className='flex min-w-0 flex-1 flex-col gap-0.5'>
-                <div className='flex items-center gap-1.5'>
-                  <span className='truncate text-sm font-medium'>
-                    {player.first_name} {player.last_name}
-                  </span>
+                <div className='truncate text-sm font-medium'>
+                  {player.first_name} {player.last_name}
                 </div>
-                <div className='flex items-center gap-1'>
+                <div className='flex flex-wrap items-center gap-1'>
                   {player.primary_position && (
                     <Badge variant='outline' className='px-1 py-0 text-[9px]'>
                       {player.primary_position}

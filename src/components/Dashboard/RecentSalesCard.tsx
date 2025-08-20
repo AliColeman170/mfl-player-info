@@ -10,8 +10,8 @@ export function RecentSalesCard() {
       headerAction={
         <Badge variant='secondary' className='flex items-center gap-1.5'>
           <div className='relative'>
-            <div className='h-2 w-2 rounded-full bg-green-500'></div>
-            <div className='absolute inset-0 h-2 w-2 rounded-full bg-green-500 animate-ping opacity-75'></div>
+            <div className='size-2 rounded-full bg-green-500'></div>
+            <div className='absolute inset-0 size-2 animate-ping rounded-full bg-green-500 opacity-75'></div>
           </div>
           Live
         </Badge>

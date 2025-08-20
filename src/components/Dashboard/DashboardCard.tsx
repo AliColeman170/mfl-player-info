@@ -33,7 +33,7 @@ export function DashboardCard({
   return (
     <Card className={cn('h-fit', className)}>
       <CardHeader className='flex flex-row items-center justify-between gap-y-0'>
-        <div className='space-y-1'>
+        <div className='flex flex-col gap-0 sm:gap-1'>
           <CardTitle className='text-lg font-semibold'>{title}</CardTitle>
           {description && (
             <CardDescription className='text-muted-foreground text-sm'>

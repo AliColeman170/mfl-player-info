@@ -86,11 +86,11 @@ export function RecentListingsContent() {
                 alt={`${listing.playerName} card`}
                 width={500}
                 height={835}
-                className='w-10 shrink-0'
+                className='w-8 shrink-0 sm:w-10'
               />
 
               {/* Player Info */}
-              <div className='flex min-w-0 flex-1 flex-col gap-1'>
+              <div className='flex flex-1 flex-col gap-1'>
                 <div className='flex items-center gap-2'>
                   <span className='truncate text-base font-semibold transition-colors'>
                     {listing.playerName}
@@ -105,7 +105,7 @@ export function RecentListingsContent() {
                     {listing.playerOverall}
                   </Badge>
                 </div>
-                <div className='flex items-center gap-1'>
+                <div className='flex flex-wrap items-center gap-1'>
                   <Badge
                     variant='outline'
                     className='bg-background flex items-center gap-1 text-[10px] [&>svg]:size-2.5!'
@@ -125,12 +125,13 @@ export function RecentListingsContent() {
               </div>
 
               {/* Listing Info */}
-              <div className='flex shrink-0 items-center gap-4'>
+              <div className='flex items-center gap-4'>
                 <div className='text-right'>
                   <p className='flex items-center justify-end gap-1 text-sm font-semibold text-blue-600'>
-                    {listing.price.toLocaleString(undefined, {
+                    {listing.price.toLocaleString('en-US', {
                       style: 'currency',
                       currency: 'USD',
+                      signDisplay: 'never',
                     })}
                   </p>
                   <p className='text-muted-foreground text-xs'>

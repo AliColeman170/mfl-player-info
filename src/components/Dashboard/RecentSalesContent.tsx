@@ -83,11 +83,11 @@ export function RecentSalesContent() {
                 alt={`${sale.playerName} card`}
                 width={500}
                 height={835}
-                className='w-10 shrink-0'
+                className='w-8 shrink-0 sm:w-10'
               />
 
               {/* Player Info */}
-              <div className='flex min-w-0 flex-1 flex-col gap-1'>
+              <div className='flex flex-1 flex-col gap-1'>
                 <div className='flex items-center gap-2'>
                   <span className='truncate text-base font-semibold'>
                     {sale.playerName}
@@ -102,7 +102,7 @@ export function RecentSalesContent() {
                     {sale.playerOverall}
                   </Badge>
                 </div>
-                <div className='flex items-center gap-1'>
+                <div className='flex flex-wrap items-center gap-1'>
                   <Badge
                     variant='outline'
                     className='bg-background flex items-center gap-1 text-[10px] [&>svg]:size-2.5!'
@@ -122,12 +122,13 @@ export function RecentSalesContent() {
               </div>
 
               {/* Sale Info */}
-              <div className='flex shrink-0 items-center gap-4'>
-                <div className='text-right'>
+              <div className='flex min-w-0 items-center gap-4'>
+                <div className='flex flex-col items-end text-right'>
                   <p className='flex items-center justify-end gap-1 text-sm font-semibold text-green-600'>
-                    {sale.price.toLocaleString(undefined, {
+                    {sale.price.toLocaleString('en-US', {
                       style: 'currency',
                       currency: 'USD',
+                      signDisplay: 'never',
                     })}
                   </p>
                   <p className='text-muted-foreground text-xs'>

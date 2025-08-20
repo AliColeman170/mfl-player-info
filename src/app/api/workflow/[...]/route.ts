@@ -262,7 +262,7 @@ const importRetiredPlayers = createWorkflow(
           console.log(
             `[STEP 3] Upsert Players ${players[0].id} to ${players[players.length - 1].id}`
           );
-          return await upsertPlayersToDatabase(players);
+          return await upsertPlayersToDatabase(players, true); // true for retired players
         }
       );
 
@@ -600,7 +600,7 @@ const importRetiredAndBurnedPlayers = createWorkflow(
           console.log(
             `[STEP 3] Upsert Players ${players[0].id} to ${players[players.length - 1].id}`
           );
-          return await upsertPlayersToDatabase(players);
+          return await upsertPlayersToDatabase(players, true);
         }
       );
 
