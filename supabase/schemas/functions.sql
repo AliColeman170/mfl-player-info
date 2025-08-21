@@ -707,9 +707,7 @@ $$;
 CREATE OR REPLACE FUNCTION get_top_owners (limit_count INTEGER DEFAULT 5) RETURNS TABLE (
   owner_wallet_address TEXT,
   owner_name TEXT,
-  player_count INTEGER,
-  total_value INTEGER,
-  avg_overall INTEGER
+  player_count INTEGER
 ) LANGUAGE plpgsql security definer
 set
   search_path = '' AS $$
