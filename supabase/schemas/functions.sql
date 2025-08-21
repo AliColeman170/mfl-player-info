@@ -11,7 +11,7 @@ set
   statement_timeout = '5min';
 
 -- RPC function to get total sales volume across all sales
-CREATE OR REPLACE FUNCTION get_total_sales_volume () RETURNS BIGINT LANGUAGE plpgsql
+CREATE OR REPLACE FUNCTION get_total_sales_volume () RETURNS BIGINT LANGUAGE plpgsql security definer
 SET
   search_path = '' AS $$
 DECLARE
@@ -718,14 +718,10 @@ BEGIN
   SELECT 
     p.owner_wallet_address::TEXT,
     p.owner_name::TEXT,
-    COUNT(*)::INTEGER as player_count,
-    COALESCE(SUM(p.market_value_estimate), 0)::INTEGER as total_value,
-    ROUND(AVG(p.overall), 0)::INTEGER as avg_overall
+    COUNT(*)::INTEGER as player_count
   FROM public.players p
   WHERE 
     p.owner_wallet_address IS NOT NULL
-    AND p.market_value_estimate IS NOT NULL
-    AND p.overall IS NOT NULL
     AND p.owner_wallet_address != '0xff8d2bbed8164db0'
     AND p.owner_wallet_address != '0x6fec8986261ecf49'
   GROUP BY p.owner_wallet_address, p.owner_name
