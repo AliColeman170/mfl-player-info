@@ -26,7 +26,7 @@ export function Header() {
             <CommandMenu />
           </div>
 
-          <div className='flex items-center gap-4'>
+          <div className='flex items-center justify-end gap-4'>
             <Suspense
               fallback={
                 <Button disabled>
