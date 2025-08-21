@@ -24,8 +24,11 @@ async function fetchFilterCounts(
   const supabase = createClient();
 
   // Get authenticated user's wallet address from auth metadata if available
-  const { data: { user } } = await supabase.auth.getUser();
-  const userWalletAddress = user?.app_metadata?.address || authenticatedWalletAddress;
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const userWalletAddress =
+    user?.app_metadata?.address || authenticatedWalletAddress;
 
   const { data, error } = await supabase.rpc('get_filter_counts', {
     // Search filters
@@ -72,8 +75,6 @@ async function fetchFilterCounts(
     price_diff_min_filter: filters.priceDiffMin || undefined,
     price_diff_max_filter: filters.priceDiffMax || undefined,
   });
-
-  console.log({ data, error });
 
   if (error) {
     throw new Error(`Failed to fetch filter counts: ${error.message}`);

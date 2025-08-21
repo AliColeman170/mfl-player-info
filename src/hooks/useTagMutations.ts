@@ -39,6 +39,7 @@ export function useUpdateTags() {
       // Invalidate queries to refresh data
       queryClient.invalidateQueries({ queryKey: ['players-db-infinite'] });
       queryClient.invalidateQueries({ queryKey: ['filter-counts'] });
+      queryClient.invalidateQueries({ queryKey: ['player', data.player_id] });
       toast.success(data.message);
     },
     onError: (error: Error) => {
