@@ -71,6 +71,11 @@ export function UpstashWorkflowControls() {
       description: 'Import all player types in parallel',
     },
     {
+      name: 'import-active-players',
+      label: 'Import Active Players',
+      description: 'Import all active players',
+    },
+    {
       name: 'import-sales',
       label: 'Import Sales',
       description: 'Import sales data incrementally',

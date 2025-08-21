@@ -20,6 +20,7 @@ interface UpsertPlayersResult {
 }
 
 const MAX_PLAYERS_LIMIT = 1500; // Max limit for player fetches
+const PLAYER_BATCH_SIZE = 20000; // Max limit for player fetches
 const MAX_SALES_LIMIT = 50; // Max limit for sales fetches
 const BATCH_SIZE = 100; // Players batch size for upserts
 const SALES_BATCH_SIZE = 2500; // Sales batch size for upserts
@@ -366,6 +367,7 @@ export async function upsertSalesToDatabase(
 // Export constants
 export {
   MAX_PLAYERS_LIMIT,
+  PLAYER_BATCH_SIZE,
   MAX_SALES_LIMIT,
   DEV_CUT_OFF,
   DEV_SALES_CUT_OFF,

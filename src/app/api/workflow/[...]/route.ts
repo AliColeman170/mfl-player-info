@@ -14,6 +14,7 @@ import {
   DEV_CUT_OFF,
   DEV_SALES_CUT_OFF,
   MARKET_VALUE_BATCH_SIZE,
+  PLAYER_BATCH_SIZE,
 } from '@/lib/upstash-workflow-helpers';
 import { supabaseAdmin as supabase } from '@/lib/supabase/admin';
 
@@ -49,7 +50,7 @@ const importActivePlayers = createWorkflow(
       );
     });
 
-    while (hasMore) {
+    while (hasMore && totalProcessed < PLAYER_BATCH_SIZE) {
       if (nextPlayerCursorId) {
         params.beforePlayerId = nextPlayerCursorId;
       }
@@ -117,11 +118,7 @@ const importActivePlayers = createWorkflow(
             .eq('workflow_run_id', workflowRunId);
 
           // Check if this was the last page for this type
-          if (
-            players.length < MAX_PLAYERS_LIMIT ||
-            (process.env.NODE_ENV === 'development' &&
-              totalProcessed >= DEV_CUT_OFF)
-          ) {
+          if (players.length < MAX_PLAYERS_LIMIT) {
             console.log(
               `[Workflow] ${configKey} players completed - ${totalFetched} total fetched.`
             );
@@ -132,14 +129,18 @@ const importActivePlayers = createWorkflow(
       );
     }
 
-    console.log('[Workflow] Active Players import completed successfully.', {
-      totalFetched,
-      totalProcessed,
-      totalFailed,
+    await context.run('update-total-player-count', async () => {
+      await supabase.rpc('update_total_player_count');
     });
 
     // Mark workflow as completed
     await context.run('mark-workflow-complete', async () => {
+      console.log('[Workflow] Active Players import completed successfully.', {
+        totalFetched,
+        totalProcessed,
+        totalFailed,
+      });
+
       await supabase
         .from('upstash_workflow_executions')
         .update({
@@ -305,6 +306,10 @@ const importRetiredPlayers = createWorkflow(
       totalFetched,
       totalProcessed,
       totalFailed,
+    });
+
+    await context.run('update-total-player-count', async () => {
+      await supabase.rpc('update_total_player_count');
     });
 
     // Mark workflow as completed
@@ -473,6 +478,10 @@ const importBurnedPlayers = createWorkflow(
       totalFetched,
       totalProcessed,
       totalFailed,
+    });
+
+    await context.run('update-total-player-count', async () => {
+      await supabase.rpc('update_total_player_count');
     });
 
     // Mark workflow as completed
@@ -647,6 +656,10 @@ const importRetiredAndBurnedPlayers = createWorkflow(
       }
     );
 
+    await context.run('update-total-player-count', async () => {
+      await supabase.rpc('update_total_player_count');
+    });
+
     // Mark workflow as completed
     await context.run('mark-workflow-complete', async () => {
       await supabase
@@ -784,10 +797,6 @@ const importAllPlayers = createWorkflow(
       totalFetched,
       totalProcessed,
       totalFailed,
-    });
-
-    await context.run('update-total-player-count', async () => {
-      await supabase.rpc('update_total_player_count');
     });
 
     // Mark workflow as completed
