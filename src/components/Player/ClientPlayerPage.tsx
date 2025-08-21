@@ -36,7 +36,7 @@ export function ClientPlayerPage({ playerId }: ClientPlayerPageProps) {
   }
 
   return (
-    <div className='bg-background shadow-foreground/2 border-border @container/main mx-auto w-full max-w-xl transform rounded-xl border p-4 shadow-2xl sm:p-6 lg:px-8 lg:pb-8'>
+    <div className='bg-card shadow-foreground/2 border-border @container/main mx-auto w-full max-w-xl transform rounded-xl border p-4 shadow-2xl sm:p-6 lg:px-8 lg:pb-8'>
       {/* Main Player Content */}
       <ClientPlayer playerId={playerId} />
     </div>
