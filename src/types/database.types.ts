@@ -754,6 +754,20 @@ export type Database = {
           updated_at: string
         }[]
       }
+      update_total_sales_count: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          total_count: number
+          updated_at: string
+        }[]
+      }
+      update_total_sales_volume: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          total_volume: number
+          updated_at: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

@@ -31,14 +31,16 @@ export const getTotalPlayers = cache(
 
     try {
       // Get total player count
-      const { count: totalPlayersCount, error: countError } = await supabase
-        .from('players')
-        .select('id', { count: 'exact', head: true });
+      const { data, error: countError } = await supabase
+        .from('sync_config')
+        .select('config_value')
+        .eq('config_key', 'total_player_count')
+        .single();
 
       if (countError) {
         console.error('Error fetching player count:', countError);
       } else {
-        totalPlayers = totalPlayersCount || 0;
+        totalPlayers = data.config_value ? parseInt(data.config_value) : 0;
       }
     } catch (error) {
       console.error('Error in getTotalPlayers:', error);
@@ -97,15 +99,17 @@ export const getTotalSalesCount = cache(
     let totalSales = 0;
 
     try {
-      // Get total player count
-      const { count: totalSalesCount, error: countError } = await supabase
-        .from('sales')
-        .select('listing_resource_id', { count: 'exact', head: true });
+      // Get total sales count
+      const { data, error: countError } = await supabase
+        .from('sync_config')
+        .select('config_value')
+        .eq('config_key', 'total_sales_count')
+        .single();
 
       if (countError) {
-        console.error('Error fetching player count:', countError);
+        console.error('Error fetching sales count:', countError);
       } else {
-        totalSales = totalSalesCount || 0;
+        totalSales = data.config_value ? parseInt(data.config_value) : 0;
       }
     } catch (error) {
       console.error('Error in getTotalSalesCount:', error);
@@ -131,14 +135,16 @@ export const getTotalSalesVolume = cache(
 
     try {
       // Get total sales volume
-      const { data: salesVolume, error: salesVolumeError } = await supabase.rpc(
-        'get_total_sales_volume'
-      );
+      const { data, error: countError } = await supabase
+        .from('sync_config')
+        .select('config_value')
+        .eq('config_key', 'total_sales_volume')
+        .single();
 
-      if (salesVolumeError) {
-        console.error('Error fetching player count:', salesVolumeError);
+      if (countError) {
+        console.error('Error fetching player count:', countError);
       } else {
-        totalSalesVolume = salesVolume || 0;
+        totalSalesVolume = data?.config_value ? parseInt(data.config_value) : 0;
       }
     } catch (error) {
       console.error('Error in getTotalSalesVolume:', error);

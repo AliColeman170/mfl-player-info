@@ -968,6 +968,11 @@ const importSales = createWorkflow(
       totalFailed,
     });
 
+    await context.run('update-total-sales-count-and-volume', async () => {
+      await supabase.rpc('update_total_sales_count');
+      await supabase.rpc('update_total_sales_volume');
+    });
+
     // Mark workflow as completed
     await context.run('mark-workflow-complete', async () => {
       await supabase
