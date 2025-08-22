@@ -58,6 +58,13 @@ export type Database = {
             foreignKeyName: "favourites_player_id_fkey"
             columns: ["player_id"]
             isOneToOne: false
+            referencedRelation: "contracted_players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "favourites_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
             referencedRelation: "players"
             referencedColumns: ["id"]
           },
@@ -387,6 +394,13 @@ export type Database = {
             foreignKeyName: "sales_player_id_fkey"
             columns: ["player_id"]
             isOneToOne: false
+            referencedRelation: "contracted_players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
             referencedRelation: "players"
             referencedColumns: ["id"]
           },
@@ -526,7 +540,26 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      contracted_players: {
+        Row: {
+          id: number | null
+        }
+        Insert: {
+          id?: number | null
+        }
+        Update: {
+          id?: number | null
+        }
+        Relationships: []
+      }
+      top_owners: {
+        Row: {
+          owner_name: string | null
+          owner_wallet_address: string | null
+          player_count: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       calculate_base_player_value: {

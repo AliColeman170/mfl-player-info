@@ -66,9 +66,8 @@ export const getContractedPlayers = cache(
       // Get total player count
       const { count: contractedPlayersCount, error: countError } =
         await supabase
-          .from('players')
-          .select('id', { count: 'exact', head: true })
-          .not('contract_id', 'is', null);
+          .from('contracted_players')
+          .select('id', { count: 'exact', head: true });
 
       if (countError) {
         console.error('Error fetching player count:', countError);
@@ -227,9 +226,12 @@ export const getTopOwners = cache(
     const supabase = await createClient();
 
     try {
-      const { data, error } = await supabase.rpc('get_top_owners', {
-        limit_count: limit,
-      });
+      const { data, error } = await supabase
+        .from('top_owners')
+        .select('*')
+        .order('player_count', { ascending: false })
+        .limit(limit)
+        .overrideTypes<Array<TopOwner>, { merge: false }>();
 
       if (error) {
         console.error('Error fetching top owners:', error);
