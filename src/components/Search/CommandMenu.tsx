@@ -177,6 +177,7 @@ function PlayerItem({
         width={500}
         height={835}
         className='w-10 shrink-0'
+        unoptimized
       />
 
       {/* Player Info */}
