@@ -84,6 +84,7 @@ export function RecentSalesContent() {
                 width={500}
                 height={835}
                 className='w-8 shrink-0 sm:w-10'
+                unoptimized
               />
 
               {/* Player Info */}

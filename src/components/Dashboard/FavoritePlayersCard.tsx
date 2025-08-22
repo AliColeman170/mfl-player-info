@@ -57,6 +57,7 @@ async function FavoritePlayersContent() {
                 width={500}
                 height={835}
                 className='w-6 shrink-0'
+                unoptimized
               />
 
               {/* Player Info */}
