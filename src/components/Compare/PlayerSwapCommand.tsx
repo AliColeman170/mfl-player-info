@@ -61,8 +61,7 @@ async function searchPlayers({
       club_name,
       club_type,
       owner_wallet_address,
-      owner_name,
-      current_listing_price
+      owner_name
     `
     )
     .ilike('search_text', `%${searchTerm}%`)
@@ -122,12 +121,6 @@ function PlayerItem({
           </Badge>
         </div>
         <div className='flex items-center gap-1'>
-          {player.current_listing_price && (
-            <Badge className='rounded-sm border-0 text-[9px] [&>svg]:size-1.5'>
-              <ShoppingBasketIcon />
-              For Sale
-            </Badge>
-          )}
           {player.club_id && (
             <PlayerContract
               club={{

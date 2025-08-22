@@ -56,7 +56,6 @@ interface SearchPlayer {
   dribbling: number | null;
   defense: number | null;
   physical: number | null;
-  current_listing_price: number | null;
 }
 
 async function searchPlayers({
@@ -103,8 +102,7 @@ async function searchPlayers({
       club_name,
       club_type,
       owner_wallet_address,
-      owner_name,
-      current_listing_price
+      owner_name
     `
     )
     .ilike('search_text', `%${searchTerm}%`)
@@ -191,12 +189,6 @@ function PlayerItem({
           </Badge>
         </div>
         <div className='flex items-center gap-1'>
-          {player.current_listing_price && (
-            <Badge className='[&>svg]:text-primary-foreground! rounded-sm border-0 text-[10px] [&>svg]:size-2.5!'>
-              <ShoppingBasketIcon />
-              For Sale
-            </Badge>
-          )}
           {player.club_id && (
             <PlayerContract
               club={{

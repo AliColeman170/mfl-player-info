@@ -185,21 +185,6 @@ export function ComparePlayerCard({ playerId }: ComparePlayerCardProps) {
 
           {/* Status Badges */}
           <div className='flex items-center gap-1.5'>
-            {player.currentListing?.price && (
-              <Link href={`https://app.playmfl.com/players/${player.id}`}>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <Badge className='border-0 text-[10px] [&>svg]:size-2.5'>
-                      <ShoppingCartIcon />
-                      For Sale
-                    </Badge>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Available to buy for ${player.currentListing.price}</p>
-                  </TooltipContent>
-                </Tooltip>
-              </Link>
-            )}
             {player.club && <PlayerContract club={player.club} />}
             <Badge
               variant='outline'
