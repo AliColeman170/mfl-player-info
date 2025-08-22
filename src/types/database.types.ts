@@ -65,6 +65,13 @@ export type Database = {
             foreignKeyName: "favourites_player_id_fkey"
             columns: ["player_id"]
             isOneToOne: false
+            referencedRelation: "favourite_players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "favourites_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
             referencedRelation: "players"
             referencedColumns: ["id"]
           },
@@ -401,6 +408,13 @@ export type Database = {
             foreignKeyName: "sales_player_id_fkey"
             columns: ["player_id"]
             isOneToOne: false
+            referencedRelation: "favourite_players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
             referencedRelation: "players"
             referencedColumns: ["id"]
           },
@@ -544,11 +558,18 @@ export type Database = {
         Row: {
           id: number | null
         }
-        Insert: {
-          id?: number | null
-        }
-        Update: {
-          id?: number | null
+        Relationships: []
+      }
+      favourite_players: {
+        Row: {
+          age: number | null
+          club_name: string | null
+          favorite_count: number | null
+          first_name: string | null
+          id: number | null
+          last_name: string | null
+          overall: number | null
+          primary_position: string | null
         }
         Relationships: []
       }
@@ -711,6 +732,10 @@ export type Database = {
       get_total_sales_volume: {
         Args: Record<PropertyKey, never>
         Returns: number
+      }
+      refresh_materialized_views: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       update_players_market_values_batch: {
         Args: { batch_size?: number; offset_val?: number }

@@ -258,9 +258,12 @@ export async function getFavoritePlayers(
 ): Promise<FavoritePlayer[]> {
   const supabase = await createClient();
 
-  const { data, error } = await supabase.rpc('get_favorite_players', {
-    limit_count: limit,
-  });
+  const { data, error } = await supabase
+    .from('favourite_players')
+    .select('*')
+    .order('favorite_count', { ascending: false })
+    .limit(limit)
+    .overrideTypes<Array<FavoritePlayer>, { merge: false }>();
 
   if (error) {
     console.error('Error fetching favorite players:', error);
