@@ -64,7 +64,7 @@ function getMarketValueTooltip(marketValue: MarketValue): string {
       return 'No recent sales data available for market value calculation.';
     }
 
-    return `${getMethodDescription(marketValue.method)} from ${marketValue.basedOn}. ${getConfidenceDescription(marketValue.confidence)}.`;
+    return `${getMethodDescription(marketValue.method)} based off last 180 days sales data. ${getConfidenceDescription(marketValue.confidence)}.`;
   } catch (error) {
     return 'Unable to calculate market value at this time.';
   }

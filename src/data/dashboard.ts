@@ -220,8 +220,6 @@ export interface TopOwner {
   owner_wallet_address: string;
   owner_name: string | null;
   player_count: number;
-  total_value: number;
-  avg_overall: number;
 }
 
 export const getTopOwners = cache(
