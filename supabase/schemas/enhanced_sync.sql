@@ -16,7 +16,6 @@ CREATE INDEX IF NOT EXISTS "idx_sync_config_key" ON "public"."sync_config" ("con
 -- Add columns to players table to track sync status
 ALTER TABLE "public"."players"
 ADD COLUMN IF NOT EXISTS "basic_data_synced_at" timestamp with time zone,
-ADD COLUMN IF NOT EXISTS "market_value_calculated_at" timestamp with time zone,
 ADD COLUMN IF NOT EXISTS "sync_stage" text DEFAULT 'pending' CHECK (
     sync_stage IN (
         'pending',
@@ -28,8 +27,6 @@ ADD COLUMN IF NOT EXISTS "sync_stage" text DEFAULT 'pending' CHECK (
 
 -- Add indexes for new columns
 CREATE INDEX IF NOT EXISTS "idx_players_basic_synced" ON "public"."players" ("basic_data_synced_at");
-
-CREATE INDEX IF NOT EXISTS "idx_players_market_calculated" ON "public"."players" ("market_value_calculated_at");
 
 CREATE TRIGGER update_sync_config_updated_at BEFORE
 UPDATE ON "public"."sync_config" FOR EACH ROW

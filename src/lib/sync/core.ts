@@ -119,15 +119,6 @@ export async function importSinglePlayer(playerId: number): Promise<boolean> {
       defense: player.metadata.defense || null,
       physical: player.metadata.physical || null,
       goalkeeping: player.metadata.goalkeeping || null,
-      resistance: player.metadata.resistance || null,
-
-      // Contract information
-      has_pre_contract: player.hasPreContract || false,
-      energy: player.energy || null,
-      offer_status: player.offerStatus || null,
-      offer_min_division: player.offerMinDivision || null,
-      offer_min_revenue_share: player.offerMinRevenueShare || null,
-      offer_auto_accept: player.offerAutoAccept || false,
 
       // Active contract data
       contract_id: player.activeContract?.id || null,
@@ -136,31 +127,16 @@ export async function importSinglePlayer(playerId: number): Promise<boolean> {
       revenue_share: player.activeContract?.revenueShare || null,
       total_revenue_share_locked:
         player.activeContract?.totalRevenueShareLocked || null,
-      start_season: player.activeContract?.startSeason || null,
-      nb_seasons: player.activeContract?.nbSeasons || null,
-      auto_renewal: player.activeContract?.autoRenewal || false,
-      contract_created_date_time:
-        player.activeContract?.createdDateTime || null,
-      clauses: player.activeContract?.clauses
-        ? JSON.stringify(player.activeContract.clauses)
-        : null,
 
       // Club information
       club_id: player.activeContract?.club?.id || null,
       club_name: player.activeContract?.club?.name || null,
-      club_main_color: player.activeContract?.club?.mainColor || null,
-      club_secondary_color: player.activeContract?.club?.secondaryColor || null,
-      club_city: player.activeContract?.club?.city || null,
       club_division: player.activeContract?.club?.division || null,
-      club_logo_version: player.activeContract?.club?.logoVersion || null,
-      club_country: player.activeContract?.club?.country || null,
       club_type: player.activeContract?.club?.type || null,
 
       // Owner information
       owner_wallet_address: player.ownedBy?.walletAddress || null,
       owner_name: player.ownedBy?.name || null,
-      owner_twitter: player.ownedBy?.twitter || null,
-      owner_last_active: player.ownedBy?.lastActive || null,
 
       // Computed fields for sorting and display
       best_position: computedFields.best_position,
@@ -174,7 +150,6 @@ export async function importSinglePlayer(playerId: number): Promise<boolean> {
       basic_data_synced_at: new Date().toISOString(),
       sync_stage: 'basic_imported',
       last_synced_at: new Date().toISOString(),
-      sync_version: 2, // v2 sync system
 
       // Data hash for change detection
       data_hash: generateDataHash(player),

@@ -12,7 +12,6 @@ export interface NFTMetadata {
   overall: string;
   nationalities: string[];
   dribbling: string;
-  resistance: string;
   name: string;
   shooting: string;
   physical: string;
@@ -36,12 +35,6 @@ export interface Player {
   season?: Season;
   ownedBy?: OwnedBy;
   activeContract?: ActiveContract;
-  hasPreContract: boolean;
-  energy: number;
-  offerStatus: number;
-  offerMinDivision?: number;
-  offerMinRevenueShare?: number;
-  offerAutoAccept?: boolean;
 }
 
 export interface Metadata {
@@ -61,14 +54,11 @@ export interface Metadata {
   defense: number;
   physical: number;
   goalkeeping: number;
-  resistance: number;
 }
 
 export interface OwnedBy {
   walletAddress: string;
   name: string;
-  twitter: string;
-  lastActive?: number;
 }
 
 export interface ActiveContract {
@@ -78,24 +68,13 @@ export interface ActiveContract {
   revenueShare: number;
   totalRevenueShareLocked: number;
   club: Club;
-  startSeason: number;
-  nbSeasons: number;
-  autoRenewal: boolean;
-  createdDateTime: number;
-  clauses: string[];
 }
 
 export interface Club {
   id: number;
   name: string;
-  mainColor: string;
-  secondaryColor: string;
-  city: string;
   division: number;
-  logoVersion: string;
-  country: string;
   ownedBy?: OwnedBy;
-  squads: any[];
   type?: string;
 }
 
@@ -196,7 +175,6 @@ export interface SearchPlayerResult {
   owner_wallet_address?: string | null;
   owner_name?: string | null;
   age?: number | null;
-  current_listing_price?: number | null;
   // Stats (optional for search results)
   pace?: number | null;
   shooting?: number | null;
@@ -236,12 +214,8 @@ export interface PositionRating {
 
 export interface MarketValue {
   estimate: number;
-  low: number;
-  high: number;
   confidence: 'high' | 'medium' | 'low';
   method: string;
-  basedOn: string;
-  sampleSize: number;
 }
 
 export interface CurrentListing {
@@ -253,7 +227,6 @@ export type PlayerWithFavouriteData = Player & {
   is_favourite: boolean;
   tags: string[];
   marketValue?: MarketValue;
-  currentListing?: CurrentListing;
   club?: Club;
   lastSyncedAt?: string;
   // Computed fields from database

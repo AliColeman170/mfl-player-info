@@ -154,7 +154,6 @@ function transformPlayerData(players: Player[], isRetired: boolean = false) {
       defense: player.metadata.defense || null,
       physical: player.metadata.physical || null,
       goalkeeping: player.metadata.goalkeeping || null,
-      resistance: player.metadata.resistance || null,
 
       // Active contract data
       contract_id: player.activeContract?.id || null,
@@ -167,19 +166,12 @@ function transformPlayerData(players: Player[], isRetired: boolean = false) {
       // Club information
       club_id: player.activeContract?.club?.id || null,
       club_name: player.activeContract?.club?.name || null,
-      club_main_color: player.activeContract?.club?.mainColor || null,
-      club_secondary_color: player.activeContract?.club?.secondaryColor || null,
-      club_city: player.activeContract?.club?.city || null,
       club_division: player.activeContract?.club?.division || null,
-      club_logo_version: player.activeContract?.club?.logoVersion || null,
-      club_country: player.activeContract?.club?.country || null,
       club_type: player.activeContract?.club?.type || null,
 
       // Owner information
       owner_wallet_address: player.ownedBy?.walletAddress || null,
       owner_name: player.ownedBy?.name || null,
-      owner_twitter: player.ownedBy?.twitter || null,
-      owner_last_active: player.ownedBy?.lastActive || null,
 
       // Computed fields for sorting and display
       best_position: computedFields.best_position,
@@ -193,7 +185,6 @@ function transformPlayerData(players: Player[], isRetired: boolean = false) {
       basic_data_synced_at: new Date().toISOString(),
       sync_stage: 'basic_imported',
       last_synced_at: new Date().toISOString(),
-      sync_version: 2, // v2 sync system
 
       // Data hash for change detection
       data_hash: generateDataHash(player),

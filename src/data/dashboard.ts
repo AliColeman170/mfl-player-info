@@ -31,14 +31,16 @@ export const getTotalPlayers = cache(
 
     try {
       // Get total player count
-      const { count: totalPlayersCount, error: countError } = await supabase
-        .from('players')
-        .select('id', { count: 'exact', head: true });
+      const { data, error: countError } = await supabase
+        .from('sync_config')
+        .select('config_value')
+        .eq('config_key', 'total_player_count')
+        .single();
 
       if (countError) {
         console.error('Error fetching player count:', countError);
       } else {
-        totalPlayers = totalPlayersCount || 0;
+        totalPlayers = data.config_value ? parseInt(data.config_value) : 0;
       }
     } catch (error) {
       console.error('Error in getTotalPlayers:', error);
@@ -66,9 +68,8 @@ export const getContractedPlayers = cache(
       // Get total player count
       const { count: contractedPlayersCount, error: countError } =
         await supabase
-          .from('players')
-          .select('id', { count: 'exact', head: true })
-          .not('contract_id', 'is', null);
+          .from('contracted_players')
+          .select('id', { count: 'exact', head: true });
 
       if (countError) {
         console.error('Error fetching player count:', countError);
@@ -98,15 +99,17 @@ export const getTotalSalesCount = cache(
     let totalSales = 0;
 
     try {
-      // Get total player count
-      const { count: totalSalesCount, error: countError } = await supabase
-        .from('sales')
-        .select('listing_resource_id', { count: 'exact', head: true });
+      // Get total sales count
+      const { data, error: countError } = await supabase
+        .from('sync_config')
+        .select('config_value')
+        .eq('config_key', 'total_sales_count')
+        .single();
 
       if (countError) {
-        console.error('Error fetching player count:', countError);
+        console.error('Error fetching sales count:', countError);
       } else {
-        totalSales = totalSalesCount || 0;
+        totalSales = data.config_value ? parseInt(data.config_value) : 0;
       }
     } catch (error) {
       console.error('Error in getTotalSalesCount:', error);
@@ -132,14 +135,16 @@ export const getTotalSalesVolume = cache(
 
     try {
       // Get total sales volume
-      const { data: salesVolume, error: salesVolumeError } = await supabase.rpc(
-        'get_total_sales_volume'
-      );
+      const { data, error: countError } = await supabase
+        .from('sync_config')
+        .select('config_value')
+        .eq('config_key', 'total_sales_volume')
+        .single();
 
-      if (salesVolumeError) {
-        console.error('Error fetching player count:', salesVolumeError);
+      if (countError) {
+        console.error('Error fetching player count:', countError);
       } else {
-        totalSalesVolume = salesVolume || 0;
+        totalSalesVolume = data?.config_value ? parseInt(data.config_value) : 0;
       }
     } catch (error) {
       console.error('Error in getTotalSalesVolume:', error);
@@ -220,8 +225,6 @@ export interface TopOwner {
   owner_wallet_address: string;
   owner_name: string | null;
   player_count: number;
-  total_value: number;
-  avg_overall: number;
 }
 
 export const getTopOwners = cache(
@@ -229,9 +232,12 @@ export const getTopOwners = cache(
     const supabase = await createClient();
 
     try {
-      const { data, error } = await supabase.rpc('get_top_owners', {
-        limit_count: limit,
-      });
+      const { data, error } = await supabase
+        .from('top_owners')
+        .select('*')
+        .order('player_count', { ascending: false })
+        .limit(limit)
+        .overrideTypes<Array<TopOwner>, { merge: false }>();
 
       if (error) {
         console.error('Error fetching top owners:', error);
@@ -258,9 +264,12 @@ export async function getFavoritePlayers(
 ): Promise<FavoritePlayer[]> {
   const supabase = await createClient();
 
-  const { data, error } = await supabase.rpc('get_favorite_players', {
-    limit_count: limit,
-  });
+  const { data, error } = await supabase
+    .from('favourite_players')
+    .select('*')
+    .order('favorite_count', { ascending: false })
+    .limit(limit)
+    .overrideTypes<Array<FavoritePlayer>, { merge: false }>();
 
   if (error) {
     console.error('Error fetching favorite players:', error);

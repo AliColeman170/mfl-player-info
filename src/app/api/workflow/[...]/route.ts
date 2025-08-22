@@ -141,6 +141,7 @@ const importActivePlayers = createWorkflow(
         totalFailed,
       });
 
+      await supabase.rpc('refresh_materialized_views');
       await supabase
         .from('upstash_workflow_executions')
         .update({
@@ -314,6 +315,7 @@ const importRetiredPlayers = createWorkflow(
 
     // Mark workflow as completed
     await context.run('mark-workflow-complete', async () => {
+      await supabase.rpc('refresh_materialized_views');
       await supabase
         .from('upstash_workflow_executions')
         .update({
@@ -486,6 +488,7 @@ const importBurnedPlayers = createWorkflow(
 
     // Mark workflow as completed
     await context.run('mark-workflow-complete', async () => {
+      await supabase.rpc('refresh_materialized_views');
       await supabase
         .from('upstash_workflow_executions')
         .update({
@@ -662,6 +665,7 @@ const importRetiredAndBurnedPlayers = createWorkflow(
 
     // Mark workflow as completed
     await context.run('mark-workflow-complete', async () => {
+      await supabase.rpc('refresh_materialized_views');
       await supabase
         .from('upstash_workflow_executions')
         .update({
@@ -962,6 +966,11 @@ const importSales = createWorkflow(
       totalFetched,
       totalProcessed,
       totalFailed,
+    });
+
+    await context.run('update-total-sales-count-and-volume', async () => {
+      await supabase.rpc('update_total_sales_count');
+      await supabase.rpc('update_total_sales_volume');
     });
 
     // Mark workflow as completed

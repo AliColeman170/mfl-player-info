@@ -56,27 +56,18 @@ async function fetchPlayersFromDB({
       best_ovr,
       ovr_difference,
       market_value_estimate,
-      market_value_low,
-      market_value_high,
       market_value_confidence,
       market_value_method,
       position_ratings,
       position_index,
       best_position_index,
-      has_pre_contract,
-      energy,
-      offer_status,
       contract_id,
       contract_status,
       owner_wallet_address,
       owner_name,
       club_id,
       club_name,
-      club_main_color,
-      club_secondary_color,
       club_type,
-      current_listing_price,
-      price_difference,
       last_synced_at,
       is_retired,
       is_burned,
@@ -342,29 +333,6 @@ async function fetchPlayersFromDB({
     }
   }
 
-  // Price difference filters
-  if (
-    filters.priceDiffMin !== undefined &&
-    filters.priceDiffMax !== undefined
-  ) {
-    // Handle both min and max together
-    if (filters.priceDiffMax === 3000) {
-      // Max is 3000 (infinity), only apply min filter
-      query = query.gte('price_difference', filters.priceDiffMin);
-    } else {
-      // Normal range filter
-      query = query.gte('price_difference', filters.priceDiffMin);
-      query = query.lte('price_difference', filters.priceDiffMax);
-    }
-  } else if (filters.priceDiffMin !== undefined) {
-    query = query.gte('price_difference', filters.priceDiffMin);
-  } else if (filters.priceDiffMax !== undefined) {
-    // If max is 3000 (the maximum), don't apply any filter (show all)
-    if (filters.priceDiffMax !== 3000) {
-      query = query.lte('price_difference', filters.priceDiffMax);
-    }
-  }
-
   // Wallet address filter
   if (filters.walletAddress) {
     query = query.eq('owner_wallet_address', filters.walletAddress);
@@ -398,9 +366,6 @@ async function fetchPlayersFromDB({
       difference: 'ovr_difference',
       'marketValue.estimate': 'market_value_estimate',
       marketValue: 'market_value_estimate',
-      'currentListing.price': 'current_listing_price',
-      listingPrice: 'current_listing_price',
-      priceDifference: 'price_difference',
       'ownedBy.name': 'owner_name_lower',
       ownerName: 'owner_name',
       'club.name': 'club_name_lower',
@@ -418,8 +383,6 @@ async function fetchPlayersFromDB({
     // Define fields that should have nulls sorted last
     const nullsLastFields = [
       'market_value_estimate',
-      'current_listing_price',
-      'price_difference',
       'best_ovr',
       'ovr_difference',
       'best_position_index',
@@ -519,7 +482,6 @@ async function fetchPlayersFromDB({
       defense: row.defense || 0,
       physical: row.physical || 0,
       goalkeeping: row.goalkeeping || 0,
-      resistance: 0, // Default resistance value
     },
     // Additional computed fields
     bestPosition: row.best_position || undefined,
@@ -531,8 +493,6 @@ async function fetchPlayersFromDB({
     marketValue: row.market_value_estimate
       ? {
           estimate: row.market_value_estimate,
-          low: row.market_value_low || 0,
-          high: row.market_value_high || 0,
           confidence:
             (row.market_value_confidence as 'high' | 'medium' | 'low') || 'low',
           method: row.market_value_method || '',
@@ -541,9 +501,6 @@ async function fetchPlayersFromDB({
         }
       : undefined,
     // Contract and owner info
-    hasPreContract: row.has_pre_contract || false,
-    energy: row.energy || 0,
-    offerStatus: row.offer_status || 0,
     activeContract: row.contract_id
       ? {
           id: row.contract_id,
@@ -555,14 +512,8 @@ async function fetchPlayersFromDB({
             ? {
                 id: row.club_id || 0,
                 name: row.club_name,
-                mainColor: row.club_main_color || '',
-                secondaryColor: row.club_secondary_color || '',
-                city: '',
                 division: 0,
-                logoVersion: '',
-                country: '',
                 ownedBy: undefined,
-                squads: [],
                 type: row.club_type || undefined,
               }
             : {
@@ -577,11 +528,6 @@ async function fetchPlayersFromDB({
                 ownedBy: undefined,
                 squads: [],
               },
-          startSeason: 0,
-          nbSeasons: 0,
-          autoRenewal: false,
-          createdDateTime: 0,
-          clauses: [],
         }
       : undefined,
     ownedBy: row.owner_wallet_address
@@ -596,24 +542,11 @@ async function fetchPlayersFromDB({
       ? {
           id: row.club_id || 0,
           name: row.club_name,
-          mainColor: row.club_main_color || '',
-          secondaryColor: row.club_secondary_color || '',
-          city: '',
           division: 0,
-          logoVersion: '',
-          country: '',
           ownedBy: undefined,
-          squads: [],
           type: row.club_type || undefined,
         }
       : undefined,
-    // Market info
-    currentListing: row.current_listing_price
-      ? {
-          price: row.current_listing_price,
-        }
-      : undefined,
-    priceDifference: row.price_difference,
     // Required fields for PlayerWithFavouriteData
     position_ratings:
       (row.position_ratings as unknown as PositionRating[]) || [],

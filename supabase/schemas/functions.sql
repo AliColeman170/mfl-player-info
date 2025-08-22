@@ -119,9 +119,7 @@ CREATE OR REPLACE FUNCTION get_filter_counts (
   best_overall_min_filter INTEGER DEFAULT NULL,
   best_overall_max_filter INTEGER DEFAULT NULL,
   market_value_min_filter INTEGER DEFAULT NULL,
-  market_value_max_filter INTEGER DEFAULT NULL,
-  price_diff_min_filter INTEGER DEFAULT NULL,
-  price_diff_max_filter INTEGER DEFAULT NULL
+  market_value_max_filter INTEGER DEFAULT NULL
 ) RETURNS JSON LANGUAGE plpgsql
 SET
   search_path = '' AS $$
@@ -874,26 +872,6 @@ BEGIN
 END;
 $$;
 
--- Function to update all players with calculated base values
-CREATE OR REPLACE FUNCTION update_all_player_base_values () RETURNS INTEGER LANGUAGE plpgsql security definer
-set
-  search_path = '' AS $$
-DECLARE
-  updated_count INTEGER;
-BEGIN
-  -- Update players with calculated base values
-  UPDATE public.players 
-  SET 
-    base_value_estimate = public.calculate_base_player_value(overall),
-    updated_at = NOW()
-  WHERE overall IS NOT NULL;
-  
-  GET DIAGNOSTICS updated_count = ROW_COUNT;
-  
-  RETURN updated_count;
-END;
-$$;
-
 -- Function to get sales data for price vs age graph
 CREATE OR REPLACE FUNCTION get_sales_price_vs_age_graph (days_back INTEGER DEFAULT 90) RETURNS TABLE (
   player_age INTEGER,
@@ -1043,93 +1021,6 @@ BEGIN
 END;
 $$;
 
--- Function to analyze multi-variable relationships for pricing model development
-CREATE OR REPLACE FUNCTION analyze_multi_variable_pricing (
-  days_back INTEGER DEFAULT 90,
-  min_sales INTEGER DEFAULT 50
-) RETURNS TABLE (
-  overall_rating INTEGER,
-  player_age INTEGER,
-  player_position TEXT,
-  avg_price NUMERIC,
-  trimmed_avg_price NUMERIC,
-  sale_count BIGINT,
-  base_value_estimate NUMERIC,
-  position_premium NUMERIC,
-  age_factor NUMERIC
-) LANGUAGE plpgsql security definer
-set
-  search_path = '' AS $$
-BEGIN
-  RETURN QUERY
-  WITH filtered_sales AS (
-    SELECT 
-      COALESCE(s.player_overall, p.overall) as rating,
-      COALESCE(s.player_age, p.age) as age,
-      COALESCE(s.player_position, p.primary_position) as position,
-      s.price,
-      s.listing_resource_id
-    FROM public.sales s
-    INNER JOIN public.players p ON s.player_id = p.id
-    WHERE 
-      (CASE 
-        WHEN s.purchase_date_time IS NOT NULL AND s.purchase_date_time > 0 
-        THEN to_timestamp(s.purchase_date_time / 1000)
-        ELSE to_timestamp(s.created_date_time / 1000)
-      END) >= (CURRENT_DATE - INTERVAL '1 day' * days_back)
-      AND s.price > 0
-      AND COALESCE(s.player_overall, p.overall) IS NOT NULL
-      AND COALESCE(s.player_age, p.age) IS NOT NULL
-      AND COALESCE(s.player_position, p.primary_position) IS NOT NULL
-      AND COALESCE(s.player_overall, p.overall) BETWEEN 40 AND 95
-      AND COALESCE(s.player_age, p.age) BETWEEN 16 AND 35
-  ),
-  percentile_trimmed AS (
-    SELECT 
-      rating, age, position, price, listing_resource_id,
-      PERCENTILE_CONT(0.05) WITHIN GROUP (ORDER BY price) OVER (PARTITION BY rating, age, position) as p5,
-      PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY price) OVER (PARTITION BY rating, age, position) as p95
-    FROM filtered_sales
-  ),
-  trimmed_sales AS (
-    SELECT rating, age, position, price, listing_resource_id
-    FROM percentile_trimmed
-    WHERE price BETWEEN p5 AND p95
-  ),
-  position_baseline AS (
-    SELECT 
-      position,
-      AVG(price) as position_avg_price
-    FROM trimmed_sales
-    GROUP BY position
-  ),
-  age_baseline AS (
-    SELECT 
-      age,
-      AVG(price) as age_avg_price
-    FROM trimmed_sales
-    GROUP BY age
-  )
-  SELECT 
-    fs.rating as overall_rating,
-    fs.age as player_age,
-    fs.position as player_position,
-    ROUND(AVG(fs.price), 2) as avg_price,
-    ROUND(AVG(ts.price), 2) as trimmed_avg_price,
-    COUNT(fs.listing_resource_id) as sale_count,
-    public.calculate_base_player_value(fs.rating) as base_value_estimate,
-    ROUND(pb.position_avg_price / (SELECT AVG(position_avg_price) FROM position_baseline), 3) as position_premium,
-    ROUND(ab.age_avg_price / (SELECT AVG(age_avg_price) FROM age_baseline), 3) as age_factor
-  FROM filtered_sales fs
-  LEFT JOIN trimmed_sales ts ON fs.rating = ts.rating AND fs.age = ts.age AND fs.position = ts.position
-  LEFT JOIN position_baseline pb ON fs.position = pb.position
-  LEFT JOIN age_baseline ab ON fs.age = ab.age
-  GROUP BY fs.rating, fs.age, fs.position, pb.position_avg_price, ab.age_avg_price
-  HAVING COUNT(fs.listing_resource_id) >= min_sales
-  ORDER BY fs.rating, fs.age, fs.position;
-END;
-$$;
-
 -- Comprehensive player pricing model function
 CREATE OR REPLACE FUNCTION calculate_comprehensive_player_value (
   player_overall INTEGER,
@@ -1227,280 +1118,6 @@ BEGIN
   END IF;
   
   RETURN ROUND(final_price, 2);
-END;
-$$;
-
--- Function to test pricing model accuracy against real sales data
-CREATE OR REPLACE FUNCTION test_pricing_model_accuracy (
-  days_back INTEGER DEFAULT 90,
-  sample_size INTEGER DEFAULT 1000
-) RETURNS TABLE (
-  test_count BIGINT,
-  avg_actual_price NUMERIC,
-  avg_predicted_price NUMERIC,
-  avg_absolute_error NUMERIC,
-  avg_percentage_error NUMERIC,
-  median_percentage_error NUMERIC,
-  accuracy_within_10_percent NUMERIC,
-  accuracy_within_20_percent NUMERIC,
-  accuracy_within_30_percent NUMERIC
-) LANGUAGE plpgsql security definer
-set
-  search_path = '' AS $$
-BEGIN
-  RETURN QUERY
-  WITH test_data AS (
-    SELECT 
-      COALESCE(s.player_overall, p.overall) as rating,
-      COALESCE(s.player_age, p.age) as age,
-      COALESCE(s.player_position, p.primary_position) as position,
-      s.price as actual_price,
-      public.calculate_comprehensive_player_value(
-        COALESCE(s.player_overall, p.overall),
-        COALESCE(s.player_age, p.age),
-        COALESCE(s.player_position, p.primary_position)
-      ) as predicted_price
-    FROM public.sales s
-    INNER JOIN public.players p ON s.player_id = p.id
-    WHERE 
-      (CASE 
-        WHEN s.purchase_date_time IS NOT NULL AND s.purchase_date_time > 0 
-        THEN to_timestamp(s.purchase_date_time / 1000)
-        ELSE to_timestamp(s.created_date_time / 1000)
-      END) >= (CURRENT_DATE - INTERVAL '1 day' * days_back)
-      AND s.price > 0
-      AND s.price BETWEEN 1 AND 1000  -- Filter extreme outliers
-      AND COALESCE(s.player_overall, p.overall) IS NOT NULL
-      AND COALESCE(s.player_age, p.age) IS NOT NULL
-      AND COALESCE(s.player_position, p.primary_position) IS NOT NULL
-    ORDER BY RANDOM()
-    LIMIT sample_size
-  ),
-  error_calculations AS (
-    SELECT 
-      actual_price,
-      predicted_price,
-      ABS(predicted_price - actual_price) as absolute_error,
-      ABS(predicted_price - actual_price) / NULLIF(actual_price, 0) * 100 as percentage_error
-    FROM test_data
-    WHERE predicted_price IS NOT NULL
-  )
-  SELECT 
-    COUNT(*) as test_count,
-    ROUND(AVG(actual_price), 2) as avg_actual_price,
-    ROUND(AVG(predicted_price), 2) as avg_predicted_price,
-    ROUND(AVG(absolute_error), 2) as avg_absolute_error,
-    ROUND(AVG(percentage_error), 2) as avg_percentage_error,
-    ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY percentage_error)::NUMERIC, 2) as median_percentage_error,
-    ROUND(COUNT(*) FILTER (WHERE percentage_error <= 10)::NUMERIC / COUNT(*) * 100, 1) as accuracy_within_10_percent,
-    ROUND(COUNT(*) FILTER (WHERE percentage_error <= 20)::NUMERIC / COUNT(*) * 100, 1) as accuracy_within_20_percent,
-    ROUND(COUNT(*) FILTER (WHERE percentage_error <= 30)::NUMERIC / COUNT(*) * 100, 1) as accuracy_within_30_percent
-  FROM error_calculations;
-END;
-$$;
-
--- Function to update a single player's market value estimates
-CREATE OR REPLACE FUNCTION update_player_market_value (player_id BIGINT) RETURNS VOID LANGUAGE plpgsql security definer
-set
-  search_path = '' AS $$
-DECLARE
-  player_record RECORD;
-  base_estimate NUMERIC;
-  comprehensive_estimate NUMERIC;
-  low_estimate INTEGER;
-  high_estimate INTEGER;
-  confidence_level TEXT;
-  estimation_method TEXT;
-  actual_sample_count INTEGER;
-  based_on_info TEXT;
-  confidence_multiplier NUMERIC;
-  days_back INTEGER := 90;
-BEGIN
-  -- Get player data
-  SELECT 
-    id, overall, age, primary_position, 
-    first_name, last_name
-  INTO player_record
-  FROM public.players 
-  WHERE id = player_id;
-  
-  -- Skip if player not found or missing required data
-  IF NOT FOUND OR player_record.overall IS NULL THEN
-    RETURN;
-  END IF;
-  
-  -- Get actual sample count from sales data for similar players
-  SELECT COUNT(*)::INTEGER INTO actual_sample_count
-  FROM public.sales s
-  INNER JOIN public.players p ON s.player_id = p.id
-  WHERE 
-    (CASE 
-      WHEN s.purchase_date_time IS NOT NULL AND s.purchase_date_time > 0 
-      THEN to_timestamp(s.purchase_date_time / 1000)
-      ELSE to_timestamp(s.created_date_time / 1000)
-    END) >= (CURRENT_DATE - INTERVAL '1 day' * days_back)
-    AND s.price > 0
-    -- Match similar players (±2 rating, ±2 age, same position)
-    AND ABS(COALESCE(s.player_overall, p.overall) - player_record.overall) <= 2
-    AND (player_record.age IS NULL OR ABS(COALESCE(s.player_age, p.age) - player_record.age) <= 2)
-    AND (player_record.primary_position IS NULL OR 
-         COALESCE(s.player_position, p.primary_position) = player_record.primary_position);
-  
-  -- If no exact matches, try broader search (±5 rating, same position)
-  IF actual_sample_count = 0 THEN
-    SELECT COUNT(*)::INTEGER INTO actual_sample_count
-    FROM public.sales s
-    INNER JOIN public.players p ON s.player_id = p.id
-    WHERE 
-      (CASE 
-        WHEN s.purchase_date_time IS NOT NULL AND s.purchase_date_time > 0 
-        THEN to_timestamp(s.purchase_date_time / 1000)
-        ELSE to_timestamp(s.created_date_time / 1000)
-      END) >= (CURRENT_DATE - INTERVAL '1 day' * days_back)
-      AND s.price > 0
-      AND ABS(COALESCE(s.player_overall, p.overall) - player_record.overall) <= 5
-      AND (player_record.primary_position IS NULL OR 
-           COALESCE(s.player_position, p.primary_position) = player_record.primary_position);
-  END IF;
-  
-  -- If still no matches, try rating range only
-  IF actual_sample_count = 0 THEN
-    SELECT COUNT(*)::INTEGER INTO actual_sample_count
-    FROM public.sales s
-    INNER JOIN public.players p ON s.player_id = p.id
-    WHERE 
-      (CASE 
-        WHEN s.purchase_date_time IS NOT NULL AND s.purchase_date_time > 0 
-        THEN to_timestamp(s.purchase_date_time / 1000)
-        ELSE to_timestamp(s.created_date_time / 1000)
-      END) >= (CURRENT_DATE - INTERVAL '1 day' * days_back)
-      AND s.price > 0
-      AND ABS(COALESCE(s.player_overall, p.overall) - player_record.overall) <= 10;
-  END IF;
-  
-  -- Default to 0 if no sales found
-  IF actual_sample_count IS NULL THEN
-    actual_sample_count := 0;
-  END IF;
-  
-  -- Calculate base estimate using our comprehensive model
-  comprehensive_estimate := public.calculate_comprehensive_player_value(
-    player_record.overall,
-    player_record.age,
-    player_record.primary_position
-  );
-  
-  -- Use comprehensive estimate as primary estimate
-  base_estimate := comprehensive_estimate;
-  
-  -- Calculate confidence based on actual sample size and model accuracy
-  IF actual_sample_count >= 1000 THEN
-    confidence_level := 'High';
-    confidence_multiplier := 0.80; -- ±20% range
-    estimation_method := 'Data-driven (High Sample)';
-  ELSIF actual_sample_count >= 100 THEN
-    confidence_level := 'Medium';
-    confidence_multiplier := 0.70; -- ±30% range
-    estimation_method := 'Data-driven (Medium Sample)';
-  ELSIF actual_sample_count >= 10 THEN
-    confidence_level := 'Low';
-    confidence_multiplier := 0.60; -- ±40% range
-    estimation_method := 'Data-driven (Low Sample)';
-  ELSE
-    -- No sales data, use model-based confidence
-    IF player_record.overall >= 85 THEN
-      confidence_level := 'Very Low';
-      confidence_multiplier := 0.50; -- ±50% range
-    ELSIF player_record.overall >= 50 THEN
-      confidence_level := 'Low';
-      confidence_multiplier := 0.65; -- ±35% range
-    ELSE
-      confidence_level := 'Medium';
-      confidence_multiplier := 0.75; -- ±25% range
-    END IF;
-    estimation_method := 'Model-based (No Sales Data)';
-  END IF;
-  
-  -- Calculate range based on confidence
-  low_estimate := ROUND(base_estimate * confidence_multiplier);
-  high_estimate := ROUND(base_estimate * (2.0 - confidence_multiplier));
-  
-  -- Ensure minimum values and logical ranges
-  IF low_estimate < 1 THEN low_estimate := 1; END IF;
-  IF high_estimate < low_estimate + 1 THEN high_estimate := low_estimate + 1; END IF;
-  IF base_estimate < 1 THEN base_estimate := 1; END IF;
-  
-  -- Based on description
-  based_on_info := 'Multi-variable model (Rating: ' || player_record.overall || 
-                   CASE WHEN player_record.age IS NOT NULL THEN ', Age: ' || player_record.age ELSE '' END ||
-                   CASE WHEN player_record.primary_position IS NOT NULL THEN ', Position: ' || player_record.primary_position ELSE '' END ||
-                   ') - ' || actual_sample_count || ' similar sales';
-  
-  -- Update player record - update base_value_estimate first, then market values
-  UPDATE public.players 
-  SET 
-    base_value_estimate = ROUND(base_estimate)::INTEGER,
-    market_value_estimate = ROUND(base_estimate)::INTEGER,
-    market_value_low = low_estimate,
-    market_value_high = high_estimate,
-    market_value_confidence = confidence_level,
-    market_value_method = estimation_method,
-    market_value_sample_size = actual_sample_count,
-    market_value_based_on = based_on_info,
-    market_value_updated_at = NOW(),
-    updated_at = NOW()
-  WHERE id = player_id;
-  
-END;
-$$;
-
--- Function to bulk update all players' market values (original slow version)
-CREATE OR REPLACE FUNCTION update_all_players_market_values () RETURNS INTEGER LANGUAGE plpgsql security definer
-set
-  search_path = '' AS $$
-DECLARE
-  updated_count INTEGER := 0;
-  player_record RECORD;
-BEGIN
-  -- Process players in batches to avoid long-running transactions
-  FOR player_record IN 
-    SELECT id FROM public.players 
-    WHERE overall IS NOT NULL 
-    ORDER BY id
-  LOOP
-    PERFORM public.update_player_market_value(player_record.id);
-    updated_count := updated_count + 1;
-    
-    -- Log progress every 10000 records
-    IF updated_count % 10000 = 0 THEN
-      RAISE NOTICE 'Updated % players market values', updated_count;
-    END IF;
-  END LOOP;
-  
-  RETURN updated_count;
-END;
-$$;
-
--- Trigger function to automatically update market value when player data changes
-CREATE OR REPLACE FUNCTION trigger_update_player_market_value () RETURNS TRIGGER LANGUAGE plpgsql
-set
-  search_path = '' AS $$
-BEGIN
-  -- Only update if relevant fields changed or it's a new player
-  IF TG_OP = 'INSERT' OR 
-     (TG_OP = 'UPDATE' AND (
-       OLD.overall IS DISTINCT FROM NEW.overall OR
-       OLD.age IS DISTINCT FROM NEW.age OR
-       OLD.primary_position IS DISTINCT FROM NEW.primary_position OR
-       OLD.market_value_estimate IS NULL OR
-       OLD.base_value_estimate IS NULL
-     )) THEN
-    
-    -- Update market value using our comprehensive function
-    PERFORM public.update_player_market_value(NEW.id);
-  END IF;
-  
-  RETURN NEW;
 END;
 $$;
 
@@ -1612,123 +1229,6 @@ BEGIN
 END;
 $$;
 
--- Optimized player market value function using pre-aggregated data
-CREATE OR REPLACE FUNCTION update_player_market_value_fast (player_id BIGINT) RETURNS VOID LANGUAGE plpgsql SECURITY DEFINER
-SET
-  search_path = '' AS $$
-DECLARE
-    player_rec RECORD;
-    summary_rec RECORD;
-    estimated_value INTEGER;
-    price_range_low INTEGER;
-    price_range_high INTEGER;
-    confidence_level TEXT;
-    method_used TEXT;
-    sample_size INTEGER;
-    based_on_text TEXT;
-BEGIN
-    -- Get player data
-    SELECT overall, age, primary_position, first_name, last_name
-    INTO player_rec
-    FROM public.players
-    WHERE id = player_id;
-    
-    IF NOT FOUND OR player_rec.overall IS NULL OR player_rec.age IS NULL THEN
-        RETURN;
-    END IF;
-    
-    -- Find best matching summary data (exact match first, then closest)
-    SELECT *
-    INTO summary_rec
-    FROM public.sales_summary
-    WHERE position = player_rec.primary_position
-    AND age_center BETWEEN (player_rec.age - 4) AND (player_rec.age + 4)
-    AND overall_center BETWEEN (player_rec.overall - 4) AND (player_rec.overall + 4)
-    ORDER BY 
-        -- Prefer exact matches
-        ABS(age_center - player_rec.age) + ABS(overall_center - player_rec.overall),
-        sample_count DESC
-    LIMIT 1;
-    
-    IF FOUND AND summary_rec.sample_count >= 5 THEN
-        -- Use pre-aggregated data for calculation
-        IF summary_rec.sample_count >= 20 AND summary_rec.recent_sales_data IS NOT NULL THEN
-            -- High sample: Use EMA from recent sales data
-            estimated_value := GREATEST(1, ROUND(
-                public.calculate_ema_from_sales_data(summary_rec.recent_sales_data)
-            ));
-            confidence_level := 'High';
-            method_used := 'Data-driven (High Sample)';
-        ELSIF summary_rec.sample_count >= 5 THEN
-            -- Medium sample: Use average with trend adjustment
-            estimated_value := GREATEST(1, ROUND(
-                summary_rec.avg_price * (1 + COALESCE(summary_rec.price_trend, 0))
-            ));
-            confidence_level := 'Medium';
-            method_used := 'Data-driven (Medium Sample)';
-        ELSE
-            -- Low sample: Use median price
-            estimated_value := GREATEST(1, ROUND(summary_rec.median_price));
-            confidence_level := 'Low';
-            method_used := 'Data-driven (Low Sample)';
-        END IF;
-        
-        sample_size := summary_rec.sample_count;
-        based_on_text := format('Pre-aggregated data: %s samples for %s age %s-%s, overall %s-%s',
-            summary_rec.sample_count,
-            summary_rec.position,
-            summary_rec.age_center - summary_rec.age_range,
-            summary_rec.age_center + summary_rec.age_range,
-            summary_rec.overall_center - summary_rec.overall_range,
-            summary_rec.overall_center + summary_rec.overall_range
-        );
-        
-        -- Calculate price range based on confidence
-        CASE confidence_level
-            WHEN 'High' THEN
-                price_range_low := ROUND(estimated_value * 0.85);
-                price_range_high := ROUND(estimated_value * 1.15);
-            WHEN 'Medium' THEN  
-                price_range_low := ROUND(estimated_value * 0.8);
-                price_range_high := ROUND(estimated_value * 1.2);
-            ELSE
-                price_range_low := ROUND(estimated_value * 0.7);
-                price_range_high := ROUND(estimated_value * 1.3);
-        END CASE;
-    ELSE
-        -- Fallback to comprehensive formula if no summary data
-        estimated_value := GREATEST(1, ROUND(
-            public.calculate_comprehensive_player_value(
-                player_rec.overall, 
-                player_rec.age, 
-                player_rec.primary_position
-            )
-        ));
-        price_range_low := ROUND(estimated_value * 0.8);
-        price_range_high := ROUND(estimated_value * 1.2);
-        confidence_level := 'Low';
-        method_used := 'Formula Fallback';
-        sample_size := 0;
-        based_on_text := format('Comprehensive formula for %s %s yo %s ovr (no market data)',
-            player_rec.primary_position, player_rec.age, player_rec.overall);
-    END IF;
-    
-    -- Update player record
-    UPDATE public.players
-    SET 
-        market_value_estimate = estimated_value,
-        market_value_low = price_range_low,
-        market_value_high = price_range_high,
-        market_value_confidence = confidence_level,
-        market_value_method = method_used,
-        market_value_sample_size = sample_size,
-        market_value_based_on = based_on_text,
-        market_value_updated_at = NOW(),
-        base_value_estimate = ROUND(public.calculate_base_player_value(player_rec.overall))
-    WHERE id = player_id;
-END;
-$$;
-
 -- Ultra-fast bulk update function using single SQL operation per chunk
 CREATE OR REPLACE FUNCTION update_players_market_values_batch (
   batch_size INTEGER DEFAULT 5000,
@@ -1804,6 +1304,58 @@ BEGIN
   RETURN QUERY
   SELECT 
     player_count as total_count,
+    NOW() as updated_at;
+END;
+$$;
+
+-- RPC function to update sync_config with total sales count
+CREATE OR REPLACE FUNCTION update_total_sales_count () RETURNS TABLE (total_count bigint, updated_at timestamptz) LANGUAGE plpgsql security definer
+set
+  search_path = '' AS $$
+DECLARE
+  sales_count bigint;
+BEGIN
+  -- Get the total count of sales
+  SELECT COUNT(*) INTO sales_count FROM public.sales;
+  
+  -- Upsert the config value
+  INSERT INTO public.sync_config (config_key, config_value, updated_at)
+  VALUES ('total_sales_count', sales_count::text, NOW())
+  ON CONFLICT (config_key) 
+  DO UPDATE SET 
+    config_value = sales_count::text,
+    updated_at = NOW();
+  
+  -- Return the count and timestamp
+  RETURN QUERY
+  SELECT 
+    sales_count as total_count,
+    NOW() as updated_at;
+END;
+$$;
+
+-- RPC function to update sync_config with total sales volume
+CREATE OR REPLACE FUNCTION update_total_sales_volume () RETURNS TABLE (total_volume bigint, updated_at timestamptz) LANGUAGE plpgsql security definer
+set
+  search_path = '' AS $$
+DECLARE
+  sales_volume bigint;
+BEGIN
+  -- Get the total count of players
+  SELECT COALESCE(SUM(price), 0) INTO sales_volume FROM public.sales;
+  
+  -- Upsert the config value
+  INSERT INTO public.sync_config (config_key, config_value, updated_at)
+  VALUES ('total_sales_volume', sales_volume::text, NOW())
+  ON CONFLICT (config_key) 
+  DO UPDATE SET 
+    config_value = sales_volume::text,
+    updated_at = NOW();
+  
+  -- Return the count and timestamp
+  RETURN QUERY
+  SELECT 
+    sales_volume as total_volume,
     NOW() as updated_at;
 END;
 $$;

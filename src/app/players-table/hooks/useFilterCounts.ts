@@ -72,8 +72,6 @@ async function fetchFilterCounts(
     best_overall_max_filter: filters.bestOverallMax || undefined,
     market_value_min_filter: filters.marketValueMin || undefined,
     market_value_max_filter: filters.marketValueMax || undefined,
-    price_diff_min_filter: filters.priceDiffMin || undefined,
-    price_diff_max_filter: filters.priceDiffMax || undefined,
   });
 
   if (error) {

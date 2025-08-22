@@ -58,6 +58,20 @@ export type Database = {
             foreignKeyName: "favourites_player_id_fkey"
             columns: ["player_id"]
             isOneToOne: false
+            referencedRelation: "contracted_players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "favourites_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "favourite_players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "favourites_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
             referencedRelation: "players"
             referencedColumns: ["id"]
           },
@@ -171,70 +185,43 @@ export type Database = {
       players: {
         Row: {
           age: number | null
-          auto_renewal: boolean | null
-          base_value_estimate: number | null
           basic_data_synced_at: string | null
           best_ovr: number | null
           best_position: string | null
           best_position_difference: number | null
           best_position_index: number | null
           best_position_rating: number | null
-          clauses: Json | null
-          club_city: string | null
-          club_country: string | null
           club_division: number | null
           club_id: number | null
-          club_logo_version: string | null
-          club_main_color: string | null
           club_name: string | null
           club_name_lower: string | null
-          club_secondary_color: string | null
           club_type: string | null
-          contract_created_date_time: number | null
           contract_id: number | null
           contract_kind: string | null
           contract_status: string | null
           created_at: string | null
-          current_listing_id: number | null
-          current_listing_price: number | null
-          current_listing_status: string | null
           data_hash: string | null
           defense: number | null
           dribbling: number | null
-          energy: number | null
           first_name: string | null
           goalkeeping: number | null
-          has_pre_contract: boolean | null
           height: number | null
           id: number
           is_burned: boolean | null
           is_retired: boolean | null
           last_name: string | null
-          last_sale_date: number | null
-          last_sale_price: number | null
           last_synced_at: string | null
-          listing_created_date_time: number | null
-          market_value_based_on: string | null
-          market_value_calculated_at: string | null
           market_value_confidence: string | null
           market_value_estimate: number | null
           market_value_high: number | null
           market_value_low: number | null
           market_value_method: string | null
-          market_value_sample_size: number | null
           market_value_updated_at: string | null
           nationality: string | null
-          nb_seasons: number | null
-          offer_auto_accept: boolean | null
-          offer_min_division: number | null
-          offer_min_revenue_share: number | null
-          offer_status: number | null
           overall: number | null
           ovr_difference: number | null
-          owner_last_active: number | null
           owner_name: string | null
           owner_name_lower: string | null
-          owner_twitter: string | null
           owner_wallet_address: string | null
           pace: number | null
           passing: number | null
@@ -242,85 +229,54 @@ export type Database = {
           position_index: number | null
           position_ratings: Json | null
           preferred_foot: string | null
-          price_difference: number | null
           primary_position: string | null
-          resistance: number | null
           revenue_share: number | null
           search_text: string | null
           secondary_positions: string[] | null
           shooting: number | null
-          start_season: number | null
           sync_stage: string | null
-          sync_version: number | null
           total_revenue_share_locked: number | null
           updated_at: string | null
         }
         Insert: {
           age?: number | null
-          auto_renewal?: boolean | null
-          base_value_estimate?: number | null
           basic_data_synced_at?: string | null
           best_ovr?: number | null
           best_position?: string | null
           best_position_difference?: number | null
           best_position_index?: number | null
           best_position_rating?: number | null
-          clauses?: Json | null
-          club_city?: string | null
-          club_country?: string | null
           club_division?: number | null
           club_id?: number | null
-          club_logo_version?: string | null
-          club_main_color?: string | null
           club_name?: string | null
           club_name_lower?: string | null
-          club_secondary_color?: string | null
           club_type?: string | null
-          contract_created_date_time?: number | null
           contract_id?: number | null
           contract_kind?: string | null
           contract_status?: string | null
           created_at?: string | null
-          current_listing_id?: number | null
-          current_listing_price?: number | null
-          current_listing_status?: string | null
           data_hash?: string | null
           defense?: number | null
           dribbling?: number | null
-          energy?: number | null
           first_name?: string | null
           goalkeeping?: number | null
-          has_pre_contract?: boolean | null
           height?: number | null
           id: number
           is_burned?: boolean | null
           is_retired?: boolean | null
           last_name?: string | null
-          last_sale_date?: number | null
-          last_sale_price?: number | null
           last_synced_at?: string | null
-          listing_created_date_time?: number | null
-          market_value_based_on?: string | null
-          market_value_calculated_at?: string | null
           market_value_confidence?: string | null
           market_value_estimate?: number | null
           market_value_high?: number | null
           market_value_low?: number | null
           market_value_method?: string | null
-          market_value_sample_size?: number | null
           market_value_updated_at?: string | null
           nationality?: string | null
-          nb_seasons?: number | null
-          offer_auto_accept?: boolean | null
-          offer_min_division?: number | null
-          offer_min_revenue_share?: number | null
-          offer_status?: number | null
           overall?: number | null
           ovr_difference?: number | null
-          owner_last_active?: number | null
           owner_name?: string | null
           owner_name_lower?: string | null
-          owner_twitter?: string | null
           owner_wallet_address?: string | null
           pace?: number | null
           passing?: number | null
@@ -328,85 +284,54 @@ export type Database = {
           position_index?: number | null
           position_ratings?: Json | null
           preferred_foot?: string | null
-          price_difference?: number | null
           primary_position?: string | null
-          resistance?: number | null
           revenue_share?: number | null
           search_text?: string | null
           secondary_positions?: string[] | null
           shooting?: number | null
-          start_season?: number | null
           sync_stage?: string | null
-          sync_version?: number | null
           total_revenue_share_locked?: number | null
           updated_at?: string | null
         }
         Update: {
           age?: number | null
-          auto_renewal?: boolean | null
-          base_value_estimate?: number | null
           basic_data_synced_at?: string | null
           best_ovr?: number | null
           best_position?: string | null
           best_position_difference?: number | null
           best_position_index?: number | null
           best_position_rating?: number | null
-          clauses?: Json | null
-          club_city?: string | null
-          club_country?: string | null
           club_division?: number | null
           club_id?: number | null
-          club_logo_version?: string | null
-          club_main_color?: string | null
           club_name?: string | null
           club_name_lower?: string | null
-          club_secondary_color?: string | null
           club_type?: string | null
-          contract_created_date_time?: number | null
           contract_id?: number | null
           contract_kind?: string | null
           contract_status?: string | null
           created_at?: string | null
-          current_listing_id?: number | null
-          current_listing_price?: number | null
-          current_listing_status?: string | null
           data_hash?: string | null
           defense?: number | null
           dribbling?: number | null
-          energy?: number | null
           first_name?: string | null
           goalkeeping?: number | null
-          has_pre_contract?: boolean | null
           height?: number | null
           id?: number
           is_burned?: boolean | null
           is_retired?: boolean | null
           last_name?: string | null
-          last_sale_date?: number | null
-          last_sale_price?: number | null
           last_synced_at?: string | null
-          listing_created_date_time?: number | null
-          market_value_based_on?: string | null
-          market_value_calculated_at?: string | null
           market_value_confidence?: string | null
           market_value_estimate?: number | null
           market_value_high?: number | null
           market_value_low?: number | null
           market_value_method?: string | null
-          market_value_sample_size?: number | null
           market_value_updated_at?: string | null
           nationality?: string | null
-          nb_seasons?: number | null
-          offer_auto_accept?: boolean | null
-          offer_min_division?: number | null
-          offer_min_revenue_share?: number | null
-          offer_status?: number | null
           overall?: number | null
           ovr_difference?: number | null
-          owner_last_active?: number | null
           owner_name?: string | null
           owner_name_lower?: string | null
-          owner_twitter?: string | null
           owner_wallet_address?: string | null
           pace?: number | null
           passing?: number | null
@@ -414,16 +339,12 @@ export type Database = {
           position_index?: number | null
           position_ratings?: Json | null
           preferred_foot?: string | null
-          price_difference?: number | null
           primary_position?: string | null
-          resistance?: number | null
           revenue_share?: number | null
           search_text?: string | null
           secondary_positions?: string[] | null
           shooting?: number | null
-          start_season?: number | null
           sync_stage?: string | null
-          sync_version?: number | null
           total_revenue_share_locked?: number | null
           updated_at?: string | null
         }
@@ -476,6 +397,20 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "sales_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "contracted_players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "favourite_players"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "sales_player_id_fkey"
             columns: ["player_id"]
@@ -619,23 +554,35 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      contracted_players: {
+        Row: {
+          id: number | null
+        }
+        Relationships: []
+      }
+      favourite_players: {
+        Row: {
+          age: number | null
+          club_name: string | null
+          favorite_count: number | null
+          first_name: string | null
+          id: number | null
+          last_name: string | null
+          overall: number | null
+          primary_position: string | null
+        }
+        Relationships: []
+      }
+      top_owners: {
+        Row: {
+          owner_name: string | null
+          owner_wallet_address: string | null
+          player_count: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
-      analyze_multi_variable_pricing: {
-        Args: { days_back?: number; min_sales?: number }
-        Returns: {
-          age_factor: number
-          avg_price: number
-          base_value_estimate: number
-          overall_rating: number
-          player_age: number
-          player_position: string
-          position_premium: number
-          sale_count: number
-          trimmed_avg_price: number
-        }[]
-      }
       calculate_base_player_value: {
         Args: { player_overall: number }
         Returns: number
@@ -714,8 +661,6 @@ export type Database = {
           passing_min_filter?: number
           physical_max_filter?: number
           physical_min_filter?: number
-          price_diff_max_filter?: number
-          price_diff_min_filter?: number
           search_text?: string
           selected_tags?: string[]
           shooting_max_filter?: number
@@ -779,45 +724,17 @@ export type Database = {
       get_top_owners: {
         Args: { limit_count?: number }
         Returns: {
-          avg_overall: number
           owner_name: string
           owner_wallet_address: string
           player_count: number
-          total_value: number
         }[]
       }
       get_total_sales_volume: {
         Args: Record<PropertyKey, never>
         Returns: number
       }
-      test_pricing_model_accuracy: {
-        Args: { days_back?: number; sample_size?: number }
-        Returns: {
-          accuracy_within_10_percent: number
-          accuracy_within_20_percent: number
-          accuracy_within_30_percent: number
-          avg_absolute_error: number
-          avg_actual_price: number
-          avg_percentage_error: number
-          avg_predicted_price: number
-          median_percentage_error: number
-          test_count: number
-        }[]
-      }
-      update_all_player_base_values: {
+      refresh_materialized_views: {
         Args: Record<PropertyKey, never>
-        Returns: number
-      }
-      update_all_players_market_values: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
-      update_player_market_value: {
-        Args: { player_id: number }
-        Returns: undefined
-      }
-      update_player_market_value_fast: {
-        Args: { player_id: number }
         Returns: undefined
       }
       update_players_market_values_batch: {
@@ -834,6 +751,20 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: {
           total_count: number
+          updated_at: string
+        }[]
+      }
+      update_total_sales_count: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          total_count: number
+          updated_at: string
+        }[]
+      }
+      update_total_sales_volume: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          total_volume: number
           updated_at: string
         }[]
       }

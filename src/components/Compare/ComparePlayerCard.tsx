@@ -64,7 +64,7 @@ function getMarketValueTooltip(marketValue: MarketValue): string {
       return 'No recent sales data available for market value calculation.';
     }
 
-    return `${getMethodDescription(marketValue.method)} from ${marketValue.basedOn}. ${getConfidenceDescription(marketValue.confidence)}.`;
+    return `${getMethodDescription(marketValue.method)} based off last 180 days sales data. ${getConfidenceDescription(marketValue.confidence)}.`;
   } catch (error) {
     return 'Unable to calculate market value at this time.';
   }
@@ -185,21 +185,6 @@ export function ComparePlayerCard({ playerId }: ComparePlayerCardProps) {
 
           {/* Status Badges */}
           <div className='flex items-center gap-1.5'>
-            {player.currentListing?.price && (
-              <Link href={`https://app.playmfl.com/players/${player.id}`}>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <Badge className='border-0 text-[10px] [&>svg]:size-2.5'>
-                      <ShoppingCartIcon />
-                      For Sale
-                    </Badge>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Available to buy for ${player.currentListing.price}</p>
-                  </TooltipContent>
-                </Tooltip>
-              </Link>
-            )}
             {player.club && <PlayerContract club={player.club} />}
             <Badge
               variant='outline'

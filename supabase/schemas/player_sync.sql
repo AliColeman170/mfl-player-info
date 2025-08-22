@@ -20,42 +20,22 @@ CREATE TABLE IF NOT EXISTS "public"."players" (
     "defense" integer,
     "physical" integer,
     "goalkeeping" integer,
-    "resistance" integer,
-    -- Contract information
-    "has_pre_contract" boolean,
-    "energy" integer,
-    "offer_status" integer,
-    "offer_min_division" integer,
-    "offer_min_revenue_share" integer,
-    "offer_auto_accept" boolean,
     -- Active contract data
     "contract_id" bigint,
     "contract_status" "text",
     "contract_kind" "text",
     "revenue_share" integer,
     "total_revenue_share_locked" integer,
-    "start_season" integer,
-    "nb_seasons" integer,
-    "auto_renewal" boolean,
-    "contract_created_date_time" bigint,
-    "clauses" "jsonb",
     -- Club information
     "club_id" bigint,
     "club_name" "text",
     "club_name_lower" "text" GENERATED ALWAYS AS (lower(trim(club_name))) STORED,
-    "club_main_color" "text",
-    "club_secondary_color" "text",
-    "club_city" "text",
     "club_division" integer,
-    "club_logo_version" "text",
-    "club_country" "text",
     "club_type" "text",
     -- Owner information
     "owner_wallet_address" "text",
     "owner_name" "text",
     "owner_name_lower" "text" GENERATED ALWAYS AS (lower(trim(owner_name))) STORED,
-    "owner_twitter" "text",
-    "owner_last_active" bigint,
     -- Burned status
     "is_burned" boolean GENERATED ALWAYS AS (
         CASE
@@ -63,29 +43,18 @@ CREATE TABLE IF NOT EXISTS "public"."players" (
             ELSE false
         END
     ) STORED,
-    -- Market/listing data
-    "current_listing_id" bigint,
-    "current_listing_price" integer,
-    "current_listing_status" "text",
-    "listing_created_date_time" bigint,
-    "last_sale_price" integer,
-    "last_sale_date" bigint,
     -- Computed fields
     "best_position" "text",
     "best_ovr" integer,
     "ovr_difference" integer,
     "position_index" integer,
     "best_position_index" integer,
-    "price_difference" integer,
     "market_value_estimate" integer,
     "market_value_low" integer,
     "market_value_high" integer,
     "market_value_confidence" "text",
     "market_value_method" "text",
-    "market_value_sample_size" integer,
-    "market_value_based_on" "text",
     "market_value_updated_at" timestamp with time zone,
-    "base_value_estimate" integer,
     "position_ratings" "jsonb",
     "best_position_rating" integer,
     "best_position_difference" integer,
@@ -101,7 +70,6 @@ CREATE TABLE IF NOT EXISTS "public"."players" (
     "last_synced_at" timestamp with time zone DEFAULT "now" (),
     "created_at" timestamp with time zone DEFAULT "now" (),
     "updated_at" timestamp with time zone DEFAULT "now" (),
-    "sync_version" integer DEFAULT 1,
     "data_hash" "text"
 );
 
@@ -184,17 +152,7 @@ CREATE INDEX IF NOT EXISTS "idx_players_club_division" ON "public"."players" USI
 
 CREATE INDEX IF NOT EXISTS "idx_players_contract_status" ON "public"."players" USING "btree" ("contract_status");
 
-CREATE INDEX IF NOT EXISTS "idx_players_listing_status" ON "public"."players" USING "btree" ("current_listing_status");
-
-CREATE INDEX IF NOT EXISTS "idx_players_listing_price" ON "public"."players" USING "btree" ("current_listing_price");
-
-CREATE INDEX IF NOT EXISTS "idx_players_energy" ON "public"."players" USING "btree" ("energy");
-
-CREATE INDEX IF NOT EXISTS "idx_players_offer_status" ON "public"."players" USING "btree" ("offer_status");
-
 CREATE INDEX IF NOT EXISTS "idx_players_goalkeeping" ON "public"."players" USING "btree" ("goalkeeping");
-
-CREATE INDEX IF NOT EXISTS "idx_players_resistance" ON "public"."players" USING "btree" ("resistance");
 
 CREATE INDEX IF NOT EXISTS "idx_players_data_hash" ON "public"."players" USING "btree" ("data_hash");
 
