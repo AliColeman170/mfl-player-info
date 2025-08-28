@@ -21,26 +21,23 @@ async function updateFavourite({
   const supabase = createClient();
 
   // Get current user
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
+  const { data, error: authError } = await supabase.auth.getClaims();
 
-  if (authError || !user?.app_metadata?.address) {
+  if (authError || !data?.claims.app_metadata?.address) {
     throw new Error('Not authenticated');
   }
 
-  const { data, error } = await supabase
+  const { data: favouriteData, error } = await supabase
     .from('favourites')
     .upsert({
-      wallet_address: user.app_metadata.address,
+      wallet_address: data.claims.app_metadata.address,
       player_id,
       is_favourite,
     })
     .select('player_id, is_favourite')
     .single();
 
-  console.log({ upsertResult: { data, error } });
+  console.log({ upsertResult: { favouriteData, error } });
 
   if (error) {
     throw new Error(error.message || 'Failed to update favourite');
@@ -62,10 +59,15 @@ export function useToggleFavourite() {
     mutationFn: updateFavourite,
     onMutate: async (variables) => {
       // Cancel any outgoing refetches so they don't overwrite our optimistic update
-      await queryClient.cancelQueries({ queryKey: ['player', variables.player_id] });
+      await queryClient.cancelQueries({
+        queryKey: ['player', variables.player_id],
+      });
 
       // Snapshot the previous value
-      const previousPlayer = queryClient.getQueryData(['player', variables.player_id]);
+      const previousPlayer = queryClient.getQueryData([
+        'player',
+        variables.player_id,
+      ]);
 
       // Optimistically update the player data
       queryClient.setQueryData(['player', variables.player_id], (old: any) => {
@@ -84,7 +86,10 @@ export function useToggleFavourite() {
     onError: (err, _variables, context) => {
       // If the mutation fails, use the context returned from onMutate to roll back
       if (context?.previousPlayer) {
-        queryClient.setQueryData(['player', context.playerId], context.previousPlayer);
+        queryClient.setQueryData(
+          ['player', context.playerId],
+          context.previousPlayer
+        );
       }
       toast.error(err.message || 'Failed to update favourite');
     },

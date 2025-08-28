@@ -5,11 +5,9 @@ import { cache } from 'react';
 import { getUserProfile } from './user';
 
 export const getUser = cache(async (supabase: SupabaseClient<Database>) => {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data } = await supabase.auth.getClaims();
 
-  return user;
+  return data?.claims;
 });
 
 export const getAuthUserProfile = async () => {
