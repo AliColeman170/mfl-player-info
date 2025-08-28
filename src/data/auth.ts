@@ -20,7 +20,7 @@ export const getAuthUserProfile = async () => {
 
   if (!userProfile) return null;
 
-  return { ...user, profile: userProfile };
+  return { user, profile: userProfile };
 };
 
 export type AuthUserProfile = Awaited<ReturnType<typeof getAuthUserProfile>>;

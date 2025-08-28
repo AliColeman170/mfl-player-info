@@ -28,11 +28,11 @@ export function ToggleFavouriteButton({
     | null;
 }) {
   const { userPromise } = useUser();
-  const user = use(userPromise);
+  const userData = use(userPromise);
   const toggleFavouriteMutation = useToggleFavourite();
 
   async function toggleFavourite() {
-    if (!user?.app_metadata.address) return;
+    if (!userData?.user.app_metadata.address) return;
 
     console.log({
       player_id: player.id,
@@ -48,7 +48,8 @@ export function ToggleFavouriteButton({
   return (
     <Button
       disabled={
-        !user?.app_metadata.address || toggleFavouriteMutation.isPending
+        !userData?.user.app_metadata.address ||
+        toggleFavouriteMutation.isPending
       }
       size='sm'
       className={cn(

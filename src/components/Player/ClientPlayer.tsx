@@ -111,8 +111,8 @@ function ConfidenceBadge({
 export function ClientPlayer({ playerId }: ClientPlayerProps) {
   const { data: player, isLoading, error } = usePlayerQuery(playerId);
   const { userPromise } = useUser();
-  const user = use(userPromise);
-  const isAuthenticated = !!user?.app_metadata?.address;
+  const userData = use(userPromise);
+  const isAuthenticated = !!userData?.user.app_metadata?.address;
 
   if (isLoading) {
     return (

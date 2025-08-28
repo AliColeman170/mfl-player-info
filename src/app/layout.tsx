@@ -64,7 +64,7 @@ export default async function RootLayout({
   children: ReactNode;
 }) {
   const userPromise = getAuthUserProfile();
-  const user = await userPromise;
+  const userData = await userPromise;
 
   const supabase = await createClient();
 
@@ -80,7 +80,7 @@ export default async function RootLayout({
         className={`${titilliumWeb.className} bg-background text-foreground flex min-h-screen flex-col`}
       >
         {data?.config_value === '1' &&
-        user?.app_metadata.address !== '0xb6fbc6072df85634' ? (
+        userData?.user.app_metadata.address !== '0xb6fbc6072df85634' ? (
           <div className='grid flex-1 items-center justify-center'>
             <Card className='max-w-auto w-full max-w-96 sm:gap-4'>
               <CardHeader className='items-center justify-center'>

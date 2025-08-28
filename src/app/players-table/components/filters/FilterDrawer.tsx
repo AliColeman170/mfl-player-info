@@ -76,10 +76,10 @@ export function FilterDrawer() {
   // Get dynamic filter counts based on current filters
   const { data: filterCounts, isLoading: countsLoading } = useFilterCounts(
     apiFilters,
-    userPromise ? use(userPromise)?.app_metadata?.address : undefined
+    userPromise ? use(userPromise)?.user.app_metadata?.address : undefined
   );
   const user = use(userPromise);
-  const isLoggedIn = !!user?.app_metadata?.address;
+  const isLoggedIn = !!user?.user.app_metadata?.address;
 
   const handleSliderChange = (
     field: string,
