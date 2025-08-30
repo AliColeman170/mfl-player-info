@@ -19,7 +19,11 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { AuthUserProfile } from '@/data/auth';
 
-export function UserProfile({ user }: { user: NonNullable<AuthUserProfile> }) {
+export function UserProfile({
+  userData,
+}: {
+  userData: NonNullable<AuthUserProfile>;
+}) {
   let [isPending, startTransition] = useTransition();
 
   async function handleLogout() {
@@ -34,16 +38,16 @@ export function UserProfile({ user }: { user: NonNullable<AuthUserProfile> }) {
     <DropdownMenu>
       <DropdownMenuTrigger className='focus:ring-primary focus:ring-offset-background relative flex rounded-full text-sm focus:ring-2 focus:ring-offset-2 focus:outline-hidden'>
         <span className='sr-only'>Open user menu</span>
-        {user?.profile?.avatar ? (
+        {userData?.profile?.avatar ? (
           <Image
             className='size-10 rounded-full'
-            src={user.profile.avatar}
+            src={userData.profile.avatar}
             alt={
-              user.profile.name
-                ? user.profile.name
-                : user.profile.discordUser?.username
-                  ? user.profile.discordUser?.username
-                  : user.profile.walletAddress
+              userData.profile.name
+                ? userData.profile.name
+                : userData.profile.discordUser?.username
+                  ? userData.profile.discordUser?.username
+                  : userData.profile.walletAddress
             }
             width={745}
             height={745}
@@ -62,7 +66,7 @@ export function UserProfile({ user }: { user: NonNullable<AuthUserProfile> }) {
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link
-            href={`/players-table?walletAddress=${user.app_metadata.address}`}
+            href={`/players-table?walletAddress=${userData.user.app_metadata.address}`}
           >
             <UsersIcon />
             <span>My Players</span>

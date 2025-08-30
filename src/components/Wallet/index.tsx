@@ -7,9 +7,9 @@ import { use } from 'react';
 
 export function Wallet() {
   const { userPromise } = useUser();
-  const user = use(userPromise);
+  const userData = use(userPromise);
 
-  if (!user) return <ConnectButton />;
+  if (!userData) return <ConnectButton />;
 
-  return <UserProfile user={user} />;
+  return <UserProfile userData={userData} />;
 }

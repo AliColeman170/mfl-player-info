@@ -24,13 +24,11 @@ async function fetchFilterCounts(
   const supabase = createClient();
 
   // Get authenticated user's wallet address from auth metadata if available
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data } = await supabase.auth.getClaims();
   const userWalletAddress =
-    user?.app_metadata?.address || authenticatedWalletAddress;
+    data?.claims.app_metadata?.address || authenticatedWalletAddress;
 
-  const { data, error } = await supabase.rpc('get_filter_counts', {
+  const { data: filterData, error } = await supabase.rpc('get_filter_counts', {
     // Search filters
     search_text: filters.search || undefined,
     favourites_filter: filters.favourites || 'all',
@@ -78,7 +76,7 @@ async function fetchFilterCounts(
     throw new Error(`Failed to fetch filter counts: ${error.message}`);
   }
 
-  return data as FilterCounts;
+  return filterData as FilterCounts;
 }
 
 export function useFilterCounts(

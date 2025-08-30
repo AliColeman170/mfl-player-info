@@ -25,10 +25,8 @@ async function fetchPlayersFromDB({
   const supabase = createClient();
 
   // Get current user to check favourites
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const userWalletAddress = user?.app_metadata?.address;
+  const { data } = await supabase.auth.getClaims();
+  const userWalletAddress = data?.claims.app_metadata?.address;
 
   // Build the query with favourites join
   let query = supabase
@@ -163,20 +161,20 @@ async function fetchPlayersFromDB({
 
     if (filters.tagsMatchAll) {
       // Match ALL selected tags - player must have every selected tag
-      const { data } = await supabase
+      const { data: favouriteData } = await supabase
         .from('favourites')
         .select('player_id')
         .eq('wallet_address', userWalletAddress)
         .contains('tags', filters.tags);
-      taggedPlayerIds = data;
+      taggedPlayerIds = favouriteData;
     } else {
       // Match ANY selected tags - player must have at least one of the selected tags
-      const { data } = await supabase
+      const { data: favouriteData } = await supabase
         .from('favourites')
         .select('player_id')
         .eq('wallet_address', userWalletAddress)
         .overlaps('tags', filters.tags);
-      taggedPlayerIds = data;
+      taggedPlayerIds = favouriteData;
     }
 
     if (taggedPlayerIds && taggedPlayerIds.length > 0) {
@@ -436,15 +434,15 @@ async function fetchPlayersFromDB({
     query = query.order('id', { ascending: true });
   }
 
-  const { data, error } = await query;
+  const { data: playersData, error } = await query;
 
   console.log('Fetched players page:', {
     pageParam: pageParam || 'first',
     offset: pageParam ? parseInt(pageParam) : 0,
-    count: data?.length || 0,
-    hasMore: (data?.length || 0) === pageSize,
-    firstId: data?.[0]?.id,
-    lastId: data?.[data.length - 1]?.id,
+    count: playersData?.length || 0,
+    hasMore: (playersData?.length || 0) === pageSize,
+    firstId: playersData?.[0]?.id,
+    lastId: playersData?.[playersData.length - 1]?.id,
   });
 
   if (error) {
@@ -452,7 +450,7 @@ async function fetchPlayersFromDB({
     throw new Error(`Database error: ${error.message}`);
   }
 
-  if (!data) {
+  if (!playersData) {
     return {
       players: [],
       nextCursor: undefined,
@@ -461,7 +459,7 @@ async function fetchPlayersFromDB({
   }
 
   // Transform database rows to match expected PlayerWithFavouriteData structure
-  const players: PlayerWithFavouriteData[] = data.map((row) => ({
+  const players: PlayerWithFavouriteData[] = playersData.map((row) => ({
     id: row.id,
     metadata: {
       id: row.id,

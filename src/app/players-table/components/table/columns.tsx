@@ -45,8 +45,8 @@ const TagsCell = React.memo(function TagsCell({
   player: PlayerWithFavouriteData;
 }) {
   const { userPromise } = useUser();
-  const user = use(userPromise);
-  const isAuthenticated = !!user?.app_metadata?.address;
+  const userData = use(userPromise);
+  const isAuthenticated = !!userData?.user.app_metadata?.address;
 
   if (!isAuthenticated) {
     return (

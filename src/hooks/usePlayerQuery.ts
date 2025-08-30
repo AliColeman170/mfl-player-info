@@ -11,8 +11,8 @@ async function fetchPlayerFromDB(
   const supabase = createClient();
 
   // Get current user for favourites data
-  const { data: userData } = await supabase.auth.getUser();
-  const userWalletAddress = userData?.user?.app_metadata?.address;
+  const { data } = await supabase.auth.getClaims();
+  const userWalletAddress = data?.claims.app_metadata?.address;
 
   const query = supabase
     .from('players')

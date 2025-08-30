@@ -23,13 +23,13 @@ export function TagManager({
   className,
 }: TagManagerProps) {
   const { userPromise } = useUser();
-  const user = use(userPromise);
+  const userData = use(userPromise);
   const [isOpen, setIsOpen] = useState(false);
   const [newTag, setNewTag] = useState('');
   const [tags, setTags] = useState<string[]>(currentTags);
   const updateTagsMutation = useUpdateTags();
 
-  const isAuthenticated = !!user?.app_metadata?.address;
+  const isAuthenticated = !!userData?.user.app_metadata?.address;
 
   const handleAddTag = () => {
     const trimmedTag = newTag.trim();
